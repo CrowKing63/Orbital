@@ -1,5 +1,5 @@
 using System;
-using System.Diagnostics;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -9,36 +9,53 @@ namespace Orbit
     public partial class RadialMenuWindow : Window
     {
         public string SelectedText { get; private set; } = string.Empty;
+        private ActionExecutorService? _actionExecutor;
 
-        public RadialMenuWindow()
+        public RadialMenuWindow(ActionExecutorService? actionExecutor)
         {
             InitializeComponent();
-            PopulateRadialButtons();
+            _actionExecutor = actionExecutor;
         }
 
-        private void PopulateRadialButtons()
+        public void UpdateActionExecutor(ActionExecutorService? executor)
         {
-            // Sample actions
-            string[] actions = { "번역", "요약", "수정", "복사", "검색" };
-            double radius = 75; // Distance from center
-            double centerX = 100; // Half of Canvas width
+            _actionExecutor = executor;
+        }
+
+        // LLM 호출이 필요한 ResultAction 목록
+        private static readonly System.Collections.Generic.HashSet<string> LlmActions =
+            new() { "Replace", "Copy", "Popup" };
+
+        private void PopulateRadialButtons(bool hasText)
+        {
+            ButtonCanvas.Children.Clear();
+
+            var actions = SettingsManager.CurrentSettings?.Actions;
+            if (actions == null || actions.Count == 0) return;
+
+            double radius = 75;
+            double centerX = 100;
             double centerY = 100;
 
-            for (int i = 0; i < actions.Length; i++)
+            for (int i = 0; i < actions.Count; i++)
             {
-                double angleIndex = i * (Math.PI * 2) / actions.Length;
-                // Offset by -90 deg to start at 12 o'clock
-                double x = centerX + radius * Math.Cos(angleIndex - Math.PI / 2) - 25; // 25 is half button width
-                double y = centerY + radius * Math.Sin(angleIndex - Math.PI / 2) - 25;
+                double angle = i * (Math.PI * 2) / actions.Count - Math.PI / 2;
+                double x = centerX + radius * Math.Cos(angle) - 25;
+                double y = centerY + radius * Math.Sin(angle) - 25;
 
-                Button btn = new Button
+                var action = actions[i];
+                bool enabled = hasText || !LlmActions.Contains(action.ResultAction);
+
+                var btn = new Button
                 {
-                    Content = actions[i],
-                    Style = (Style)FindResource("RadialButtonStyle")
+                    Content = action.Name,
+                    Tag = action,
+                    Style = (Style)FindResource("RadialButtonStyle"),
+                    IsEnabled = enabled,
+                    Opacity = enabled ? 1.0 : 0.35
                 };
-                
-                btn.Click += ActionButton_Click;
 
+                btn.Click += ActionButton_Click;
                 Canvas.SetLeft(btn, x);
                 Canvas.SetTop(btn, y);
                 ButtonCanvas.Children.Add(btn);
@@ -47,57 +64,57 @@ namespace Orbit
 
         public void ShowAtCursor(int mouseX, int mouseY, string text)
         {
-            this.SelectedText = text;
+            SelectedText = text;
+            PopulateRadialButtons(!string.IsNullOrEmpty(text));
 
-            // We must call Show() first so WPF can attach a PresentationSource to this window
-            this.Show();
+            Show();
 
-            // Convert raw physical screen pixels from the hook to WPF logical pixels (DIP) based on current DPI
             PresentationSource source = PresentationSource.FromVisual(this);
-            double dpiFactorX = 1.0;
-            double dpiFactorY = 1.0;
+            double dpiX = source?.CompositionTarget?.TransformFromDevice.M11 ?? 1.0;
+            double dpiY = source?.CompositionTarget?.TransformFromDevice.M22 ?? 1.0;
 
-            if (source?.CompositionTarget != null)
-            {
-                dpiFactorX = source.CompositionTarget.TransformFromDevice.M11;
-                dpiFactorY = source.CompositionTarget.TransformFromDevice.M22;
-            }
+            Left = mouseX * dpiX - Width / 2;
+            Top  = mouseY * dpiY - Height / 2;
 
-            double logicalX = mouseX * dpiFactorX;
-            double logicalY = mouseY * dpiFactorY;
+            // 화면 경계 보정
+            Rect workArea = SystemParameters.WorkArea;
+            Left = Math.Max(workArea.Left, Math.Min(Left, workArea.Right  - Width));
+            Top  = Math.Max(workArea.Top,  Math.Min(Top,  workArea.Bottom - Height));
 
-            // X and Y denote the center of the radial menu.
-            this.Left = logicalX - (this.Width / 2);
-            this.Top = logicalY - (this.Height / 2);
-
-            this.Activate(); // Bring to front and focus
+            Activate();
         }
 
-        private void ActionButton_Click(object sender, RoutedEventArgs e)
+        private async void ActionButton_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is not Button { Content: string action })
+            if (sender is not Button { Tag: ActionProfile action }) return;
+
+            Hide();
+
+            if (_actionExecutor == null)
+            {
+                MessageBox.Show(
+                    "API 키가 설정되지 않았습니다.\n시스템 트레이 아이콘을 더블클릭하여 설정 창을 여세요.",
+                    "Orbit", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
-
-            // Handle actions here. For now, we simulate simple console output.
-            Debug.WriteLine($"Action '{action}' executed on text: {SelectedText}");
-
-            if (action == "번역")
-            {
-                // Simulated LLM translation
-                ClipboardHelper.ReplaceSelectedText($"[번역됨] {SelectedText}");
-            }
-            else if (action == "복사")
-            {
-                Clipboard.SetText(SelectedText);
             }
 
-            this.Hide();
+            try
+            {
+                await Task.Run(() => _actionExecutor.ExecuteAsync(action, SelectedText));
+            }
+            catch (Exception ex)
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    var tooltip = new ResultTooltipWindow($"오류가 발생했습니다:\n{ex.Message}");
+                    tooltip.Show();
+                });
+            }
         }
 
-        // Hide when user clicks outside the window
         private void Window_Deactivated(object sender, EventArgs e)
         {
-            this.Hide();
+            Hide();
         }
     }
 }

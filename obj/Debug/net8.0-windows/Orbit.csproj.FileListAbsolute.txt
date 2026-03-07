@@ -20,3 +20,13 @@ C:\Users\CrowKing63\Developments\Orbital\obj\Debug\net8.0-windows\refint\Orbit.d
 C:\Users\CrowKing63\Developments\Orbital\obj\Debug\net8.0-windows\Orbit.pdb
 C:\Users\CrowKing63\Developments\Orbital\obj\Debug\net8.0-windows\Orbit.genruntimeconfig.cache
 C:\Users\CrowKing63\Developments\Orbital\obj\Debug\net8.0-windows\ref\Orbit.dll
+C:\Users\CrowKing63\Developments\Orbital\obj\Debug\net8.0-windows\Orbit.csproj.AssemblyReference.cache
+C:\Users\CrowKing63\Developments\Orbital\obj\Debug\net8.0-windows\ActionEditDialog.baml
+C:\Users\CrowKing63\Developments\Orbital\obj\Debug\net8.0-windows\SettingsWindow.baml
+C:\Users\CrowKing63\Developments\Orbital\obj\Debug\net8.0-windows\ActionEditDialog.g.cs
+C:\Users\CrowKing63\Developments\Orbital\obj\Debug\net8.0-windows\SettingsWindow.g.cs
+C:\Users\CrowKing63\Developments\Orbital\obj\Debug\net8.0-windows\ResultTooltipWindow.baml
+C:\Users\CrowKing63\Developments\Orbital\obj\Debug\net8.0-windows\ResultTooltipWindow.g.cs
+C:\Users\CrowKing63\Developments\Orbital\bin\Debug\net8.0-windows\Newtonsoft.Json.dll
+C:\Users\CrowKing63\Developments\Orbital\obj\Debug\net8.0-windows\Orbit.sourcelink.json
+C:\Users\CrowKing63\Developments\Orbital\obj\Debug\net8.0-windows\Orbit.csproj.Up2Date

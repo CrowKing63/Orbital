@@ -1,0 +1,90 @@
+<Window x:Class="Orbit.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Orbit 설정" Height="600" Width="620"
+        WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- API 설정 섹션 -->
+        <GroupBox Grid.Row="0" Header="API 설정" Margin="0,0,0,12" Padding="10">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- 제공자 선택 -->
+                <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,6,8">
+                    <TextBlock Text="API 제공자" FontSize="11" Foreground="Gray" Margin="0,0,0,3"/>
+                    <ComboBox x:Name="ProviderBox" SelectionChanged="ProviderBox_SelectionChanged">
+                        <ComboBoxItem Tag="openai"     Content="OpenAI"/>
+                        <ComboBoxItem Tag="openrouter" Content="OpenRouter"/>
+                        <ComboBoxItem Tag="custom"     Content="사용자 지정"/>
+                    </ComboBox>
+                </StackPanel>
+
+                <!-- 모델 선택 -->
+                <StackPanel Grid.Row="0" Grid.Column="1" Margin="6,0,0,8">
+                    <TextBlock Text="모델" FontSize="11" Foreground="Gray" Margin="0,0,0,3"/>
+                    <ComboBox x:Name="ModelBox" IsEditable="True" IsTextSearchEnabled="False"/>
+                </StackPanel>
+
+                <!-- Base URL -->
+                <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Margin="0,0,0,8">
+                    <TextBlock Text="API Base URL" FontSize="11" Foreground="Gray" Margin="0,0,0,3"/>
+                    <TextBox x:Name="BaseUrlBox"/>
+                </StackPanel>
+
+                <!-- API 키 -->
+                <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Margin="0,0,0,4">
+                    <TextBlock Text="API 키" FontSize="11" Foreground="Gray" Margin="0,0,0,3"/>
+                    <DockPanel>
+                        <Button DockPanel.Dock="Right" Content="저장" Width="65" Margin="8,0,0,0"
+                                Click="SaveApiKey_Click"/>
+                        <PasswordBox x:Name="ApiKeyBox" PasswordChar="●"
+                                     KeyDown="ApiKeyBox_KeyDown"/>
+                    </DockPanel>
+                </StackPanel>
+
+                <!-- 상태 -->
+                <TextBlock Grid.Row="3" Grid.ColumnSpan="2"
+                           x:Name="ApiKeyStatus" FontSize="11" Foreground="Gray" TextWrapping="Wrap"/>
+            </Grid>
+        </GroupBox>
+
+        <!-- 액션 버튼 섹션 -->
+        <DockPanel Grid.Row="1" Margin="0,0,0,6">
+            <TextBlock Text="액션 버튼 목록" FontWeight="SemiBold" VerticalAlignment="Center"/>
+            <Button DockPanel.Dock="Right" Content="+ 추가" Width="70" Click="AddAction_Click"/>
+        </DockPanel>
+
+        <ListView Grid.Row="2" x:Name="ActionsList" SelectionMode="Single">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="이름"     Width="90"  DisplayMemberBinding="{Binding Name}"/>
+                    <GridViewColumn Header="프롬프트" Width="300" DisplayMemberBinding="{Binding PromptFormat}"/>
+                    <GridViewColumn Header="출력 방식" Width="90" DisplayMemberBinding="{Binding ResultAction}"/>
+                </GridView>
+            </ListView.View>
+        </ListView>
+
+        <!-- 하단 버튼 -->
+        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+            <Button Content="삭제"      Width="75" Margin="0,0,8,0" Click="DeleteAction_Click"/>
+            <Button Content="편집"      Width="75" Margin="0,0,8,0" Click="EditAction_Click"/>
+            <Button Content="저장 및 닫기" Width="100" Click="SaveAndClose_Click" IsDefault="True"/>
+        </StackPanel>
+    </Grid>
+</Window>

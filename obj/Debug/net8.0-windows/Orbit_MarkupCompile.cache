@@ -10,11 +10,11 @@ none
 false
 TRACE;DEBUG;NET;NET8_0;NETCOREAPP
 C:\Users\CrowKing63\Developments\Orbital\App.xaml
-21246928165
+5-1691731432
 
-7270648432
-198717675157
-MainWindow.xaml;RadialMenuWindow.xaml;
+142124406601
+2081113195539
+ActionEditDialog.xaml;MainWindow.xaml;RadialMenuWindow.xaml;ResultTooltipWindow.xaml;SettingsWindow.xaml;
 
 False
 

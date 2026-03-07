@@ -1,0 +1,50 @@
+<Window x:Class="Orbit.ActionEditDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="액션 편집" Height="300" Width="460"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- 이름 -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,10">
+            <TextBlock Text="버튼 이름" FontWeight="SemiBold" Margin="0,0,0,4"/>
+            <TextBox x:Name="NameBox"/>
+        </StackPanel>
+
+        <!-- 프롬프트 -->
+        <StackPanel Grid.Row="1" Margin="0,0,0,10">
+            <TextBlock FontWeight="SemiBold" Margin="0,0,0,4">
+                프롬프트 <Run Foreground="Gray" FontWeight="Normal">({text} 자리에 선택된 텍스트가 삽입됩니다)</Run>
+            </TextBlock>
+            <TextBox x:Name="PromptBox" Height="70" TextWrapping="Wrap"
+                     AcceptsReturn="True" VerticalScrollBarVisibility="Auto"/>
+        </StackPanel>
+
+        <!-- 출력 방식 -->
+        <StackPanel Grid.Row="2" Margin="0,0,0,10">
+            <TextBlock Text="출력 방식" FontWeight="SemiBold" Margin="0,0,0,4"/>
+            <ComboBox x:Name="ResultActionBox" SelectedIndex="0">
+                <ComboBoxItem Content="Replace" ToolTip="AI 결과로 선택된 텍스트를 바로 교체합니다"/>
+                <ComboBoxItem Content="Copy" ToolTip="AI 결과를 클립보드에 저장합니다"/>
+                <ComboBoxItem Content="Popup" ToolTip="AI 결과를 팝업으로 표시합니다"/>
+                <ComboBoxItem Content="Browser" ToolTip="선택된 텍스트로 구글 검색을 엽니다 (AI 미사용)"/>
+                <ComboBoxItem Content="DirectCopy" ToolTip="선택된 텍스트를 클립보드에 복사합니다 (AI 미사용)"/>
+                <ComboBoxItem Content="Cut" ToolTip="선택된 텍스트를 잘라내기합니다 (AI 미사용)"/>
+                <ComboBoxItem Content="Paste" ToolTip="클립보드 내용을 현재 위치에 붙여넣습니다 (AI 미사용, 롱프레스로 트리거)"/>
+            </ComboBox>
+        </StackPanel>
+
+        <!-- 버튼 -->
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="확인" Width="75" Margin="0,0,8,0" IsDefault="True" Click="Ok_Click"/>
+            <Button Content="취소" Width="75" IsCancel="True" Click="Cancel_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

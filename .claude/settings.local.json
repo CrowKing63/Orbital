@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dotnet build:*)",
+      "Bash(cmd.exe:*)",
+      "Bash(powershell.exe:*)",
+      "WebFetch(domain:forum.popclip.app)",
+      "WebFetch(domain:www.popclip.app)"
+    ]
+  }
+}

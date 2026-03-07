@@ -61,6 +61,7 @@ namespace Orbit
         private const ushort VK_LCONTROL = 0xA2;
         private const ushort VK_C = 0x43;
         private const ushort VK_V = 0x56;
+        private const ushort VK_DELETE = 0x2E;
 
         [DllImport("user32.dll")]
         static extern uint SendInput(uint nInputs, INPUT[] pInputs, int cbSize);
@@ -68,25 +69,36 @@ namespace Orbit
         /// <summary>
         /// Simulates a Ctrl+C keystroke to copy currently selected text,
         /// waits briefly, and returns the clipboard string.
+        /// 기존 클립보드 내용을 백업 후 복원하므로 사용자의 클립보드를 덮어쓰지 않습니다.
         /// </summary>
         public static string GetSelectedText()
         {
-            // Optional: backup existing clipboard if needed.
-            Application.Current.Dispatcher.Invoke(() => Clipboard.Clear());
+            // 기존 클립보드 내용 백업
+            IDataObject? backup = null;
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                try { backup = Clipboard.GetDataObject(); } catch { }
+                Clipboard.Clear();
+            });
 
             // Simulate Ctrl + C
             SimulateKeyStroke(VK_LCONTROL, VK_C);
 
-            // Wait a little bit for clipboard structure to be filled
             Thread.Sleep(100);
 
             string selectedText = string.Empty;
-            Application.Current.Dispatcher.Invoke(() => 
+            Application.Current.Dispatcher.Invoke(() =>
             {
                 if (Clipboard.ContainsText())
-                {
                     selectedText = Clipboard.GetText();
+
+                // 기존 클립보드 복원
+                try
+                {
+                    if (backup != null)
+                        Clipboard.SetDataObject(backup, true);
                 }
+                catch { }
             });
 
             return selectedText;
@@ -105,6 +117,34 @@ namespace Orbit
             Thread.Sleep(50);
 
             // Simulate Ctrl + V
+            SimulateKeyStroke(VK_LCONTROL, VK_V);
+        }
+
+        /// <summary>
+        /// 선택된 텍스트를 Delete 키로 삭제합니다. (잘라내기 액션용)
+        /// </summary>
+        public static void DeleteSelectedText()
+        {
+            Thread.Sleep(50);
+
+            INPUT[] inputs = new INPUT[2];
+
+            inputs[0].type = INPUT_KEYBOARD;
+            inputs[0].U.ki.wVk = VK_DELETE;
+
+            inputs[1].type = INPUT_KEYBOARD;
+            inputs[1].U.ki.wVk = VK_DELETE;
+            inputs[1].U.ki.dwFlags = KEYEVENTF_KEYUP;
+
+            SendInput((uint)inputs.Length, inputs, INPUT.Size);
+        }
+
+        /// <summary>
+        /// 현재 클립보드 내용을 Ctrl+V로 붙여넣습니다. (붙여넣기 액션용)
+        /// </summary>
+        public static void SimulatePaste()
+        {
+            Thread.Sleep(50);
             SimulateKeyStroke(VK_LCONTROL, VK_V);
         }
 
