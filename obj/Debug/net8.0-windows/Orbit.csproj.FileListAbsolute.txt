@@ -30,3 +30,4 @@ C:\Users\CrowKing63\Developments\Orbital\obj\Debug\net8.0-windows\ResultTooltipW
 C:\Users\CrowKing63\Developments\Orbital\bin\Debug\net8.0-windows\Newtonsoft.Json.dll
 C:\Users\CrowKing63\Developments\Orbital\obj\Debug\net8.0-windows\Orbit.sourcelink.json
 C:\Users\CrowKing63\Developments\Orbital\obj\Debug\net8.0-windows\Orbit.csproj.Up2Date
+C:\Users\CrowKing63\Developments\Orbital\obj\Debug\net8.0-windows\App.baml

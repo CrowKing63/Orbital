@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -6,6 +7,21 @@ namespace Orbit
     public partial class ActionEditDialog : Window
     {
         public ActionProfile Result { get; private set; } = new ActionProfile();
+
+        [DllImport("dwmapi.dll")]
+        private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int value, int size);
+
+        protected override void OnSourceInitialized(EventArgs e)
+        {
+            base.OnSourceInitialized(e);
+            try
+            {
+                var hwnd = new System.Windows.Interop.WindowInteropHelper(this).Handle;
+                int dark = 1;
+                DwmSetWindowAttribute(hwnd, 20, ref dark, sizeof(int));
+            }
+            catch { }
+        }
 
         public ActionEditDialog(ActionProfile? existing = null)
         {

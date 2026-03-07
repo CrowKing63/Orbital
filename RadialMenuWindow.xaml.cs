@@ -33,9 +33,9 @@ namespace Orbit
             var actions = SettingsManager.CurrentSettings?.Actions;
             if (actions == null || actions.Count == 0) return;
 
-            double radius = 75;
-            double centerX = 100;
-            double centerY = 100;
+            double radius = 88;
+            double centerX = 115;
+            double centerY = 115;
 
             for (int i = 0; i < actions.Count; i++)
             {

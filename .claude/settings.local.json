@@ -8,7 +8,8 @@
       "WebFetch(domain:www.popclip.app)",
       "WebFetch(domain:openrouter.ai)",
       "Bash(claude mcp:*)",
-      "mcp__plugin_github_github__get_me"
+      "mcp__plugin_github_github__get_me",
+      "Bash(\"C:\\\\Program Files\\\\dotnet\\\\dotnet.exe\" build:*)"
     ]
   },
   "hooks": {

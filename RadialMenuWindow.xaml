@@ -1,52 +1,141 @@
 <Window x:Class="Orbit.RadialMenuWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="OrbitMenu" Height="250" Width="250"
+        Title="OrbitMenu" Height="290" Width="290"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         Topmost="True" ShowInTaskbar="False" ResizeMode="NoResize"
         Deactivated="Window_Deactivated">
-    
+
     <Window.Resources>
+        <!-- TextBlock 기본 스타일 재정의 — 버튼 내부 텍스트가 부모 Foreground를 상속하도록 -->
+        <Style TargetType="TextBlock"/>
+
+        <!-- 방사형 버튼 스타일 — 오르트 구름 컨셉: 딥 스페이스 + 네뷸라 글로우 -->
         <Style TargetType="Button" x:Key="RadialButtonStyle">
-            <Setter Property="Width" Value="50"/>
-            <Setter Property="Height" Value="50"/>
-            <Setter Property="Background" Value="#AAFFFFFF"/> <!-- Semi-transparent -->
-            <Setter Property="Foreground" Value="#333333"/>
-            <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Width"      Value="52"/>
+            <Setter Property="Height"     Value="52"/>
+            <Setter Property="Background" Value="#CC0D0D22"/>
+            <Setter Property="Foreground" Value="#C8C8FF"/>
+            <Setter Property="FontSize"   Value="10"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor"     Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" CornerRadius="25">
+                        <Border x:Name="Bd"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="26"
+                                BorderBrush="#507080FF"
+                                BorderThickness="1">
+                            <Border.Effect>
+                                <DropShadowEffect Color="#7080FF" BlurRadius="10"
+                                                  ShadowDepth="0" Opacity="0.35"/>
+                            </Border.Effect>
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background"   Value="#CC1A1A40"/>
+                                <Setter TargetName="Bd" Property="BorderBrush"  Value="#CC00D4FF"/>
+                                <Setter TargetName="Bd" Property="Effect">
+                                    <Setter.Value>
+                                        <DropShadowEffect Color="#00D4FF" BlurRadius="20"
+                                                          ShadowDepth="0" Opacity="0.8"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#CC0A0A2E"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#20404080"/>
+                                <Setter TargetName="Bd" Property="Effect">
+                                    <Setter.Value>
+                                        <DropShadowEffect Color="#000000" BlurRadius="0"
+                                                          ShadowDepth="0" Opacity="0"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#FFFFFFFF"/>
-                    <Setter Property="Cursor" Value="Hand"/>
+                    <Setter Property="Foreground" Value="#F0F8FF"/>
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Foreground" Value="#30506080"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
     </Window.Resources>
 
     <Grid>
-        <!-- Glassmorphism Ring -->
-        <Ellipse Fill="#40000000" Stroke="#80FFFFFF" StrokeThickness="2" Width="200" Height="200">
+        <!-- 배경 주변 앰비언트 글로우 (오르트 구름 아우라) -->
+        <Ellipse Width="280" Height="280">
+            <Ellipse.Fill>
+                <RadialGradientBrush>
+                    <GradientStop Color="#00000000" Offset="0.45"/>
+                    <GradientStop Color="#1A0A0A22" Offset="1.0"/>
+                </RadialGradientBrush>
+            </Ellipse.Fill>
+        </Ellipse>
+
+        <!-- 메인 유리 원판 -->
+        <Ellipse Width="230" Height="230">
+            <Ellipse.Fill>
+                <RadialGradientBrush>
+                    <GradientStop Color="#D00A0A1E" Offset="0.0"/>
+                    <GradientStop Color="#C00D0D28" Offset="1.0"/>
+                </RadialGradientBrush>
+            </Ellipse.Fill>
             <Ellipse.Effect>
-                <BlurEffect Radius="15"/>
+                <BlurEffect Radius="2"/>
             </Ellipse.Effect>
         </Ellipse>
 
-        <!-- Container for Buttons -->
-        <Canvas x:Name="ButtonCanvas" Width="200" Height="200" HorizontalAlignment="Center" VerticalAlignment="Center">
-            <!-- Buttons will be dynamically added or pre-defined here.
-                 For prototyping, we add some static buttons around the center -->
-        </Canvas>
-        
-        <!-- Center Cursor Indicator (Optional visuals) -->
-        <Ellipse Fill="#80FFFFFF" Width="10" Height="10" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <!-- 궤도 링 (외곽 스트로크 + 글로우) -->
+        <Ellipse Width="230" Height="230" Fill="Transparent"
+                 Stroke="#357080FF" StrokeThickness="1">
+            <Ellipse.Effect>
+                <DropShadowEffect Color="#7080FF" BlurRadius="14"
+                                  ShadowDepth="0" Opacity="0.5"/>
+            </Ellipse.Effect>
+        </Ellipse>
+
+        <!-- 내부 미세 링 -->
+        <Ellipse Width="180" Height="180" Fill="Transparent"
+                 Stroke="#1500D4FF" StrokeThickness="1"
+                 StrokeDashArray="2 8"/>
+
+        <!-- 버튼 캔버스 -->
+        <Canvas x:Name="ButtonCanvas" Width="230" Height="230"
+                HorizontalAlignment="Center" VerticalAlignment="Center"/>
+
+        <!-- 중심 별 (행성 코어) -->
+        <Ellipse Width="14" Height="14"
+                 HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Ellipse.Fill>
+                <RadialGradientBrush>
+                    <GradientStop Color="#FF00D4FF" Offset="0"/>
+                    <GradientStop Color="#FF7080FF" Offset="0.65"/>
+                    <GradientStop Color="#AA7080FF" Offset="1"/>
+                </RadialGradientBrush>
+            </Ellipse.Fill>
+            <Ellipse.Effect>
+                <DropShadowEffect Color="#00D4FF" BlurRadius="12"
+                                  ShadowDepth="0" Opacity="0.95"/>
+            </Ellipse.Effect>
+        </Ellipse>
+
+        <!-- 코어 하이라이트 -->
+        <Ellipse Width="5" Height="5"
+                 HorizontalAlignment="Center" VerticalAlignment="Center"
+                 Margin="-2,-2,0,0">
+            <Ellipse.Fill>
+                <SolidColorBrush Color="#AAFFFFFF"/>
+            </Ellipse.Fill>
+        </Ellipse>
     </Grid>
 </Window>
