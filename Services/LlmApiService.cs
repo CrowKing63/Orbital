@@ -24,7 +24,7 @@ namespace Orbit
             _endpointUrl = baseUrl.TrimEnd('/') + "/chat/completions";
 
             _httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(60) };
-            _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
+            _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey.Trim()}");
 
             // OpenRouter 사용 시 필수 헤더
             _httpClient.DefaultRequestHeaders.Add("HTTP-Referer", "https://github.com/orbit-app");

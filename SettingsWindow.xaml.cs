@@ -18,8 +18,8 @@ namespace Orbit
                 "https://openrouter.ai/api/v1",
                 new[]
                 {
-                    // 자동 무료 라우팅 (기본값)
-                    "openrouter/auto:free",
+                    // 무료 모델 자동 라우팅 (기본값)
+                    "openrouter/free",
                     // 유료
                     "openai/gpt-4o-mini",
                     "openai/gpt-4o",
