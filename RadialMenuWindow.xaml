@@ -4,6 +4,7 @@
         Title="OrbitMenu" Height="290" Width="290"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         Topmost="True" ShowInTaskbar="False" ResizeMode="NoResize"
+        ShowActivated="False"
         Deactivated="Window_Deactivated">
 
     <Window.Resources>
@@ -71,9 +72,9 @@
         </Style>
     </Window.Resources>
 
-    <Grid>
+    <Grid MouseDown="Grid_MouseDown">
         <!-- 배경 주변 앰비언트 글로우 (오르트 구름 아우라) -->
-        <Ellipse Width="280" Height="280">
+        <Ellipse Width="280" Height="280" IsHitTestVisible="False">
             <Ellipse.Fill>
                 <RadialGradientBrush>
                     <GradientStop Color="#00000000" Offset="0.45"/>
@@ -82,22 +83,33 @@
             </Ellipse.Fill>
         </Ellipse>
 
-        <!-- 메인 유리 원판 -->
-        <Ellipse Width="230" Height="230">
-            <Ellipse.Fill>
-                <RadialGradientBrush>
+        <!-- 메인 유리 원판 — 도넛 형태 (중앙 hole 반경 62px) -->
+        <Path IsHitTestVisible="False">
+            <Path.Data>
+                <CombinedGeometry GeometryCombineMode="Exclude">
+                    <CombinedGeometry.Geometry1>
+                        <EllipseGeometry Center="145,145" RadiusX="115" RadiusY="115"/>
+                    </CombinedGeometry.Geometry1>
+                    <CombinedGeometry.Geometry2>
+                        <EllipseGeometry Center="145,145" RadiusX="62" RadiusY="62"/>
+                    </CombinedGeometry.Geometry2>
+                </CombinedGeometry>
+            </Path.Data>
+            <Path.Fill>
+                <RadialGradientBrush Center="0.5,0.5" GradientOrigin="0.5,0.5">
                     <GradientStop Color="#D00A0A1E" Offset="0.0"/>
                     <GradientStop Color="#C00D0D28" Offset="1.0"/>
                 </RadialGradientBrush>
-            </Ellipse.Fill>
-            <Ellipse.Effect>
+            </Path.Fill>
+            <Path.Effect>
                 <BlurEffect Radius="2"/>
-            </Ellipse.Effect>
-        </Ellipse>
+            </Path.Effect>
+        </Path>
 
         <!-- 궤도 링 (외곽 스트로크 + 글로우) -->
         <Ellipse Width="230" Height="230" Fill="Transparent"
-                 Stroke="#357080FF" StrokeThickness="1">
+                 Stroke="#357080FF" StrokeThickness="1"
+                 IsHitTestVisible="False">
             <Ellipse.Effect>
                 <DropShadowEffect Color="#7080FF" BlurRadius="14"
                                   ShadowDepth="0" Opacity="0.5"/>
@@ -105,37 +117,16 @@
         </Ellipse>
 
         <!-- 내부 미세 링 -->
-        <Ellipse Width="180" Height="180" Fill="Transparent"
+        <Ellipse Width="124" Height="124" Fill="Transparent"
                  Stroke="#1500D4FF" StrokeThickness="1"
-                 StrokeDashArray="2 8"/>
+                 StrokeDashArray="2 8"
+                 IsHitTestVisible="False"/>
+
+        <!-- 클릭 감지용 원 (알파=1/255: OS가 이벤트를 통과시키지 않을 만큼의 최소 불투명도) -->
+        <Ellipse Width="230" Height="230" Fill="#01000000"/>
 
         <!-- 버튼 캔버스 -->
         <Canvas x:Name="ButtonCanvas" Width="230" Height="230"
                 HorizontalAlignment="Center" VerticalAlignment="Center"/>
-
-        <!-- 중심 별 (행성 코어) -->
-        <Ellipse Width="14" Height="14"
-                 HorizontalAlignment="Center" VerticalAlignment="Center">
-            <Ellipse.Fill>
-                <RadialGradientBrush>
-                    <GradientStop Color="#FF00D4FF" Offset="0"/>
-                    <GradientStop Color="#FF7080FF" Offset="0.65"/>
-                    <GradientStop Color="#AA7080FF" Offset="1"/>
-                </RadialGradientBrush>
-            </Ellipse.Fill>
-            <Ellipse.Effect>
-                <DropShadowEffect Color="#00D4FF" BlurRadius="12"
-                                  ShadowDepth="0" Opacity="0.95"/>
-            </Ellipse.Effect>
-        </Ellipse>
-
-        <!-- 코어 하이라이트 -->
-        <Ellipse Width="5" Height="5"
-                 HorizontalAlignment="Center" VerticalAlignment="Center"
-                 Margin="-2,-2,0,0">
-            <Ellipse.Fill>
-                <SolidColorBrush Color="#AAFFFFFF"/>
-            </Ellipse.Fill>
-        </Ellipse>
     </Grid>
 </Window>

@@ -34,6 +34,9 @@ namespace Orbit
         private static IntPtr _mouseHookID = IntPtr.Zero;
         private static HookProc _mouseProc = MouseHookCallback;
 
+        /// <summary>마우스 버튼이 눌릴 때 항상 발생 (팝업 외부 클릭 감지용)</summary>
+        public static event EventHandler<MousePoint>? OnAnyMouseDown;
+
         /// <summary>마우스 드래그(텍스트 선택) 완료 시 발생</summary>
         public static event EventHandler<MousePoint>? OnMouseUp;
 
@@ -89,6 +92,8 @@ namespace Orbit
 
                 if (wParam == (IntPtr)WM_LBUTTONDOWN)
                 {
+                    OnAnyMouseDown?.Invoke(null, hookStruct.pt);
+
                     _buttonDownPos = hookStruct.pt;
                     _isLongPressed = false;
 
@@ -108,14 +113,19 @@ namespace Orbit
                     _longPressTimer?.Dispose();
                     _longPressTimer = null;
 
-                    // 롱프레스가 이미 발생했으면 드래그 이벤트 스킵
-                    if (!_isLongPressed && _mouseDownInClient)
+                    if (_mouseDownInClient)
                     {
                         int dx = Math.Abs(hookStruct.pt.X - _buttonDownPos.X);
                         int dy = Math.Abs(hookStruct.pt.Y - _buttonDownPos.Y);
 
-                        if (dx > DragThreshold || dy > DragThreshold)
+                        if (_isLongPressed && dx <= DragThreshold && dy <= DragThreshold)
                         {
+                            // 500ms 이상 누른 후 움직임 없이 릴리즈 → 롱프레스
+                            OnLongPress?.Invoke(null, hookStruct.pt);
+                        }
+                        else if (!_isLongPressed && (dx > DragThreshold || dy > DragThreshold))
+                        {
+                            // 드래그 후 릴리즈 → 텍스트 선택
                             OnMouseUp?.Invoke(null, hookStruct.pt);
                         }
                     }
@@ -131,7 +141,8 @@ namespace Orbit
             _longPressTimer?.Dispose();
             _longPressTimer = null;
 
-            // 현재 커서 위치가 눌린 위치에서 크게 벗어나지 않은 경우만 롱프레스로 인정
+            // 현재 커서 위치가 눌린 위치에서 크게 벗어나지 않은 경우만 롱프레스 후보로 표시
+            // 실제 이벤트는 마우스 릴리즈 시점에 발생 (드래그 의도 여부 확정 후)
             GetCursorPos(out MousePoint currentPos);
             int dx = Math.Abs(currentPos.X - _buttonDownPos.X);
             int dy = Math.Abs(currentPos.Y - _buttonDownPos.Y);
@@ -139,7 +150,6 @@ namespace Orbit
             if (dx <= DragThreshold && dy <= DragThreshold)
             {
                 _isLongPressed = true;
-                OnLongPress?.Invoke(null, currentPos);
             }
         }
 

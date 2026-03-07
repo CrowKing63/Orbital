@@ -2,6 +2,7 @@ using System;
 using System.Drawing;
 using System.Threading;
 using System.Windows;
+using System.Windows.Media;
 using WinForms = System.Windows.Forms;
 
 namespace Orbit
@@ -23,6 +24,7 @@ namespace Orbit
 
             _radialMenu = new RadialMenuWindow(_actionExecutor);
 
+            SystemHookManager.OnAnyMouseDown += SystemHookManager_OnAnyMouseDown;
             SystemHookManager.OnMouseUp += SystemHookManager_OnMouseUp;
             SystemHookManager.OnLongPress += SystemHookManager_OnLongPress;
             SystemHookManager.StartMouseHook();
@@ -89,6 +91,31 @@ namespace Orbit
                     _radialMenu.UpdateActionExecutor(_actionExecutor);
                 });
             };
+        }
+
+        private void SystemHookManager_OnAnyMouseDown(object? sender, SystemHookManager.MousePoint e)
+        {
+            // BeginInvoke: 훅 콜백은 UI 스레드에서 실행되므로 Invoke 대신 BeginInvoke 사용
+            Dispatcher.BeginInvoke(() =>
+            {
+                if (!_radialMenu.IsVisible) return;
+
+                var source = PresentationSource.FromVisual(_radialMenu);
+                if (source?.CompositionTarget == null) return;
+                double dpiX = source.CompositionTarget.TransformFromDevice.M11;
+                double dpiY = source.CompositionTarget.TransformFromDevice.M22;
+
+                double mouseXDip = e.X * dpiX;
+                double mouseYDip = e.Y * dpiY;
+
+                bool insideWindow = mouseXDip >= _radialMenu.Left &&
+                                    mouseXDip <= _radialMenu.Left + _radialMenu.Width &&
+                                    mouseYDip >= _radialMenu.Top &&
+                                    mouseYDip <= _radialMenu.Top + _radialMenu.Height;
+
+                if (!insideWindow)
+                    _radialMenu.Hide();
+            });
         }
 
         private void SystemHookManager_OnMouseUp(object? sender, SystemHookManager.MousePoint e)

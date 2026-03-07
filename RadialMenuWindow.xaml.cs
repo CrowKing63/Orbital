@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 
 namespace Orbit
@@ -80,8 +81,6 @@ namespace Orbit
             Rect workArea = SystemParameters.WorkArea;
             Left = Math.Max(workArea.Left, Math.Min(Left, workArea.Right  - Width));
             Top  = Math.Max(workArea.Top,  Math.Min(Top,  workArea.Bottom - Height));
-
-            Activate();
         }
 
         private async void ActionButton_Click(object sender, RoutedEventArgs e)
@@ -110,6 +109,18 @@ namespace Orbit
                     tooltip.Show();
                 });
             }
+        }
+
+        private void Grid_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            // 비주얼 트리를 타고 올라가서 Button 조상이 있으면 버튼 클릭 — 건드리지 않음
+            DependencyObject? source = e.OriginalSource as DependencyObject;
+            while (source != null)
+            {
+                if (source is Button) return;
+                source = System.Windows.Media.VisualTreeHelper.GetParent(source);
+            }
+            Hide();
         }
 
         private void Window_Deactivated(object sender, EventArgs e)
