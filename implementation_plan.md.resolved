@@ -1,0 +1,124 @@
+# Orbit 프로젝트 구현 계획 (Implementation Plan)
+
+## Goal Description
+기획된 사양서에 따라 Windows 텍스트 감지 기반의 AI 생산성 도구 **'Orbit'**의 기초 프로젝트를 구성하고 핵심 기능을 구현합니다.
+Windows OS와 가장 밀접하게 통신해야 하는 특성(글로벌 마우스/키보드 후킹, 투명 오버레이 윈도우 렌더링, 클립보드 제어)을 고려하여 **C# WPF (.NET 8.0)** 프레임워크를 기반으로 개발하는 것을 제안합니다.
+
+> [!IMPORTANT]
+> **User Review Required: 기술 스택 확정**
+> 현재 프로젝트 폴더(`C:\Users\CrowKing63\Developments\Orbital`)가 비어 있는 상태입니다. 
+> Windows 전용 시스템 제어와 투명 방사형 UI(Radial Menu) 구현에 가장 안정적이고 효율적인 **C# WPF**를 메인 기술 스택으로 제안합니다. 
+> (만약 웹 개발 방식이 편하시다면 Tauri(Rust+React)로 변경 가능하나, 윈도우 후킹 구현 난이도가 높습니다.)
+
+## Proposed Changes
+
+### Component: Core Application Setup
+C# WPF 프로젝트의 기본 뼈대 및 디자인 시스템(Glassmorphism) 세팅.
+
+#### [NEW] [Orbit.csproj](file:///C:/Users/CrowKing63/Developments/Orbital/Orbit.csproj)
+* .NET 8.0 WPF 애플리케이션 프레임워크 타겟 설정
+* 전역 단축키 및 후킹을 위한 외부 라이브러리(필요시) 패키지 참조 추가
+
+#### [NEW] [App.xaml](file:///C:/Users/CrowKing63/Developments/Orbital/App.xaml) & [App.xaml.cs](file:///C:/Users/CrowKing63/Developments/Orbital/App.xaml.cs)
+* 애플리케이션 진입점
+* 시스템 트레이(System Tray) 아이콘으로 백그라운드 상주 동작 설정
+* 전역 마우스/키보드 후킹(Global Hook) 리스너 초기화
+
+### Component: UI / Radial Menu (OrbitWindow)
+마우스 커서 주변에 원형으로 나타나는 반투명 모양의 플로팅 윈도우.
+
+#### [NEW] [RadialMenuWindow.xaml](file:///C:/Users/CrowKing63/Developments/Orbital/RadialMenuWindow.xaml)
+* `WindowStyle="None"`, `AllowsTransparency="True"`, `Topmost="True"` 속성을 사용하여 배경이 투명한 플로팅 오버레이 윈도우 구성
+* 윈도우 내부에 원형(Ellipse) 패널 및 애니메이션 효과(Glassmorphism 블러 효과) 적용
+
+#### [NEW] [RadialMenuWindow.xaml.cs](file:///C:/Users/CrowKing63/Developments/Orbital/RadialMenuWindow.xaml.cs)
+* 현재 마우스 좌표를 읽어와 윈도우를 해당 위치의 중앙에 렌더링하는 로직 구현
+
+### Component: Input Hooking & Clipboard Management (Core Engine)
+글로벌 시스템 후킹을 통해 텍스트 선택 이벤트를 가로채고, 클립보드에 접근.
+
+#### [NEW] [SystemHookManager.cs](file:///C:/Users/CrowKing63/Developments/Orbital/SystemHookManager.cs)
+* 마우스 좌클릭 드래그(Mouse Up 이벤트)를 감지
+* `User32.dll`의 `SetWindowsHookEx`를 활용하여 윈도우 전역 마우스/키보드 감지
+* **주의:** 저수준 훅 콜백은 WPF Dispatcher와 별개의 스레드에서 실행될 수 있으므로, UI 업데이트는 반드시 `Application.Current.Dispatcher.Invoke`를 통해 처리
+
+#### [NEW] [ClipboardHelper.cs](file:///C:/Users/CrowKing63/Developments/Orbital/ClipboardHelper.cs)
+* 드래그 이벤트 발생 시 `Ctrl+C` 키 이벤트를 내부적으로 발생시켜 선택된 텍스트를 클립보드로 자동 복사해오는 로직 (텍스트 감지 시뮬레이션)
+* 기존 클립보드 데이터를 백업 및 복원하는 기능
+* **알려진 한계:** `Ctrl+C` 시뮬레이션은 일부 앱(관리자 권한 앱, 게임, 일부 보안 앱)에서 동작하지 않을 수 있음. 이 경우 UI Automation API(`IUIAutomationTextPattern`) 또는 포커스된 윈도우의 `GetWindowText`를 보조 수단으로 검토 필요.
+
+### Component: 데이터 모델 및 설정 관리 (Configuration)
+버튼 구성, 사용자 설정, API 키를 로컬에 저장하고 불러오는 레이어.
+
+#### [NEW] [Models/ActionButton.cs](file:///C:/Users/CrowKing63/Developments/Orbital/Models/ActionButton.cs)
+* 커스텀 버튼 1개의 데이터 구조 정의
+  - `Id`, `Name`, `IconPath`, `SystemPrompt`, `OutputMode` (Replace / Tooltip / Copy), `IsBuiltIn`
+
+#### [NEW] [Models/AppSettings.cs](file:///C:/Users/CrowKing63/Developments/Orbital/Models/AppSettings.cs)
+* 앱 전체 설정 구조 정의
+  - `List<ActionButton> Buttons`, `bool LaunchOnStartup`, `bool HoverMode`, `string SelectedApiProvider`
+
+#### [NEW] [Services/ConfigurationService.cs](file:///C:/Users/CrowKing63/Developments/Orbital/Services/ConfigurationService.cs)
+* `AppSettings`를 로컬 JSON 파일(`%AppData%\Orbit\settings.json`)로 읽기/쓰기
+* `.orbit` 프로필 파일 Import/Export 기능
+
+#### [NEW] [Services/SecureStorageService.cs](file:///C:/Users/CrowKing63/Developments/Orbital/Services/SecureStorageService.cs)
+* Windows DPAPI(`System.Security.Cryptography.ProtectedData`)를 사용하여 API 키 암호화 저장/복호화 읽기
+* 저장 위치: Windows Credential Manager 또는 DPAPI 암호화된 로컬 파일
+
+### Component: AI API 연동 및 결과 처리 (Action Executor)
+선택된 텍스트와 프롬프트를 조합하여 API를 호출하고, 결과를 출력.
+
+#### [NEW] [Services/LlmApiService.cs](file:///C:/Users/CrowKing63/Developments/Orbital/Services/LlmApiService.cs)
+* `HttpClient`를 통해 OpenAI Chat Completions API(또는 호환 API) 호출
+* 비동기(`async/await`) 처리, 타임아웃 설정 포함
+* 인터페이스(`ILlmApiService`)로 추상화하여 추후 다른 LLM 벤더 교체 용이하게 구성
+
+#### [NEW] [Services/ActionExecutorService.cs](file:///C:/Users/CrowKing63/Developments/Orbital/Services/ActionExecutorService.cs)
+* 버튼의 `OutputMode`에 따라 결과 처리 분기:
+  - **Replace:** 원본 텍스트를 클립보드에 덮고, `Ctrl+V`로 자동 붙여넣기
+  - **Copy:** 결과를 조용히 클립보드에 저장
+  - **Tooltip:** 별도의 작은 결과 팝업 윈도우(`ResultTooltipWindow`) 표시
+
+### Component: 설정 UI (Settings Window)
+사용자가 API 키와 커스텀 버튼을 관리하는 창.
+
+#### [NEW] [SettingsWindow.xaml](file:///C:/Users/CrowKing63/Developments/Orbital/SettingsWindow.xaml) & [SettingsWindow.xaml.cs](file:///C:/Users/CrowKing63/Developments/Orbital/SettingsWindow.xaml.cs)
+* API 키 입력 필드 (마스킹 처리, `PasswordBox` 사용)
+* 현재 버튼 목록 표시 및 순서 변경
+* `[+ 새 버튼 만들기]` 버튼 — 이름, 프롬프트, 아이콘, 출력 방식 설정 다이얼로그 포함
+* 시작 시 자동 실행 / 호버 모드 등 일반 옵션 토글
+
+### Component: 결과 팝업 (Result Tooltip)
+
+#### [NEW] [ResultTooltipWindow.xaml](file:///C:/Users/CrowKing63/Developments/Orbital/ResultTooltipWindow.xaml)
+* AI 처리 결과를 화면 우측 하단 또는 커서 근처에 표시하는 작은 토스트 스타일 팝업
+* 일정 시간 후 자동 소멸 또는 닫기 버튼으로 수동 닫기
+
+## Verification Plan
+1. **Automated Tests:**
+    * C# xUnit 또는 NUnit 프로젝트를 추가하여 다음 항목에 대한 단위 테스트 구축:
+      - `ClipboardHelper`: 클립보드 백업/복원 정상 동작
+      - `ConfigurationService`: JSON 직렬화/역직렬화, Import/Export
+      - `ActionButton` 모델: 필드 유효성 검사
+      - `LlmApiService`: Mock HTTP 응답으로 API 파싱 로직 검증
+
+2. **Manual Verification (UI & Interaction):**
+    * `dotnet run`으로 프로젝트를 실행하고 시스템 트레이에 아이콘이 나타나는지 확인.
+    * 메모장 등 외부 프로그램에서 임의의 텍스트를 드래그하고 손을 떼었을 때(Mouse Up), 현재 마우스 커서 위치에 `RadialMenuWindow`가 투명하게 정상 팝업되는지 확인.
+    * 팝업된 상태에서 텍스트가 아닌 다른 곳을 클릭하면 창이 즉시 사라지는지 확인.
+    * 다중 모니터 환경에서 팝업이 화면 경계를 벗어나지 않는지 확인.
+    * 설정 창에서 버튼 추가 → 저장 → 재시작 후에도 버튼이 유지되는지 확인.
+
+3. **API 연동 검증:**
+    * 유효한 API 키로 번역 버튼 실행 → 결과가 올바른 방식(Replace/Tooltip/Copy)으로 출력되는지 확인.
+    * 잘못된 API 키 또는 네트워크 오프라인 상태에서 오류 메시지가 UI에 표시되고 앱이 크래시되지 않는지 확인.
+
+4. **성능 측정:**
+    * 텍스트 선택 후 팝업 표시까지 소요 시간이 100ms 이하인지 측정 (`Stopwatch` 사용).
+    * 앱 상주 메모리 사용량이 50MB 이하인지 작업 관리자로 확인.
+
+## 배포 계획 (Deployment)
+* **배포 방식:** `dotnet publish -r win-x64 --self-contained true`로 단일 실행파일(self-contained) 생성
+* **인스톨러:** Inno Setup 또는 MSIX 패키지로 설치 파일 구성 (시작 프로그램 등록 포함)
+* **GitHub Releases:** 태그 기반으로 자동 빌드 및 릴리즈 아티팩트 업로드 (GitHub Actions 워크플로우)
