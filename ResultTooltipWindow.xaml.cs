@@ -24,9 +24,18 @@ namespace Orbit
 
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
-            Rect workArea = SystemParameters.WorkArea;
-            Left = workArea.Right - ActualWidth - 20;
-            Top = workArea.Bottom - ActualHeight - 20;
+            PresentationSource? source = PresentationSource.FromVisual(this);
+            double dpiX = source?.CompositionTarget?.TransformFromDevice.M11 ?? 1.0;
+            double dpiY = source?.CompositionTarget?.TransformFromDevice.M22 ?? 1.0;
+
+            var cursorPosition = System.Windows.Forms.Cursor.Position;
+            var screen = System.Windows.Forms.Screen.FromPoint(cursorPosition);
+
+            double workAreaRight = screen.WorkingArea.Right * dpiX;
+            double workAreaBottom = screen.WorkingArea.Bottom * dpiY;
+
+            Left = workAreaRight - ActualWidth - 20;
+            Top = workAreaBottom - ActualHeight - 20;
         }
 
         private void CloseButton_Click(object sender, RoutedEventArgs e)

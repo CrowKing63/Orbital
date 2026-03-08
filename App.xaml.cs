@@ -18,7 +18,11 @@ namespace Orbit
             base.OnStartup(e);
             ShutdownMode = ShutdownMode.OnExplicitShutdown;
 
-            SettingsManager.LoadSettings();
+            bool recovered = SettingsManager.LoadSettings();
+            if (recovered)
+            {
+                MessageBox.Show("Your settings file was corrupted and has been reset to defaults.\n\nA backup of the corrupted file was saved with a .bak extension.", "Orbit Settings Recovery", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
             RebuildActionExecutor();
             InitializeTrayIcon();
 
@@ -35,7 +39,7 @@ namespace Orbit
             string apiKey = SettingsManager.GetApiKey();
             if (string.IsNullOrEmpty(apiKey))
             {
-                _actionExecutor = null;
+                _actionExecutor = new ActionExecutorService(null);
                 return;
             }
             string baseUrl = string.IsNullOrWhiteSpace(SettingsManager.CurrentSettings.ApiBaseUrl)

@@ -31,6 +31,7 @@ namespace Orbit
             {
                 NameBox.Text = existing.Name;
                 PromptBox.Text = existing.PromptFormat;
+                RequiresSelectionCheck.IsChecked = existing.IsSelectionRequired;
 
                 foreach (ComboBoxItem item in ResultActionBox.Items)
                 {
@@ -55,7 +56,8 @@ namespace Orbit
             {
                 Name = NameBox.Text.Trim(),
                 PromptFormat = PromptBox.Text,
-                ResultAction = (ResultActionBox.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Popup"
+                ResultAction = (ResultActionBox.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Popup",
+                RequiresSelection = RequiresSelectionCheck.IsChecked
             };
 
             DialogResult = true;

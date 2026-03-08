@@ -12,6 +12,11 @@ namespace Orbit
         public string Name { get; set; }
         public string PromptFormat { get; set; }  // e.g. "Translate this to Korean: {text}"
         public string ResultAction { get; set; }  // "Copy", "Replace", "Popup"
+        
+        public bool? RequiresSelection { get; set; }
+
+        [JsonIgnore]
+        public bool IsSelectionRequired => RequiresSelection ?? (ResultAction != "Paste");
     }
 
     public class AppSettings
@@ -31,18 +36,42 @@ namespace Orbit
 
         public static AppSettings CurrentSettings { get; private set; }
 
-        public static void LoadSettings()
+        public static bool LoadSettings()
         {
+            bool recovered = false;
             if (File.Exists(ConfigPath))
             {
-                string json = File.ReadAllText(ConfigPath);
-                CurrentSettings = JsonConvert.DeserializeObject<AppSettings>(json) ?? CreateDefaultSettings();
+                try
+                {
+                    string json = File.ReadAllText(ConfigPath);
+                    CurrentSettings = JsonConvert.DeserializeObject<AppSettings>(json);
+                    if (CurrentSettings == null)
+                    {
+                        throw new JsonException("Deserialized settings is null.");
+                    }
+                }
+                catch (Exception)
+                {
+                    string backupPath = ConfigPath + ".corrupt.bak";
+                    try
+                    {
+                        if (File.Exists(backupPath)) File.Delete(backupPath);
+                        File.Move(ConfigPath, backupPath);
+                    }
+                    catch { } // Best effort backup
+
+                    CurrentSettings = CreateDefaultSettings();
+                    SaveSettings();
+                    recovered = true;
+                }
             }
             else
             {
                 CurrentSettings = CreateDefaultSettings();
                 SaveSettings();
             }
+
+            return recovered;
         }
 
         public static void SaveSettings()
@@ -64,13 +93,13 @@ namespace Orbit
                 EncryptedApiKey = string.Empty,
                 Actions = new List<ActionProfile>
                 {
-                    new ActionProfile { Name = "Copy",      PromptFormat = "",                                                               ResultAction = "DirectCopy" },
-                    new ActionProfile { Name = "Cut",       PromptFormat = "",                                                               ResultAction = "Cut"        },
-                    new ActionProfile { Name = "Paste",     PromptFormat = "",                                                               ResultAction = "Paste"      },
-                    new ActionProfile { Name = "Translate", PromptFormat = "Translate the following to Korean organically: {text}",          ResultAction = "Replace"    },
-                    new ActionProfile { Name = "Summarize", PromptFormat = "Summarize the following in 3 lines: {text}",                    ResultAction = "Popup"      },
-                    new ActionProfile { Name = "Polish",    PromptFormat = "Correct grammar and make this sound professional: {text}",       ResultAction = "Replace"    },
-                    new ActionProfile { Name = "Search",    PromptFormat = "",                                                               ResultAction = "Browser"    }
+                    new ActionProfile { Name = "Copy",      PromptFormat = "",                                                               ResultAction = "DirectCopy", RequiresSelection = true },
+                    new ActionProfile { Name = "Cut",       PromptFormat = "",                                                               ResultAction = "Cut",        RequiresSelection = true },
+                    new ActionProfile { Name = "Paste",     PromptFormat = "",                                                               ResultAction = "Paste",      RequiresSelection = false },
+                    new ActionProfile { Name = "Translate", PromptFormat = "Translate the following to Korean organically: {text}",          ResultAction = "Replace",    RequiresSelection = true },
+                    new ActionProfile { Name = "Summarize", PromptFormat = "Summarize the following in 3 lines: {text}",                   ResultAction = "Popup",      RequiresSelection = true },
+                    new ActionProfile { Name = "Polish",    PromptFormat = "Correct grammar and make this sound professional: {text}",       ResultAction = "Replace",    RequiresSelection = true },
+                    new ActionProfile { Name = "Search",    PromptFormat = "",                                                               ResultAction = "Browser",    RequiresSelection = true }
                 }
             };
         }

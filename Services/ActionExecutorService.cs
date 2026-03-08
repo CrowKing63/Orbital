@@ -7,9 +7,11 @@ namespace Orbit
 {
     public class ActionExecutorService
     {
-        private readonly ILlmApiService _llmService;
+        private readonly ILlmApiService? _llmService;
 
-        public ActionExecutorService(ILlmApiService llmService)
+        public bool HasLlmService => _llmService != null;
+
+        public ActionExecutorService(ILlmApiService? llmService)
         {
             _llmService = llmService;
         }
@@ -20,6 +22,12 @@ namespace Orbit
         /// </summary>
         public async Task ExecuteAsync(ActionProfile action, string selectedText)
         {
+            if (action.IsSelectionRequired && string.IsNullOrEmpty(selectedText))
+            {
+                // Defensive runtime guard
+                return;
+            }
+
             // LLM을 사용하지 않는 유틸리티 액션들
             switch (action.ResultAction)
             {
@@ -46,6 +54,11 @@ namespace Orbit
             }
 
             // LLM 액션
+            if (_llmService == null)
+            {
+                throw new InvalidOperationException("API key is not configured for LLM actions.");
+            }
+
             string prompt = action.PromptFormat.Replace("{text}", selectedText);
             string result = await _llmService.CallApiAsync(prompt);
 

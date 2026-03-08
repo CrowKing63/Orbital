@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Orbit")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+80bfdb77b1dace9a08a8baafb3ea2a9ebfcbc11d")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ffd13bdefe6da68d32b6619a1187686718748ab8")]
 [assembly: System.Reflection.AssemblyProductAttribute("Orbit")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Orbit")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

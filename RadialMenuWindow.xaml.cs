@@ -50,7 +50,7 @@ namespace Orbit
                 }
 
                 var action = actions[i];
-                bool enabled = hasText || !LlmActions.Contains(action.ResultAction);
+                bool enabled = hasText || !action.IsSelectionRequired;
 
                 var btn = new Button
                 {
@@ -89,10 +89,14 @@ namespace Orbit
             double left = cursorX - ActualWidth / 2;
             double top  = cursorY - ActualHeight - 8;
 
-            // 화면 경계 보정
-            Rect workArea = SystemParameters.WorkArea;
-            left = Math.Max(workArea.Left + 4, Math.Min(left, workArea.Right - ActualWidth - 4));
-            if (top < workArea.Top + 4)
+            // 화면 경계 보정 (모니터 인식)
+            var screen = System.Windows.Forms.Screen.FromPoint(new System.Drawing.Point(mouseX, mouseY));
+            double workAreaLeft = screen.WorkingArea.Left * dpiX;
+            double workAreaTop = screen.WorkingArea.Top * dpiY;
+            double workAreaRight = screen.WorkingArea.Right * dpiX;
+
+            left = Math.Max(workAreaLeft + 4, Math.Min(left, workAreaRight - ActualWidth - 4));
+            if (top < workAreaTop + 4)
                 top = cursorY + 8; // 위쪽 공간 부족 → 아래 표시
 
             Left = left;
@@ -106,7 +110,8 @@ namespace Orbit
 
             Hide();
 
-            if (_actionExecutor == null)
+            bool isLlmAction = LlmActions.Contains(action.ResultAction);
+            if (isLlmAction && (_actionExecutor == null || !_actionExecutor.HasLlmService))
             {
                 MessageBox.Show(
                     "API key is not configured.\nDouble-click the system tray icon to open Settings.",
@@ -116,7 +121,10 @@ namespace Orbit
 
             try
             {
-                await Task.Run(() => _actionExecutor.ExecuteAsync(action, SelectedText));
+                if (_actionExecutor != null)
+                {
+                    await Task.Run(() => _actionExecutor.ExecuteAsync(action, SelectedText));
+                }
             }
             catch (Exception ex)
             {
