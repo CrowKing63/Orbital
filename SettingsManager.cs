@@ -10,11 +10,11 @@ namespace Orbit
 {
     public class ActionProfile
     {
-        public string Name { get; set; }
-        public string PromptFormat { get; set; }  // e.g. "Translate this to Korean: {text}"
+        public string Name { get; set; } = string.Empty;
+        public string PromptFormat { get; set; } = string.Empty;  // e.g. "Translate this to Korean: {text}"
         
         // String property for JSON serialization (backward compatibility)
-        public string ResultAction { get; set; }  // "Copy", "Replace", "Popup", etc.
+        public string ResultAction { get; set; } = ActionType.Popup.ToSerializedString();  // "Copy", "Replace", "Popup", etc.
         
         // Typed property for code usage
         [JsonIgnore]
@@ -32,7 +32,7 @@ namespace Orbit
 
     public class AppSettings
     {
-        public string EncryptedApiKey { get; set; }
+        public string EncryptedApiKey { get; set; } = string.Empty;
         public string ApiBaseUrl  { get; set; } = "https://api.openai.com/v1";
         public string ModelName   { get; set; } = "gpt-4o-mini";
         public List<ActionProfile> Actions { get; set; } = new List<ActionProfile>();
@@ -40,12 +40,15 @@ namespace Orbit
 
     public static class SettingsManager
     {
-        private static readonly string ConfigPath = Path.Combine(
+        private static readonly string DefaultConfigPath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), 
             "Orbit", 
             "settings.json");
+        private static string? _configPathOverride;
 
-        public static AppSettings CurrentSettings { get; private set; }
+        private static string ConfigPath => _configPathOverride ?? DefaultConfigPath;
+
+        public static AppSettings CurrentSettings { get; private set; } = CreateDefaultSettings();
 
         public static bool LoadSettings()
         {
@@ -55,11 +58,13 @@ namespace Orbit
                 try
                 {
                     string json = File.ReadAllText(ConfigPath);
-                    CurrentSettings = JsonConvert.DeserializeObject<AppSettings>(json);
-                    if (CurrentSettings == null)
+                    AppSettings? loadedSettings = JsonConvert.DeserializeObject<AppSettings>(json);
+                    if (loadedSettings == null)
                     {
                         throw new JsonException("Deserialized settings is null.");
                     }
+
+                    CurrentSettings = loadedSettings;
                 }
                 catch (Exception)
                 {
@@ -87,7 +92,8 @@ namespace Orbit
 
         public static void SaveSettings()
         {
-            string dir = Path.GetDirectoryName(ConfigPath);
+            string dir = Path.GetDirectoryName(ConfigPath)
+                ?? throw new InvalidOperationException("Unable to resolve settings directory.");
             if (!Directory.Exists(dir))
             {
                 Directory.CreateDirectory(dir);
@@ -153,7 +159,18 @@ namespace Orbit
             }
         }
 
-        public static string ExportActionPack(string filePath)
+        internal static IDisposable OverrideConfigPathForTesting(string configPath)
+        {
+            string? previousOverride = _configPathOverride;
+            AppSettings previousSettings = CurrentSettings;
+
+            _configPathOverride = configPath;
+            CurrentSettings = CreateDefaultSettings();
+
+            return new ConfigPathOverrideScope(previousOverride, previousSettings);
+        }
+
+        public static string? ExportActionPack(string filePath)
         {
             try
             {
@@ -168,7 +185,7 @@ namespace Orbit
             }
         }
 
-        public static string ImportActionPack(string filePath, bool replaceExisting)
+        public static string? ImportActionPack(string filePath, bool replaceExisting)
         {
             try
             {
@@ -182,13 +199,17 @@ namespace Orbit
                     return "No valid actions found in file.";
 
                 // Validate imported actions
+                var importedNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                 foreach (var action in importedActions)
                 {
-                    if (string.IsNullOrWhiteSpace(action.Name))
-                        return "Invalid action: Name is required.";
-                    
-                    if (string.IsNullOrWhiteSpace(action.ResultAction))
-                        return $"Invalid action '{action.Name}': ResultAction is required.";
+                    string? validationError = ValidateImportedAction(action);
+                    if (validationError != null)
+                        return validationError;
+
+                    action.Name = action.Name.Trim();
+
+                    if (!importedNames.Add(action.Name))
+                        return $"Duplicate action name '{action.Name}' found in import file.";
                 }
 
                 if (replaceExisting)
@@ -207,6 +228,7 @@ namespace Orbit
                         if (!existingNames.Contains(action.Name))
                         {
                             CurrentSettings.Actions.Add(action);
+                            existingNames.Add(action.Name);
                         }
                     }
                 }
@@ -221,6 +243,46 @@ namespace Orbit
             catch (Exception ex)
             {
                 return $"Import failed: {ex.Message}";
+            }
+        }
+
+        private static string? ValidateImportedAction(ActionProfile action)
+        {
+            if (string.IsNullOrWhiteSpace(action.Name))
+                return "Invalid action: Name is required.";
+                    
+            if (string.IsNullOrWhiteSpace(action.ResultAction))
+                return $"Invalid action '{action.Name}': ResultAction is required.";
+
+            if (!ActionTypeExtensions.TryFromString(action.ResultAction, out _))
+                return $"Invalid action '{action.Name}': Unknown ResultAction '{action.ResultAction}'.";
+
+            action.PromptFormat ??= string.Empty;
+            return null;
+        }
+
+        private sealed class ConfigPathOverrideScope : IDisposable
+        {
+            private readonly string? _previousOverride;
+            private readonly AppSettings _previousSettings;
+            private bool _disposed;
+
+            public ConfigPathOverrideScope(string? previousOverride, AppSettings previousSettings)
+            {
+                _previousOverride = previousOverride;
+                _previousSettings = previousSettings;
+            }
+
+            public void Dispose()
+            {
+                if (_disposed)
+                {
+                    return;
+                }
+
+                _configPathOverride = _previousOverride;
+                CurrentSettings = _previousSettings;
+                _disposed = true;
             }
         }
     }

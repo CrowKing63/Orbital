@@ -33,6 +33,40 @@ namespace Orbit
     public static class ActionTypeExtensions
     {
         /// <summary>
+        /// Attempts to convert a serialized string into an ActionType.
+        /// </summary>
+        public static bool TryFromString(string? value, out ActionType actionType)
+        {
+            switch (value?.Trim())
+            {
+                case "Replace":
+                    actionType = ActionType.Replace;
+                    return true;
+                case "Copy":
+                    actionType = ActionType.Copy;
+                    return true;
+                case "Popup":
+                    actionType = ActionType.Popup;
+                    return true;
+                case "Browser":
+                    actionType = ActionType.Browser;
+                    return true;
+                case "DirectCopy":
+                    actionType = ActionType.DirectCopy;
+                    return true;
+                case "Cut":
+                    actionType = ActionType.Cut;
+                    return true;
+                case "Paste":
+                    actionType = ActionType.Paste;
+                    return true;
+                default:
+                    actionType = ActionType.Popup;
+                    return false;
+            }
+        }
+
+        /// <summary>
         /// Checks if the action requires LLM processing.
         /// </summary>
         public static bool RequiresLlm(this ActionType actionType)
@@ -49,19 +83,11 @@ namespace Orbit
         /// <summary>
         /// Converts a string to ActionType, maintaining backward compatibility.
         /// </summary>
-        public static ActionType FromString(string value)
+        public static ActionType FromString(string? value)
         {
-            return value switch
-            {
-                "Replace" => ActionType.Replace,
-                "Copy" => ActionType.Copy,
-                "Popup" => ActionType.Popup,
-                "Browser" => ActionType.Browser,
-                "DirectCopy" => ActionType.DirectCopy,
-                "Cut" => ActionType.Cut,
-                "Paste" => ActionType.Paste,
-                _ => ActionType.Popup // Default fallback
-            };
+            return TryFromString(value, out ActionType actionType)
+                ? actionType
+                : ActionType.Popup;
         }
 
         /// <summary>

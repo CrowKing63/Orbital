@@ -237,7 +237,7 @@ namespace Orbit
 
             if (dialog.ShowDialog() == true)
             {
-                string error = SettingsManager.ExportActionPack(dialog.FileName);
+                string? error = SettingsManager.ExportActionPack(dialog.FileName);
                 if (error == null)
                 {
                     MessageBox.Show($"Action pack exported successfully to:\n{dialog.FileName}",
@@ -274,7 +274,7 @@ namespace Orbit
                     return;
 
                 bool replaceExisting = (result == MessageBoxResult.Yes);
-                string error = SettingsManager.ImportActionPack(dialog.FileName, replaceExisting);
+                string? error = SettingsManager.ImportActionPack(dialog.FileName, replaceExisting);
 
                 if (error == null)
                 {
