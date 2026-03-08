@@ -182,6 +182,7 @@ namespace Orbit
             if (dialog.ShowDialog() == true)
             {
                 SettingsManager.CurrentSettings.Actions.Add(dialog.Result);
+                SettingsManager.SaveSettings();
                 RefreshActionList();
             }
         }
@@ -197,6 +198,7 @@ namespace Orbit
                 if (idx >= 0)
                 {
                     SettingsManager.CurrentSettings.Actions[idx] = dialog.Result;
+                    SettingsManager.SaveSettings();
                     RefreshActionList();
                 }
             }
@@ -212,6 +214,7 @@ namespace Orbit
             if (confirm == MessageBoxResult.Yes)
             {
                 SettingsManager.CurrentSettings.Actions.Remove(selected);
+                SettingsManager.SaveSettings();
                 RefreshActionList();
             }
         }
@@ -220,6 +223,75 @@ namespace Orbit
         {
             SaveApiKey_Click(sender, e); // Base URL + 모델도 함께 저장
             Close();
+        }
+
+        private void ExportActions_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new Microsoft.Win32.SaveFileDialog
+            {
+                Filter = "Orbit Action Pack (*.json)|*.json|All Files (*.*)|*.*",
+                DefaultExt = ".json",
+                FileName = "orbit-actions.json",
+                Title = "Export Action Pack"
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                string error = SettingsManager.ExportActionPack(dialog.FileName);
+                if (error == null)
+                {
+                    MessageBox.Show($"Action pack exported successfully to:\n{dialog.FileName}",
+                        "Orbit", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                else
+                {
+                    MessageBox.Show(error, "Export Failed", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        private void ImportActions_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new Microsoft.Win32.OpenFileDialog
+            {
+                Filter = "Orbit Action Pack (*.json)|*.json|All Files (*.*)|*.*",
+                DefaultExt = ".json",
+                Title = "Import Action Pack"
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                var result = MessageBox.Show(
+                    "Replace existing actions or merge with current actions?\n\n" +
+                    "Yes = Replace all existing actions\n" +
+                    "No = Merge (skip duplicates by name)\n" +
+                    "Cancel = Abort import",
+                    "Import Mode",
+                    MessageBoxButton.YesNoCancel,
+                    MessageBoxImage.Question);
+
+                if (result == MessageBoxResult.Cancel)
+                    return;
+
+                bool replaceExisting = (result == MessageBoxResult.Yes);
+                string error = SettingsManager.ImportActionPack(dialog.FileName, replaceExisting);
+
+                if (error == null)
+                {
+                    RefreshActionList();
+                    MessageBox.Show(
+                        replaceExisting 
+                            ? "Action pack imported successfully. All previous actions were replaced."
+                            : "Action pack imported successfully. New actions were merged with existing ones.",
+                        "Orbit",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
+                }
+                else
+                {
+                    MessageBox.Show(error, "Import Failed", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
         }
     }
 }

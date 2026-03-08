@@ -66,6 +66,8 @@ namespace Orbit
         [DllImport("user32.dll")]
         static extern uint SendInput(uint nInputs, INPUT[] pInputs, int cbSize);
 
+        private static readonly object _clipboardLock = new object();
+
         /// <summary>
         /// Simulates a Ctrl+C keystroke to copy currently selected text,
         /// waits briefly, and returns the clipboard string.
@@ -73,35 +75,38 @@ namespace Orbit
         /// </summary>
         public static string GetSelectedText()
         {
-            // 기존 클립보드 내용 백업
-            IDataObject? backup = null;
-            Application.Current.Dispatcher.Invoke(() =>
+            lock (_clipboardLock)
             {
-                try { backup = Clipboard.GetDataObject(); } catch { }
-                Clipboard.Clear();
-            });
-
-            // Simulate Ctrl + C
-            SimulateKeyStroke(VK_LCONTROL, VK_C);
-
-            Thread.Sleep(100);
-
-            string selectedText = string.Empty;
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                if (Clipboard.ContainsText())
-                    selectedText = Clipboard.GetText();
-
-                // 기존 클립보드 복원
-                try
+                // 기존 클립보드 내용 백업
+                IDataObject? backup = null;
+                Application.Current.Dispatcher.Invoke(() =>
                 {
-                    if (backup != null)
-                        Clipboard.SetDataObject(backup, true);
-                }
-                catch { }
-            });
+                    try { backup = Clipboard.GetDataObject(); } catch { }
+                    Clipboard.Clear();
+                });
 
-            return selectedText;
+                // Simulate Ctrl + C
+                SimulateKeyStroke(VK_LCONTROL, VK_C);
+
+                Thread.Sleep(100);
+
+                string selectedText = string.Empty;
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    if (Clipboard.ContainsText())
+                        selectedText = Clipboard.GetText();
+
+                    // 기존 클립보드 복원
+                    try
+                    {
+                        if (backup != null)
+                            Clipboard.SetDataObject(backup, true);
+                    }
+                    catch { }
+                });
+
+                return selectedText;
+            }
         }
 
         /// <summary>
@@ -109,15 +114,33 @@ namespace Orbit
         /// </summary>
         public static void ReplaceSelectedText(string newText)
         {
-            Application.Current.Dispatcher.Invoke(() => 
+            lock (_clipboardLock)
             {
-                Clipboard.SetText(newText);
-            });
+                IDataObject? backup = null;
+                Application.Current.Dispatcher.Invoke(() => 
+                {
+                    try { backup = Clipboard.GetDataObject(); } catch { }
+                    Clipboard.SetText(newText);
+                });
 
-            Thread.Sleep(50);
+                Thread.Sleep(50);
 
-            // Simulate Ctrl + V
-            SimulateKeyStroke(VK_LCONTROL, VK_V);
+                // Simulate Ctrl + V
+                SimulateKeyStroke(VK_LCONTROL, VK_V);
+
+                // Wait for the application to process Paste
+                Thread.Sleep(150);
+
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    try
+                    {
+                        if (backup != null)
+                            Clipboard.SetDataObject(backup, true);
+                    }
+                    catch { }
+                });
+            }
         }
 
         /// <summary>
@@ -125,18 +148,21 @@ namespace Orbit
         /// </summary>
         public static void DeleteSelectedText()
         {
-            Thread.Sleep(50);
+            lock (_clipboardLock)
+            {
+                Thread.Sleep(50);
 
-            INPUT[] inputs = new INPUT[2];
+                INPUT[] inputs = new INPUT[2];
 
-            inputs[0].type = INPUT_KEYBOARD;
-            inputs[0].U.ki.wVk = VK_DELETE;
+                inputs[0].type = INPUT_KEYBOARD;
+                inputs[0].U.ki.wVk = VK_DELETE;
 
-            inputs[1].type = INPUT_KEYBOARD;
-            inputs[1].U.ki.wVk = VK_DELETE;
-            inputs[1].U.ki.dwFlags = KEYEVENTF_KEYUP;
+                inputs[1].type = INPUT_KEYBOARD;
+                inputs[1].U.ki.wVk = VK_DELETE;
+                inputs[1].U.ki.dwFlags = KEYEVENTF_KEYUP;
 
-            SendInput((uint)inputs.Length, inputs, INPUT.Size);
+                SendInput((uint)inputs.Length, inputs, INPUT.Size);
+            }
         }
 
         /// <summary>
@@ -144,8 +170,22 @@ namespace Orbit
         /// </summary>
         public static void SimulatePaste()
         {
-            Thread.Sleep(50);
-            SimulateKeyStroke(VK_LCONTROL, VK_V);
+            lock (_clipboardLock)
+            {
+                Thread.Sleep(50);
+                SimulateKeyStroke(VK_LCONTROL, VK_V);
+            }
+        }
+
+        /// <summary>
+        /// 안전하게 텍스트를 클립보드에 복사합니다.
+        /// </summary>
+        public static void CopyToClipboard(string text)
+        {
+            lock (_clipboardLock)
+            {
+                Application.Current.Dispatcher.Invoke(() => Clipboard.SetText(text));
+            }
         }
 
         private static void SimulateKeyStroke(ushort modifier, ushort key)

@@ -12,6 +12,8 @@ namespace Orbit
         private RadialMenuWindow _radialMenu = null!;
         private WinForms.NotifyIcon _notifyIcon = null!;
         private ActionExecutorService? _actionExecutor;
+        private CancellationTokenSource? _selectionCts;
+        private readonly object _selectionLock = new object();
 
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -31,11 +33,39 @@ namespace Orbit
             SystemHookManager.OnAnyMouseDown += SystemHookManager_OnAnyMouseDown;
             SystemHookManager.OnMouseUp += SystemHookManager_OnMouseUp;
             SystemHookManager.OnLongPress += SystemHookManager_OnLongPress;
-            SystemHookManager.StartMouseHook();
+            
+            if (!SystemHookManager.StartMouseHook(out int hookErrorCode))
+            {
+                string errorMessage = $"Failed to install global mouse hook (Error code: {hookErrorCode}).\n\n" +
+                                    "Orbit requires this hook to detect text selection gestures.\n" +
+                                    "The application will now exit.\n\n" +
+                                    "Common causes:\n" +
+                                    "- Insufficient permissions\n" +
+                                    "- Conflicting software (security tools, other hook-based apps)\n" +
+                                    "- System resource limitations";
+                
+                MessageBox.Show(errorMessage, "Orbit Startup Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                Shutdown();
+                return;
+            }
+        }
+
+        private void OpenSettingsWindow()
+        {
+            var win = new SettingsWindow();
+            win.ShowDialog();
+            RebuildActionExecutor();
+            _radialMenu.UpdateActionExecutor(_actionExecutor);
         }
 
         private void RebuildActionExecutor()
         {
+            // Dispose old service if it exists
+            if (_actionExecutor?.LlmService is IDisposable disposable)
+            {
+                disposable.Dispose();
+            }
+
             string apiKey = SettingsManager.GetApiKey();
             if (string.IsNullOrEmpty(apiKey))
             {
@@ -48,7 +78,17 @@ namespace Orbit
             string modelName = string.IsNullOrWhiteSpace(SettingsManager.CurrentSettings.ModelName)
                 ? "gpt-4o-mini"
                 : SettingsManager.CurrentSettings.ModelName;
-            _actionExecutor = new ActionExecutorService(new OpenAiApiService(apiKey, baseUrl, modelName));
+            
+            try
+            {
+                _actionExecutor = new ActionExecutorService(new OpenAiApiService(apiKey, baseUrl, modelName));
+            }
+            catch (ArgumentException ex)
+            {
+                MessageBox.Show($"Invalid API configuration: {ex.Message}\n\nPlease check your settings.", 
+                    "Orbit Configuration Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                _actionExecutor = new ActionExecutorService(null);
+            }
         }
 
         private void InitializeTrayIcon()
@@ -62,17 +102,7 @@ namespace Orbit
 
             var menu = new WinForms.ContextMenuStrip();
 
-            menu.Items.Add("Settings", null, (s, e) =>
-            {
-                Dispatcher.Invoke(() =>
-                {
-                    var win = new SettingsWindow();
-                    win.ShowDialog();
-                    // 설정 창 닫힌 후 API 키 변경 반영
-                    RebuildActionExecutor();
-                    _radialMenu.UpdateActionExecutor(_actionExecutor);
-                });
-            });
+            menu.Items.Add("Settings", null, (s, e) => Dispatcher.Invoke(OpenSettingsWindow));
 
             menu.Items.Add(new WinForms.ToolStripSeparator());
 
@@ -85,16 +115,7 @@ namespace Orbit
             _notifyIcon.ContextMenuStrip = menu;
 
             // 더블클릭으로도 설정 열기
-            _notifyIcon.DoubleClick += (s, e) =>
-            {
-                Dispatcher.Invoke(() =>
-                {
-                    var win = new SettingsWindow();
-                    win.ShowDialog();
-                    RebuildActionExecutor();
-                    _radialMenu.UpdateActionExecutor(_actionExecutor);
-                });
-            };
+            _notifyIcon.DoubleClick += (s, e) => Dispatcher.Invoke(OpenSettingsWindow);
         }
 
         private void SystemHookManager_OnAnyMouseDown(object? sender, SystemHookManager.MousePoint e)
@@ -124,19 +145,33 @@ namespace Orbit
 
         private void SystemHookManager_OnMouseUp(object? sender, SystemHookManager.MousePoint e)
         {
+            CancellationToken token;
+            lock (_selectionLock)
+            {
+                _selectionCts?.Cancel();
+                _selectionCts?.Dispose();
+                _selectionCts = new CancellationTokenSource();
+                token = _selectionCts.Token;
+            }
+
             System.Threading.Tasks.Task.Run(() =>
             {
+                if (token.IsCancellationRequested) return;
+
                 Thread.Sleep(50);
+                if (token.IsCancellationRequested) return;
+
                 string selectedText = ClipboardHelper.GetSelectedText();
 
-                if (!string.IsNullOrWhiteSpace(selectedText))
+                if (!string.IsNullOrWhiteSpace(selectedText) && !token.IsCancellationRequested)
                 {
                     Dispatcher.Invoke(() =>
                     {
-                        _radialMenu.ShowAtCursor(e.X, e.Y, selectedText);
+                        if (!token.IsCancellationRequested)
+                            _radialMenu.ShowAtCursor(e.X, e.Y, selectedText);
                     });
                 }
-            });
+            }, token);
         }
 
         private void SystemHookManager_OnLongPress(object? sender, SystemHookManager.MousePoint e)
@@ -152,6 +187,14 @@ namespace Orbit
         {
             SystemHookManager.StopMouseHook();
             _notifyIcon?.Dispose();
+            _selectionCts?.Dispose();
+            
+            // Dispose LLM service if it implements IDisposable
+            if (_actionExecutor?.LlmService is IDisposable disposable)
+            {
+                disposable.Dispose();
+            }
+            
             base.OnExit(e);
         }
     }

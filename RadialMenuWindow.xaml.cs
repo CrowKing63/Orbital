@@ -23,10 +23,6 @@ namespace Orbit
             _actionExecutor = executor;
         }
 
-        // LLM 호출이 필요한 ResultAction 목록
-        private static readonly System.Collections.Generic.HashSet<string> LlmActions =
-            new() { "Replace", "Copy", "Popup" };
-
         private void PopulateBarButtons(bool hasText)
         {
             ButtonPanel.Children.Clear();
@@ -110,7 +106,7 @@ namespace Orbit
 
             Hide();
 
-            bool isLlmAction = LlmActions.Contains(action.ResultAction);
+            bool isLlmAction = action.ActionType.RequiresLlm();
             if (isLlmAction && (_actionExecutor == null || !_actionExecutor.HasLlmService))
             {
                 MessageBox.Show(

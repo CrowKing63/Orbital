@@ -10,6 +10,7 @@ namespace Orbit
         private readonly ILlmApiService? _llmService;
 
         public bool HasLlmService => _llmService != null;
+        public ILlmApiService? LlmService => _llmService;
 
         public ActionExecutorService(ILlmApiService? llmService)
         {
@@ -29,9 +30,9 @@ namespace Orbit
             }
 
             // LLM을 사용하지 않는 유틸리티 액션들
-            switch (action.ResultAction)
+            switch (action.ActionType)
             {
-                case "Browser":
+                case ActionType.Browser:
                     string url = $"https://www.google.com/search?q={Uri.EscapeDataString(selectedText)}";
                     Application.Current.Dispatcher.Invoke(() =>
                     {
@@ -39,16 +40,16 @@ namespace Orbit
                     });
                     return;
 
-                case "DirectCopy":
-                    Application.Current.Dispatcher.Invoke(() => Clipboard.SetText(selectedText));
+                case ActionType.DirectCopy:
+                    ClipboardHelper.CopyToClipboard(selectedText);
                     return;
 
-                case "Cut":
-                    Application.Current.Dispatcher.Invoke(() => Clipboard.SetText(selectedText));
+                case ActionType.Cut:
+                    ClipboardHelper.CopyToClipboard(selectedText);
                     ClipboardHelper.DeleteSelectedText();
                     return;
 
-                case "Paste":
+                case ActionType.Paste:
                     ClipboardHelper.SimulatePaste();
                     return;
             }
@@ -62,17 +63,17 @@ namespace Orbit
             string prompt = action.PromptFormat.Replace("{text}", selectedText);
             string result = await _llmService.CallApiAsync(prompt);
 
-            switch (action.ResultAction)
+            switch (action.ActionType)
             {
-                case "Replace":
+                case ActionType.Replace:
                     ClipboardHelper.ReplaceSelectedText(result);
                     break;
 
-                case "Copy":
-                    Application.Current.Dispatcher.Invoke(() => Clipboard.SetText(result));
+                case ActionType.Copy:
+                    ClipboardHelper.CopyToClipboard(result);
                     break;
 
-                case "Popup":
+                case ActionType.Popup:
                 default:
                     Application.Current.Dispatcher.Invoke(() =>
                     {

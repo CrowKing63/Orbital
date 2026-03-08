@@ -107,9 +107,15 @@
         <DockPanel Grid.Row="2" Margin="0,0,0,8">
             <TextBlock Text="Actions" FontSize="11" FontWeight="SemiBold"
                        Foreground="#5A5A90" VerticalAlignment="Center"/>
-            <Button DockPanel.Dock="Right" Content="+ Add" Width="76"
-                    Style="{StaticResource PrimaryButton}"
-                    Click="AddAction_Click"/>
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                <Button Content="Import" Width="76" Margin="0,0,8,0"
+                        Click="ImportActions_Click"/>
+                <Button Content="Export" Width="76" Margin="0,0,8,0"
+                        Click="ExportActions_Click"/>
+                <Button Content="+ Add" Width="76"
+                        Style="{StaticResource PrimaryButton}"
+                        Click="AddAction_Click"/>
+            </StackPanel>
         </DockPanel>
 
         <!-- ── 액션 리스트 ── -->

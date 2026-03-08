@@ -1,4 +1,4 @@
-name: Build
+name: Build and Test
 
 on:
   push:
@@ -23,6 +23,15 @@ jobs:
 
       - name: Build
         run: dotnet build Orbit.csproj --no-restore --configuration Release
+
+      - name: Restore test dependencies
+        run: dotnet restore Orbit.Tests/Orbit.Tests.csproj
+
+      - name: Build tests
+        run: dotnet build Orbit.Tests/Orbit.Tests.csproj --no-restore --configuration Release
+
+      - name: Run tests
+        run: dotnet test Orbit.Tests/Orbit.Tests.csproj --no-build --configuration Release --verbosity normal
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

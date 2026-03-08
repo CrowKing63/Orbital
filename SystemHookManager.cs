@@ -60,9 +60,10 @@ namespace Orbit
             public IntPtr dwExtraInfo;
         }
 
-        public static void StartMouseHook()
+        public static bool StartMouseHook(out int errorCode)
         {
-            _mouseHookID = SetHook(_mouseProc);
+            _mouseHookID = SetHook(_mouseProc, out errorCode);
+            return _mouseHookID != IntPtr.Zero;
         }
 
         public static void StopMouseHook()
@@ -74,13 +75,15 @@ namespace Orbit
             _mouseHookID = IntPtr.Zero;
         }
 
-        private static IntPtr SetHook(HookProc proc)
+        private static IntPtr SetHook(HookProc proc, out int errorCode)
         {
             using (Process curProcess = Process.GetCurrentProcess())
             using (ProcessModule curModule = curProcess.MainModule!)
             {
-                return SetWindowsHookEx(WH_MOUSE_LL, proc,
+                IntPtr hook = SetWindowsHookEx(WH_MOUSE_LL, proc,
                     GetModuleHandle(curModule.ModuleName!), 0);
+                errorCode = hook == IntPtr.Zero ? Marshal.GetLastWin32Error() : 0;
+                return hook;
             }
         }
 

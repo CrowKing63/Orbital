@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Newtonsoft.Json;
 using System.Security.Cryptography;
 using System.Text;
@@ -11,12 +12,22 @@ namespace Orbit
     {
         public string Name { get; set; }
         public string PromptFormat { get; set; }  // e.g. "Translate this to Korean: {text}"
-        public string ResultAction { get; set; }  // "Copy", "Replace", "Popup"
+        
+        // String property for JSON serialization (backward compatibility)
+        public string ResultAction { get; set; }  // "Copy", "Replace", "Popup", etc.
+        
+        // Typed property for code usage
+        [JsonIgnore]
+        public ActionType ActionType
+        {
+            get => ActionTypeExtensions.FromString(ResultAction ?? "Popup");
+            set => ResultAction = value.ToSerializedString();
+        }
         
         public bool? RequiresSelection { get; set; }
 
         [JsonIgnore]
-        public bool IsSelectionRequired => RequiresSelection ?? (ResultAction != "Paste");
+        public bool IsSelectionRequired => RequiresSelection ?? (ActionType != Orbit.ActionType.Paste);
     }
 
     public class AppSettings
@@ -139,6 +150,77 @@ namespace Orbit
             catch
             {
                 return string.Empty; // Failsafe if encryption key changes or gets corrupted
+            }
+        }
+
+        public static string ExportActionPack(string filePath)
+        {
+            try
+            {
+                var actionPack = new List<ActionProfile>(CurrentSettings.Actions);
+                string json = JsonConvert.SerializeObject(actionPack, Formatting.Indented);
+                File.WriteAllText(filePath, json);
+                return null; // Success
+            }
+            catch (Exception ex)
+            {
+                return $"Export failed: {ex.Message}";
+            }
+        }
+
+        public static string ImportActionPack(string filePath, bool replaceExisting)
+        {
+            try
+            {
+                if (!File.Exists(filePath))
+                    return "File not found.";
+
+                string json = File.ReadAllText(filePath);
+                var importedActions = JsonConvert.DeserializeObject<List<ActionProfile>>(json);
+
+                if (importedActions == null || importedActions.Count == 0)
+                    return "No valid actions found in file.";
+
+                // Validate imported actions
+                foreach (var action in importedActions)
+                {
+                    if (string.IsNullOrWhiteSpace(action.Name))
+                        return "Invalid action: Name is required.";
+                    
+                    if (string.IsNullOrWhiteSpace(action.ResultAction))
+                        return $"Invalid action '{action.Name}': ResultAction is required.";
+                }
+
+                if (replaceExisting)
+                {
+                    CurrentSettings.Actions = importedActions;
+                }
+                else
+                {
+                    // Merge: add imported actions, skip duplicates by name
+                    var existingNames = new HashSet<string>(
+                        CurrentSettings.Actions.Select(a => a.Name),
+                        StringComparer.OrdinalIgnoreCase);
+
+                    foreach (var action in importedActions)
+                    {
+                        if (!existingNames.Contains(action.Name))
+                        {
+                            CurrentSettings.Actions.Add(action);
+                        }
+                    }
+                }
+
+                SaveSettings();
+                return null; // Success
+            }
+            catch (JsonException ex)
+            {
+                return $"Invalid JSON format: {ex.Message}";
+            }
+            catch (Exception ex)
+            {
+                return $"Import failed: {ex.Message}";
             }
         }
     }

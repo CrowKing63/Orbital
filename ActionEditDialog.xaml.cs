@@ -33,9 +33,10 @@ namespace Orbit
                 PromptBox.Text = existing.PromptFormat;
                 RequiresSelectionCheck.IsChecked = existing.IsSelectionRequired;
 
+                // Use typed ActionType instead of string comparison
                 foreach (ComboBoxItem item in ResultActionBox.Items)
                 {
-                    if (item.Content?.ToString() == existing.ResultAction)
+                    if (item.Content?.ToString() == existing.ActionType.ToSerializedString())
                     {
                         ResultActionBox.SelectedItem = item;
                         break;
@@ -52,11 +53,13 @@ namespace Orbit
                 return;
             }
 
+            string selectedActionString = (ResultActionBox.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Popup";
+            
             Result = new ActionProfile
             {
                 Name = NameBox.Text.Trim(),
                 PromptFormat = PromptBox.Text,
-                ResultAction = (ResultActionBox.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Popup",
+                ActionType = ActionTypeExtensions.FromString(selectedActionString),
                 RequiresSelection = RequiresSelectionCheck.IsChecked
             };
 
