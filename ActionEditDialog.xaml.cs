@@ -47,7 +47,7 @@ namespace Orbit
         {
             if (string.IsNullOrWhiteSpace(NameBox.Text))
             {
-                MessageBox.Show("버튼 이름을 입력하세요.", "Orbit", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Please enter a button name.", "Orbit", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 

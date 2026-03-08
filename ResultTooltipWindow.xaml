@@ -96,7 +96,7 @@
                              CaretBrush="Transparent"/>
 
                     <!-- 복사 버튼 -->
-                    <Button Content="클립보드에 복사" Margin="0,12,0,0"
+                    <Button Content="Copy to Clipboard" Margin="0,12,0,0"
                             HorizontalAlignment="Right" Click="CopyButton_Click">
                         <Button.Style>
                             <Style TargetType="Button">

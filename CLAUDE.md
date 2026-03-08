@@ -2,9 +2,20 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Language Policy
+
+**All project artifacts must be written in English.** This includes:
+- UI strings (labels, buttons, tooltips, error messages, window titles)
+- Code comments
+- Commit messages
+- Documentation (README, changelogs, release notes)
+- Default action names and prompt templates in `SettingsManager.cs`
+
+Conversation between the developer and Claude may be in Korean. Code artifacts are always English.
+
 ## Project Overview
 
-**Orbit**는 Windows 시스템 트레이 앱으로, 마우스로 텍스트를 드래그 선택하면 커서 위치에 방사형 메뉴(Radial Menu)를 띄워 LLM 기반 액션을 실행합니다. OpenAI 호환 API를 사용하며, 사용자 정의 프롬프트 액션을 지원합니다.
+**Orbit**는 Windows 시스템 트레이 앱으로, 마우스로 텍스트를 드래그 선택하면 커서 위에 수평 바형 메뉴(Bar Menu)를 띄워 LLM 기반 액션을 실행합니다. OpenAI 호환 API를 사용하며, 사용자 정의 프롬프트 액션을 지원합니다.
 
 ## Build & Run
 
@@ -21,7 +32,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - 테스트 프레임워크 없음 (수동 테스트만)
 - WPF + WinForms 혼용 (`UseWPF`, `UseWindowsForms` 둘 다 활성화) — WinForms는 `NotifyIcon`(트레이)에만 사용
-- **네임스페이스 충돌**: WPF+WinForms 공존으로 `Application`, `Clipboard`, `MessageBox`, `Button`, `IDataObject`, `Timer` 등이 모호해짐 → `GlobalUsings.cs`에서 전역 별칭으로 일괄 해소
+- **네임스페이스 충돌**: WPF+WinForms 공존으로 `Application`, `Clipboard`, `MessageBox`, `Button`, `IDataObject`, `Timer` 등이 모호해짐 → `GlobalUsings.cs`에서 전역 별칭으로 일괄 해소. **`Color`는 GlobalUsings에 없음** — `System.Windows.Media.Color`로 완전 경로 직접 사용할 것
 
 ## Architecture
 
@@ -42,8 +53,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   → 기존 클립보드 백업 → Ctrl+C 시뮬레이션 → 텍스트 추출 → 클립보드 복원
 
 [RadialMenuWindow.ShowAtCursor()]
-  → SettingsManager.Actions 기준 방사형 버튼 동적 생성
-  → LLM 필요 액션(Replace/Copy/Popup)은 텍스트 없을 때 비활성화(Opacity 0.35)
+  → SettingsManager.Actions 기준 StackPanel에 수평 버튼 동적 생성
+  → LLM 필요 액션(Replace/Copy/Popup)은 텍스트 없을 때 비활성화(Opacity 0.4)
+  → Opacity=0으로 오프스크린 표시 → UpdateLayout()으로 크기 측정 → 커서 위 8px 위치 후 Opacity=1
       ↓ 버튼 클릭
 [ActionExecutorService.ExecuteAsync()]
   → ResultAction 분기:
@@ -64,7 +76,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | `GlobalUsings.cs` | WPF/WinForms 타입 충돌 전역 별칭 (`Application`, `Clipboard`, `Button` 등) |
 | `SystemHookManager.cs` | Win32 WH_MOUSE_LL 훅. HTCLIENT 필터 + 8px 드래그 임계값 + 500ms 롱프레스 타이머 |
 | `ClipboardHelper.cs` | `SendInput`으로 Ctrl+C/V/Delete 시뮬레이션. 클립보드 백업/복원 포함 |
-| `RadialMenuWindow.xaml.cs` | 투명 WPF 창. 액션 수 기반 원형 배치. 텍스트 없을 때 LLM 버튼 비활성화 |
+| `RadialMenuWindow.xaml.cs` | 투명 WPF 창(SizeToContent pill 바형). StackPanel 수평 배치. 텍스트 없을 때 LLM 버튼 비활성화 |
 | `ResultTooltipWindow.xaml.cs` | AI 결과 팝업. 우측 하단 표시, 20초 자동 닫힘, 복사 버튼 |
 | `SettingsManager.cs` | `ActionProfile`/`AppSettings` 모델. `%APPDATA%\Orbit\settings.json` 저장. DPAPI 암호화 |
 | `Services/LlmApiService.cs` | `ILlmApiService` + `OpenAiApiService`. 전체 URL 직접 조립 방식으로 BaseAddress 경로 버그 방지 |

@@ -64,13 +64,13 @@ namespace Orbit
                 EncryptedApiKey = string.Empty,
                 Actions = new List<ActionProfile>
                 {
-                    new ActionProfile { Name = "복사",     PromptFormat = "",                                                               ResultAction = "DirectCopy" },
-                    new ActionProfile { Name = "잘라내기", PromptFormat = "",                                                               ResultAction = "Cut"        },
-                    new ActionProfile { Name = "붙여넣기", PromptFormat = "",                                                               ResultAction = "Paste"      },
-                    new ActionProfile { Name = "번역",     PromptFormat = "Translate the following to Korean organically: {text}",          ResultAction = "Replace"    },
-                    new ActionProfile { Name = "요약",     PromptFormat = "Summarize the following in 3 lines: {text}",                    ResultAction = "Popup"      },
-                    new ActionProfile { Name = "수정",     PromptFormat = "Correct grammar and make this sound professional: {text}",       ResultAction = "Replace"    },
-                    new ActionProfile { Name = "검색",     PromptFormat = "",                                                               ResultAction = "Browser"    }
+                    new ActionProfile { Name = "Copy",      PromptFormat = "",                                                               ResultAction = "DirectCopy" },
+                    new ActionProfile { Name = "Cut",       PromptFormat = "",                                                               ResultAction = "Cut"        },
+                    new ActionProfile { Name = "Paste",     PromptFormat = "",                                                               ResultAction = "Paste"      },
+                    new ActionProfile { Name = "Translate", PromptFormat = "Translate the following to Korean organically: {text}",          ResultAction = "Replace"    },
+                    new ActionProfile { Name = "Summarize", PromptFormat = "Summarize the following in 3 lines: {text}",                    ResultAction = "Popup"      },
+                    new ActionProfile { Name = "Polish",    PromptFormat = "Correct grammar and make this sound professional: {text}",       ResultAction = "Replace"    },
+                    new ActionProfile { Name = "Search",    PromptFormat = "",                                                               ResultAction = "Browser"    }
                 }
             };
         }

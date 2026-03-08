@@ -1,7 +1,7 @@
 <Window x:Class="Orbit.SettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Orbit 설정" Height="620" Width="640"
+        Title="Orbit Settings" Height="620" Width="640"
         Background="#0A0A18"
         WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize">
 
@@ -34,7 +34,7 @@
             </Ellipse>
             <TextBlock Text="Orbit" FontSize="18" FontWeight="Bold"
                        Foreground="#8090FF" VerticalAlignment="Center"/>
-            <TextBlock Text="  설정" FontSize="16" FontWeight="Light"
+            <TextBlock Text="  Settings" FontSize="16" FontWeight="Light"
                        Foreground="#9898C8" VerticalAlignment="Center"/>
         </StackPanel>
 
@@ -46,7 +46,7 @@
             </Border.Effect>
             <StackPanel>
                 <!-- 섹션 헤더 -->
-                <TextBlock Text="API 설정" FontSize="11" FontWeight="SemiBold"
+                <TextBlock Text="API Settings" FontSize="11" FontWeight="SemiBold"
                            Foreground="#5A5A90" Margin="0,0,0,12"/>
 
                 <Grid>
@@ -63,17 +63,17 @@
 
                     <!-- 제공자 -->
                     <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,8,10">
-                        <TextBlock Text="API 제공자" FontSize="11" Foreground="#5A5A90" Margin="0,0,0,5"/>
+                        <TextBlock Text="Provider" FontSize="11" Foreground="#5A5A90" Margin="0,0,0,5"/>
                         <ComboBox x:Name="ProviderBox" SelectionChanged="ProviderBox_SelectionChanged">
                             <ComboBoxItem Tag="openai"     Content="OpenAI"/>
                             <ComboBoxItem Tag="openrouter" Content="OpenRouter"/>
-                            <ComboBoxItem Tag="custom"     Content="사용자 지정"/>
+                            <ComboBoxItem Tag="custom"     Content="Custom"/>
                         </ComboBox>
                     </StackPanel>
 
                     <!-- 모델 -->
                     <StackPanel Grid.Row="0" Grid.Column="1" Margin="8,0,0,10">
-                        <TextBlock Text="모델" FontSize="11" Foreground="#5A5A90" Margin="0,0,0,5"/>
+                        <TextBlock Text="Model" FontSize="11" Foreground="#5A5A90" Margin="0,0,0,5"/>
                         <ComboBox x:Name="ModelBox" IsEditable="True" IsTextSearchEnabled="False"/>
                     </StackPanel>
 
@@ -85,9 +85,9 @@
 
                     <!-- API 키 -->
                     <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Margin="0,0,0,6">
-                        <TextBlock Text="API 키" FontSize="11" Foreground="#5A5A90" Margin="0,0,0,5"/>
+                        <TextBlock Text="API Key" FontSize="11" Foreground="#5A5A90" Margin="0,0,0,5"/>
                         <DockPanel>
-                            <Button DockPanel.Dock="Right" Content="저장" Width="72" Margin="8,0,0,0"
+                            <Button DockPanel.Dock="Right" Content="Save" Width="72" Margin="8,0,0,0"
                                     Style="{StaticResource PrimaryButton}"
                                     Click="SaveApiKey_Click"/>
                             <PasswordBox x:Name="ApiKeyBox" PasswordChar="●"
@@ -105,9 +105,9 @@
 
         <!-- ── 액션 버튼 헤더 ── -->
         <DockPanel Grid.Row="2" Margin="0,0,0,8">
-            <TextBlock Text="액션 버튼" FontSize="11" FontWeight="SemiBold"
+            <TextBlock Text="Actions" FontSize="11" FontWeight="SemiBold"
                        Foreground="#5A5A90" VerticalAlignment="Center"/>
-            <Button DockPanel.Dock="Right" Content="+ 추가" Width="76"
+            <Button DockPanel.Dock="Right" Content="+ Add" Width="76"
                     Style="{StaticResource PrimaryButton}"
                     Click="AddAction_Click"/>
         </DockPanel>
@@ -116,21 +116,21 @@
         <ListView Grid.Row="3" x:Name="ActionsList" SelectionMode="Single">
             <ListView.View>
                 <GridView>
-                    <GridViewColumn Header="이름"     Width="95"  DisplayMemberBinding="{Binding Name}"/>
-                    <GridViewColumn Header="프롬프트" Width="305" DisplayMemberBinding="{Binding PromptFormat}"/>
-                    <GridViewColumn Header="출력 방식" Width="98" DisplayMemberBinding="{Binding ResultAction}"/>
+                    <GridViewColumn Header="Name"   Width="95"  DisplayMemberBinding="{Binding Name}"/>
+                    <GridViewColumn Header="Prompt" Width="305" DisplayMemberBinding="{Binding PromptFormat}"/>
+                    <GridViewColumn Header="Output" Width="98"  DisplayMemberBinding="{Binding ResultAction}"/>
                 </GridView>
             </ListView.View>
         </ListView>
 
         <!-- ── 하단 버튼 ── -->
         <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
-            <Button Content="삭제" Width="76" Margin="0,0,8,0"
+            <Button Content="Delete" Width="76" Margin="0,0,8,0"
                     Style="{StaticResource DangerButton}"
                     Click="DeleteAction_Click"/>
-            <Button Content="편집" Width="76" Margin="0,0,8,0"
+            <Button Content="Edit" Width="76" Margin="0,0,8,0"
                     Click="EditAction_Click"/>
-            <Button Content="저장 및 닫기" Width="110"
+            <Button Content="Save &amp; Close" Width="110"
                     Style="{StaticResource PrimaryButton}"
                     Click="SaveAndClose_Click" IsDefault="True"/>
         </StackPanel>

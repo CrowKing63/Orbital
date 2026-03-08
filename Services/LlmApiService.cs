@@ -53,13 +53,13 @@ namespace Orbit
             }
             catch (Exception ex)
             {
-                throw new Exception($"네트워크 오류 (URL: {_endpointUrl})\n{ex.Message}", ex);
+                throw new Exception($"Network error (URL: {_endpointUrl})\n{ex.Message}", ex);
             }
 
             if (!response.IsSuccessStatusCode)
             {
                 string body = await response.Content.ReadAsStringAsync();
-                throw new Exception($"API 오류 {(int)response.StatusCode}: {body}");
+                throw new Exception($"API error {(int)response.StatusCode}: {body}");
             }
 
             string responseJson = await response.Content.ReadAsStringAsync();

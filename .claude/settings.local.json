@@ -9,7 +9,8 @@
       "WebFetch(domain:openrouter.ai)",
       "Bash(claude mcp:*)",
       "mcp__plugin_github_github__get_me",
-      "Bash(\"C:\\\\Program Files\\\\dotnet\\\\dotnet.exe\" build:*)"
+      "Bash(\"C:\\\\Program Files\\\\dotnet\\\\dotnet.exe\" build:*)",
+      "Bash(\"C:\\\\Program Files\\\\dotnet\\\\dotnet.exe\" build Orbit.csproj --no-restore)"
     ]
   },
   "hooks": {

@@ -1,7 +1,8 @@
 <Window x:Class="Orbit.RadialMenuWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="OrbitMenu" Height="290" Width="290"
+        Title="OrbitMenu"
+        SizeToContent="WidthAndHeight"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         Topmost="True" ShowInTaskbar="False" ResizeMode="NoResize"
         ShowActivated="False"
@@ -11,51 +12,30 @@
         <!-- TextBlock 기본 스타일 재정의 — 버튼 내부 텍스트가 부모 Foreground를 상속하도록 -->
         <Style TargetType="TextBlock"/>
 
-        <!-- 방사형 버튼 스타일 — 오르트 구름 컨셉: 딥 스페이스 + 네뷸라 글로우 -->
-        <Style TargetType="Button" x:Key="RadialButtonStyle">
-            <Setter Property="Width"      Value="52"/>
-            <Setter Property="Height"     Value="52"/>
-            <Setter Property="Background" Value="#CC0D0D22"/>
+        <!-- 바형 버튼 스타일 — 오르트 구름 컨셉: 딥 스페이스 + 네뷸라 글로우 -->
+        <Style TargetType="Button" x:Key="BarButtonStyle">
+            <Setter Property="Height"     Value="36"/>
+            <Setter Property="MinWidth"   Value="44"/>
+            <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Foreground" Value="#C8C8FF"/>
-            <Setter Property="FontSize"   Value="10"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize"   Value="11"/>
             <Setter Property="Cursor"     Value="Hand"/>
+            <Setter Property="Padding"    Value="10,0"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Border x:Name="Bd"
                                 Background="{TemplateBinding Background}"
-                                CornerRadius="26"
-                                BorderBrush="#507080FF"
-                                BorderThickness="1">
-                            <Border.Effect>
-                                <DropShadowEffect Color="#7080FF" BlurRadius="10"
-                                                  ShadowDepth="0" Opacity="0.35"/>
-                            </Border.Effect>
+                                CornerRadius="16"
+                                Padding="{TemplateBinding Padding}">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" Property="Background"   Value="#CC1A1A40"/>
-                                <Setter TargetName="Bd" Property="BorderBrush"  Value="#CC00D4FF"/>
-                                <Setter TargetName="Bd" Property="Effect">
-                                    <Setter.Value>
-                                        <DropShadowEffect Color="#00D4FF" BlurRadius="20"
-                                                          ShadowDepth="0" Opacity="0.8"/>
-                                    </Setter.Value>
-                                </Setter>
+                                <Setter TargetName="Bd" Property="Background" Value="#2800D4FF"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#CC0A0A2E"/>
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter TargetName="Bd" Property="BorderBrush" Value="#20404080"/>
-                                <Setter TargetName="Bd" Property="Effect">
-                                    <Setter.Value>
-                                        <DropShadowEffect Color="#000000" BlurRadius="0"
-                                                          ShadowDepth="0" Opacity="0"/>
-                                    </Setter.Value>
-                                </Setter>
+                                <Setter TargetName="Bd" Property="Background" Value="#4000D4FF"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -63,7 +43,7 @@
             </Setter>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Foreground" Value="#F0F8FF"/>
+                    <Setter Property="Foreground" Value="#00D4FF"/>
                 </Trigger>
                 <Trigger Property="IsEnabled" Value="False">
                     <Setter Property="Foreground" Value="#30506080"/>
@@ -72,61 +52,17 @@
         </Style>
     </Window.Resources>
 
-    <Grid MouseDown="Grid_MouseDown">
-        <!-- 배경 주변 앰비언트 글로우 (오르트 구름 아우라) -->
-        <Ellipse Width="280" Height="280" IsHitTestVisible="False">
-            <Ellipse.Fill>
-                <RadialGradientBrush>
-                    <GradientStop Color="#00000000" Offset="0.45"/>
-                    <GradientStop Color="#1A0A0A22" Offset="1.0"/>
-                </RadialGradientBrush>
-            </Ellipse.Fill>
-        </Ellipse>
-
-        <!-- 메인 유리 원판 — 도넛 형태 (중앙 hole 반경 62px) -->
-        <Path IsHitTestVisible="False">
-            <Path.Data>
-                <CombinedGeometry GeometryCombineMode="Exclude">
-                    <CombinedGeometry.Geometry1>
-                        <EllipseGeometry Center="145,145" RadiusX="115" RadiusY="115"/>
-                    </CombinedGeometry.Geometry1>
-                    <CombinedGeometry.Geometry2>
-                        <EllipseGeometry Center="145,145" RadiusX="62" RadiusY="62"/>
-                    </CombinedGeometry.Geometry2>
-                </CombinedGeometry>
-            </Path.Data>
-            <Path.Fill>
-                <RadialGradientBrush Center="0.5,0.5" GradientOrigin="0.5,0.5">
-                    <GradientStop Color="#D00A0A1E" Offset="0.0"/>
-                    <GradientStop Color="#C00D0D28" Offset="1.0"/>
-                </RadialGradientBrush>
-            </Path.Fill>
-            <Path.Effect>
-                <BlurEffect Radius="2"/>
-            </Path.Effect>
-        </Path>
-
-        <!-- 궤도 링 (외곽 스트로크 + 글로우) -->
-        <Ellipse Width="230" Height="230" Fill="Transparent"
-                 Stroke="#357080FF" StrokeThickness="1"
-                 IsHitTestVisible="False">
-            <Ellipse.Effect>
-                <DropShadowEffect Color="#7080FF" BlurRadius="14"
-                                  ShadowDepth="0" Opacity="0.5"/>
-            </Ellipse.Effect>
-        </Ellipse>
-
-        <!-- 내부 미세 링 -->
-        <Ellipse Width="124" Height="124" Fill="Transparent"
-                 Stroke="#1500D4FF" StrokeThickness="1"
-                 StrokeDashArray="2 8"
-                 IsHitTestVisible="False"/>
-
-        <!-- 클릭 감지용 원 (알파=1/255: OS가 이벤트를 통과시키지 않을 만큼의 최소 불투명도) -->
-        <Ellipse Width="230" Height="230" Fill="#01000000"/>
-
-        <!-- 버튼 캔버스 -->
-        <Canvas x:Name="ButtonCanvas" Width="230" Height="230"
-                HorizontalAlignment="Center" VerticalAlignment="Center"/>
-    </Grid>
+    <!-- Pill 배경 — 글라스모피즘 + 네뷸라 글로우 -->
+    <Border x:Name="PillBorder"
+            CornerRadius="22"
+            Background="#CC0D0D22"
+            BorderBrush="#507080FF"
+            BorderThickness="1"
+            Padding="6,4"
+            MouseDown="PillBorder_MouseDown">
+        <Border.Effect>
+            <DropShadowEffect Color="#7080FF" BlurRadius="18" ShadowDepth="0" Opacity="0.45"/>
+        </Border.Effect>
+        <StackPanel x:Name="ButtonPanel" Orientation="Horizontal" VerticalAlignment="Center"/>
+    </Border>
 </Window>

@@ -27,22 +27,27 @@ namespace Orbit
         private static readonly System.Collections.Generic.HashSet<string> LlmActions =
             new() { "Replace", "Copy", "Popup" };
 
-        private void PopulateRadialButtons(bool hasText)
+        private void PopulateBarButtons(bool hasText)
         {
-            ButtonCanvas.Children.Clear();
+            ButtonPanel.Children.Clear();
 
             var actions = SettingsManager.CurrentSettings?.Actions;
             if (actions == null || actions.Count == 0) return;
 
-            double radius = 88;
-            double centerX = 115;
-            double centerY = 115;
-
             for (int i = 0; i < actions.Count; i++)
             {
-                double angle = i * (Math.PI * 2) / actions.Count - Math.PI / 2;
-                double x = centerX + radius * Math.Cos(angle) - 25;
-                double y = centerY + radius * Math.Sin(angle) - 25;
+                // 구분선 (첫 번째 버튼 앞은 제외)
+                if (i > 0)
+                {
+                    ButtonPanel.Children.Add(new Border
+                    {
+                        Width = 1,
+                        Height = 18,
+                        Background = new SolidColorBrush(System.Windows.Media.Color.FromArgb(0x28, 0x70, 0x80, 0xFF)),
+                        VerticalAlignment = VerticalAlignment.Center,
+                        IsHitTestVisible = false
+                    });
+                }
 
                 var action = actions[i];
                 bool enabled = hasText || !LlmActions.Contains(action.ResultAction);
@@ -51,36 +56,48 @@ namespace Orbit
                 {
                     Content = action.Name,
                     Tag = action,
-                    Style = (Style)FindResource("RadialButtonStyle"),
+                    Style = (Style)FindResource("BarButtonStyle"),
                     IsEnabled = enabled,
-                    Opacity = enabled ? 1.0 : 0.35
+                    Opacity = enabled ? 1.0 : 0.4
                 };
 
                 btn.Click += ActionButton_Click;
-                Canvas.SetLeft(btn, x);
-                Canvas.SetTop(btn, y);
-                ButtonCanvas.Children.Add(btn);
+                ButtonPanel.Children.Add(btn);
             }
         }
 
         public void ShowAtCursor(int mouseX, int mouseY, string text)
         {
             SelectedText = text;
-            PopulateRadialButtons(!string.IsNullOrEmpty(text));
+            PopulateBarButtons(!string.IsNullOrEmpty(text));
 
+            // 측정을 위해 화면 밖에서 불투명도 0으로 먼저 표시
+            Opacity = 0;
+            Left = -9999;
+            Top = -9999;
             Show();
+            UpdateLayout();
 
-            PresentationSource source = PresentationSource.FromVisual(this);
+            PresentationSource? source = PresentationSource.FromVisual(this);
             double dpiX = source?.CompositionTarget?.TransformFromDevice.M11 ?? 1.0;
             double dpiY = source?.CompositionTarget?.TransformFromDevice.M22 ?? 1.0;
 
-            Left = mouseX * dpiX - Width / 2;
-            Top  = mouseY * dpiY - Height / 2;
+            double cursorX = mouseX * dpiX;
+            double cursorY = mouseY * dpiY;
+
+            // 커서 위, 수평 중앙 정렬
+            double left = cursorX - ActualWidth / 2;
+            double top  = cursorY - ActualHeight - 8;
 
             // 화면 경계 보정
             Rect workArea = SystemParameters.WorkArea;
-            Left = Math.Max(workArea.Left, Math.Min(Left, workArea.Right  - Width));
-            Top  = Math.Max(workArea.Top,  Math.Min(Top,  workArea.Bottom - Height));
+            left = Math.Max(workArea.Left + 4, Math.Min(left, workArea.Right - ActualWidth - 4));
+            if (top < workArea.Top + 4)
+                top = cursorY + 8; // 위쪽 공간 부족 → 아래 표시
+
+            Left = left;
+            Top = top;
+            Opacity = 1;
         }
 
         private async void ActionButton_Click(object sender, RoutedEventArgs e)
@@ -92,7 +109,7 @@ namespace Orbit
             if (_actionExecutor == null)
             {
                 MessageBox.Show(
-                    "API 키가 설정되지 않았습니다.\n시스템 트레이 아이콘을 더블클릭하여 설정 창을 여세요.",
+                    "API key is not configured.\nDouble-click the system tray icon to open Settings.",
                     "Orbit", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
@@ -105,20 +122,20 @@ namespace Orbit
             {
                 Dispatcher.Invoke(() =>
                 {
-                    var tooltip = new ResultTooltipWindow($"오류가 발생했습니다:\n{ex.Message}");
+                    var tooltip = new ResultTooltipWindow($"An error occurred:\n{ex.Message}");
                     tooltip.Show();
                 });
             }
         }
 
-        private void Grid_MouseDown(object sender, MouseButtonEventArgs e)
+        private void PillBorder_MouseDown(object sender, MouseButtonEventArgs e)
         {
             // 비주얼 트리를 타고 올라가서 Button 조상이 있으면 버튼 클릭 — 건드리지 않음
             DependencyObject? source = e.OriginalSource as DependencyObject;
             while (source != null)
             {
                 if (source is Button) return;
-                source = System.Windows.Media.VisualTreeHelper.GetParent(source);
+                source = VisualTreeHelper.GetParent(source);
             }
             Hide();
         }

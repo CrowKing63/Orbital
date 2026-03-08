@@ -51,14 +51,14 @@ namespace Orbit
         {
             _notifyIcon = new WinForms.NotifyIcon
             {
-                Text = "Orbit - 텍스트 AI 도우미",
+                Text = "Orbit - Text AI Assistant",
                 Icon = SystemIcons.Application,
                 Visible = true
             };
 
             var menu = new WinForms.ContextMenuStrip();
 
-            menu.Items.Add("설정", null, (s, e) =>
+            menu.Items.Add("Settings", null, (s, e) =>
             {
                 Dispatcher.Invoke(() =>
                 {
@@ -72,7 +72,7 @@ namespace Orbit
 
             menu.Items.Add(new WinForms.ToolStripSeparator());
 
-            menu.Items.Add("종료", null, (s, e) =>
+            menu.Items.Add("Exit", null, (s, e) =>
             {
                 _notifyIcon.Visible = false;
                 Dispatcher.Invoke(Shutdown);

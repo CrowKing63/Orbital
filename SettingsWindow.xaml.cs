@@ -75,8 +75,8 @@ namespace Orbit
 
             string key = SettingsManager.GetApiKey();
             ApiKeyStatus.Text = string.IsNullOrEmpty(key)
-                ? "API 키가 설정되지 않았습니다."
-                : $"API 키가 설정되어 있습니다. (끝 4자리: ...{(key.Length >= 4 ? key[^4..] : key)})";
+                ? "API key not configured."
+                : $"API key saved. (Last 4: ...{(key.Length >= 4 ? key[^4..] : key)})";
 
             _suppressEvents = false;
 
@@ -159,7 +159,7 @@ namespace Orbit
             {
                 SettingsManager.SetApiKey(key);
                 ApiKeyBox.Password = string.Empty;
-                ApiKeyStatus.Text = $"API 키가 저장되었습니다. (끝 4자리: ...{(key.Length >= 4 ? key[^4..] : key)})";
+                ApiKeyStatus.Text = $"API key saved. (Last 4: ...{(key.Length >= 4 ? key[^4..] : key)})";
             }
 
             SettingsManager.SaveSettings();
@@ -206,7 +206,7 @@ namespace Orbit
         {
             if (ActionsList.SelectedItem is not ActionProfile selected) return;
 
-            var confirm = MessageBox.Show($"'{selected.Name}' 액션을 삭제하시겠습니까?",
+            var confirm = MessageBox.Show($"Delete action '{selected.Name}'?",
                 "Orbit", MessageBoxButton.YesNo, MessageBoxImage.Question);
 
             if (confirm == MessageBoxResult.Yes)
