@@ -30,6 +30,7 @@ namespace Orbit
             if (existing != null)
             {
                 NameBox.Text = existing.Name;
+                IconBox.Text = existing.Icon;
                 PromptBox.Text = existing.PromptFormat;
                 RequiresSelectionCheck.IsChecked = existing.IsSelectionRequired;
 
@@ -58,6 +59,7 @@ namespace Orbit
             Result = new ActionProfile
             {
                 Name = NameBox.Text.Trim(),
+                Icon = IconBox.Text.Trim(),
                 PromptFormat = PromptBox.Text,
                 ActionType = ActionTypeExtensions.FromString(selectedActionString),
                 RequiresSelection = RequiresSelectionCheck.IsChecked

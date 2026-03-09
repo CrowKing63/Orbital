@@ -11,6 +11,7 @@ namespace Orbit
     public class ActionProfile
     {
         public string Name { get; set; } = string.Empty;
+        public string Icon { get; set; } = string.Empty;  // Icon glyph or emoji
         public string PromptFormat { get; set; } = string.Empty;  // e.g. "Translate this to Korean: {text}"
         
         // String property for JSON serialization (backward compatibility)
@@ -110,13 +111,13 @@ namespace Orbit
                 EncryptedApiKey = string.Empty,
                 Actions = new List<ActionProfile>
                 {
-                    new ActionProfile { Name = "Copy",      PromptFormat = "",                                                               ResultAction = "DirectCopy", RequiresSelection = true },
-                    new ActionProfile { Name = "Cut",       PromptFormat = "",                                                               ResultAction = "Cut",        RequiresSelection = true },
-                    new ActionProfile { Name = "Paste",     PromptFormat = "",                                                               ResultAction = "Paste",      RequiresSelection = false },
-                    new ActionProfile { Name = "Translate", PromptFormat = "Translate the following to Korean organically: {text}",          ResultAction = "Replace",    RequiresSelection = true },
-                    new ActionProfile { Name = "Summarize", PromptFormat = "Summarize the following in 3 lines: {text}",                   ResultAction = "Popup",      RequiresSelection = true },
-                    new ActionProfile { Name = "Polish",    PromptFormat = "Correct grammar and make this sound professional: {text}",       ResultAction = "Replace",    RequiresSelection = true },
-                    new ActionProfile { Name = "Search",    PromptFormat = "",                                                               ResultAction = "Browser",    RequiresSelection = true }
+                    new ActionProfile { Name = "Copy",      Icon = "\uE8C8", PromptFormat = "",                                                               ResultAction = "DirectCopy", RequiresSelection = true },
+                    new ActionProfile { Name = "Cut",       Icon = "\uE8C6", PromptFormat = "",                                                               ResultAction = "Cut",        RequiresSelection = true },
+                    new ActionProfile { Name = "Paste",     Icon = "\uE77F", PromptFormat = "",                                                               ResultAction = "Paste",      RequiresSelection = false },
+                    new ActionProfile { Name = "Translate", Icon = "\uE8C1", PromptFormat = "Translate the following to Korean organically: {text}",          ResultAction = "Replace",    RequiresSelection = true },
+                    new ActionProfile { Name = "Summarize", Icon = "\uE7C3", PromptFormat = "Summarize the following in 3 lines: {text}",                   ResultAction = "Popup",      RequiresSelection = true },
+                    new ActionProfile { Name = "Polish",    Icon = "\uE70F", PromptFormat = "Correct grammar and make this sound professional: {text}",       ResultAction = "Replace",    RequiresSelection = true },
+                    new ActionProfile { Name = "Search",    Icon = "\uE721", PromptFormat = "",                                                               ResultAction = "Browser",    RequiresSelection = true }
                 }
             };
         }

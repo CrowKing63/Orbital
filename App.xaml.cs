@@ -96,9 +96,33 @@ namespace Orbit
             _notifyIcon = new WinForms.NotifyIcon
             {
                 Text = "Orbit - Text AI Assistant",
-                Icon = SystemIcons.Application,
                 Visible = true
             };
+
+            try
+            {
+                // WPF 리소스로부터 이미지 로드하여 트레이 아이콘으로 설정
+                var uri = new Uri("pack://application:,,,/Assets/orbit_logo.png");
+                var streamInfo = System.Windows.Application.GetResourceStream(uri);
+                if (streamInfo != null)
+                {
+                    using (var stream = streamInfo.Stream)
+                    using (var bitmap = new Bitmap(stream))
+                    {
+                        // Bitmap을 Icon으로 변환 (HiconHandle 사용)
+                        IntPtr hIcon = bitmap.GetHicon();
+                        _notifyIcon.Icon = System.Drawing.Icon.FromHandle(hIcon);
+                    }
+                }
+                else
+                {
+                    _notifyIcon.Icon = SystemIcons.Application;
+                }
+            }
+            catch
+            {
+                _notifyIcon.Icon = SystemIcons.Application;
+            }
 
             var menu = new WinForms.ContextMenuStrip();
 

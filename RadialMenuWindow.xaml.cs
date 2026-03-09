@@ -48,9 +48,39 @@ namespace Orbit
                 var action = actions[i];
                 bool enabled = hasText || !action.IsSelectionRequired;
 
+                // Create content with icon if available
+                object content;
+                if (!string.IsNullOrEmpty(action.Icon))
+                {
+                    var stack = new StackPanel { Orientation = Orientation.Horizontal };
+                    
+                    // Icon
+                    stack.Children.Add(new TextBlock
+                    {
+                        Text = action.Icon,
+                        FontFamily = new FontFamily("Segoe MDL2 Assets"),
+                        FontSize = 14,
+                        VerticalAlignment = VerticalAlignment.Center,
+                        Margin = new Thickness(0, 0, 8, 0)
+                    });
+
+                    // Name
+                    stack.Children.Add(new TextBlock
+                    {
+                        Text = action.Name,
+                        VerticalAlignment = VerticalAlignment.Center
+                    });
+
+                    content = stack;
+                }
+                else
+                {
+                    content = action.Name;
+                }
+
                 var btn = new Button
                 {
-                    Content = action.Name,
+                    Content = content,
                     Tag = action,
                     Style = (Style)FindResource("BarButtonStyle"),
                     IsEnabled = enabled,

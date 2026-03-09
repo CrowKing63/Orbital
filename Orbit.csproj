@@ -15,4 +15,8 @@
     <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="8.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Resource Include="Assets\orbit_logo.png" />
+  </ItemGroup>
+
 </Project>
