@@ -9,6 +9,8 @@ namespace Orbit
 {
     public partial class RadialMenuWindow : Window
     {
+        private static readonly System.Windows.Media.FontFamily _iconFont = new System.Windows.Media.FontFamily("Segoe MDL2 Assets");
+
         public string SelectedText { get; private set; } = string.Empty;
         private ActionExecutorService? _actionExecutor;
 
@@ -52,13 +54,13 @@ namespace Orbit
                 object content;
                 if (!string.IsNullOrEmpty(action.Icon))
                 {
-                    var stack = new StackPanel { Orientation = Orientation.Horizontal };
+                    var stack = new StackPanel { Orientation = System.Windows.Controls.Orientation.Horizontal };
                     
                     // Icon
                     stack.Children.Add(new TextBlock
                     {
                         Text = action.Icon,
-                        FontFamily = new FontFamily("Segoe MDL2 Assets"),
+                        FontFamily = _iconFont,
                         FontSize = 14,
                         VerticalAlignment = VerticalAlignment.Center,
                         Margin = new Thickness(0, 0, 8, 0)

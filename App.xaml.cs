@@ -1,5 +1,6 @@
 using System;
 using System.Drawing;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows;
 using System.Windows.Media;
@@ -9,6 +10,9 @@ namespace Orbit
 {
     public partial class App : System.Windows.Application
     {
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern bool DestroyIcon(IntPtr hIcon);
+
         private RadialMenuWindow _radialMenu = null!;
         private WinForms.NotifyIcon _notifyIcon = null!;
         private ActionExecutorService? _actionExecutor;
@@ -109,9 +113,10 @@ namespace Orbit
                     using (var stream = streamInfo.Stream)
                     using (var bitmap = new Bitmap(stream))
                     {
-                        // Bitmap을 Icon으로 변환 (HiconHandle 사용)
+                        // Bitmap을 Icon으로 변환. Clone()으로 소유권을 가진 Icon을 만든 뒤 원본 HICON 해제.
                         IntPtr hIcon = bitmap.GetHicon();
-                        _notifyIcon.Icon = System.Drawing.Icon.FromHandle(hIcon);
+                        _notifyIcon.Icon = (System.Drawing.Icon)System.Drawing.Icon.FromHandle(hIcon).Clone();
+                        DestroyIcon(hIcon);
                     }
                 }
                 else
