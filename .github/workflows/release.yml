@@ -85,6 +85,24 @@ jobs:
             Write-Warning "dist directory does not exist!"
           }
 
+      - name: Delete stale installer assets from existing release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $tag = '${{ steps.version.outputs.tag }}'
+          $json = gh release view $tag --repo '${{ github.repository }}' --json assets 2>$null
+          if ($json) {
+            ($json | ConvertFrom-Json).assets |
+              Where-Object { $_.name -like '*-Setup.exe' } |
+              ForEach-Object {
+                Write-Host "Removing stale installer asset: $($_.name)"
+                gh release delete-asset $tag $_.name --repo '${{ github.repository }}' --yes
+              }
+          } else {
+            Write-Host "No existing release found for $tag — skipping cleanup."
+          }
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
