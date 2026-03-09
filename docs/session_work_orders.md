@@ -1,4 +1,4 @@
-# Orbit Session Work Orders
+# Orbital Session Work Orders
 
 This document turns the audit report into session-sized work packets.
 Each packet is designed to be:
@@ -165,7 +165,7 @@ Keep the radial menu and result tooltip on the correct monitor with correct boun
 Why this exists:
 
 - Current placement logic uses `SystemParameters.WorkArea`, which maps poorly to multi-monitor behavior.
-- The core UX of Orbit depends on cursor-proximate display.
+- The core UX of Orbital depends on cursor-proximate display.
 
 Likely files:
 

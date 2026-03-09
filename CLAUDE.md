@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## App Name
+
+The application is named **Orbital**. Always use "Orbital" — never "Orbit" — when referring to the app by name in UI strings, documentation, commit messages, and comments. (The project build file is `Orbit.csproj` and the binary is `Orbit.exe` for historical reasons, but the display name is Orbital.)
+
 ## Language Policy
 
 **All project artifacts must be written in English.** This includes:
@@ -15,7 +19,7 @@ Conversation between the developer and Claude may be in Korean. Code artifacts a
 
 ## Project Overview
 
-**Orbit**는 Windows 시스템 트레이 앱으로, 마우스로 텍스트를 드래그 선택하면 커서 위에 수평 바형 메뉴(Bar Menu)를 띄워 LLM 기반 액션을 실행합니다. OpenAI 호환 API를 사용하며, 사용자 정의 프롬프트 액션을 지원합니다.
+**Orbital**은 Windows 시스템 트레이 앱으로, 마우스로 텍스트를 드래그 선택하면 커서 위에 수평 바형 메뉴(Bar Menu)를 띄워 LLM 기반 액션을 실행합니다. OpenAI 호환 API를 사용하며, 사용자 정의 프롬프트 액션을 지원합니다.
 
 ## Build & Run
 
