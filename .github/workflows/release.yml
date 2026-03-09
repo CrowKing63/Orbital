@@ -75,12 +75,23 @@ jobs:
           Compress-Archive -Path "publish/staging/$folder" -DestinationPath "dist/Orbital-$ver-Portable.zip"
 
       # ---------- Create GitHub Release ----------
+      - name: List dist artifacts
+        shell: pwsh
+        run: |
+          Write-Host "=== dist directory contents ==="
+          if (Test-Path dist) {
+            Get-ChildItem -Path dist | Format-Table Name, Length -AutoSize
+          } else {
+            Write-Warning "dist directory does not exist!"
+          }
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           name: Orbital ${{ steps.version.outputs.tag }}
           prerelease: ${{ steps.version.outputs.prerelease }}
           generate_release_notes: true
+          fail_on_unmatched_files: true
           files: |
-            dist/Orbital-${{ steps.version.outputs.version }}-Setup.exe
-            dist/Orbital-${{ steps.version.outputs.version }}-Portable.zip
+            dist/Orbital-*-Setup.exe
+            dist/Orbital-*-Portable.zip
