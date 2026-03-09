@@ -95,7 +95,7 @@ begin
       'Click Cancel to abort installation.',
       mbConfirmation, MB_OKCANCEL) = IDOK then
     begin
-      ShellExec('open', '{#DotNetDownloadURL}', '', '', SW_SHOWNORMAL, ewNoWait, Result);
+      ShellExec('open', DotNetDownloadURL, '', '', SW_SHOWNORMAL, ewNoWait, Result);
     end;
     Result := False;
   end;
