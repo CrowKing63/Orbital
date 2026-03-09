@@ -81,7 +81,7 @@ Out of scope:
 
 Verification:
 
-- build with `dotnet build Orbit.csproj`
+- build with `dotnet build Orbital.csproj`
 - confirm code path shows local actions no longer depend on `_actionExecutor != null`
 - confirm LLM actions still fail gracefully without a key
 
@@ -137,7 +137,7 @@ Out of scope:
 
 Verification:
 
-- build with `dotnet build Orbit.csproj`
+- build with `dotnet build Orbital.csproj`
 - confirm empty-selection paths cannot run `Cut`, `DirectCopy`, `Browser`, or LLM text transforms
 - confirm `Paste` still works from long-press mode
 
@@ -188,7 +188,7 @@ Out of scope:
 
 Verification:
 
-- build with `dotnet build Orbit.csproj`
+- build with `dotnet build Orbital.csproj`
 - confirm code no longer relies on a single global work area for all popups
 - document any assumptions if tooltip origin tracking needs a lightweight parameter change
 
@@ -211,7 +211,7 @@ Expected size: one session
 
 Goal:
 
-Prevent a bad `%APPDATA%\Orbit\settings.json` from breaking startup.
+Prevent a bad `%APPDATA%\Orbital\settings.json` from breaking startup.
 
 Why this exists:
 
@@ -238,7 +238,7 @@ Out of scope:
 
 Verification:
 
-- build with `dotnet build Orbit.csproj`
+- build with `dotnet build Orbital.csproj`
 - reason through or test a malformed JSON file path
 - confirm the fallback path recreates valid settings
 
@@ -290,7 +290,7 @@ Out of scope:
 
 Verification:
 
-- build with `dotnet build Orbit.csproj`
+- build with `dotnet build Orbital.csproj`
 - inspect that selection capture cannot start multiple overlapping destructive clipboard flows
 - confirm replace flow does not permanently destroy prior clipboard state if restoration is implemented
 
@@ -342,7 +342,7 @@ Out of scope:
 
 Verification:
 
-- build with `dotnet build Orbit.csproj`
+- build with `dotnet build Orbital.csproj`
 - confirm action changes are either persisted immediately or explicitly confirmed on close
 - confirm there is no silent-loss path through normal window close behavior
 
@@ -392,7 +392,7 @@ Out of scope:
 
 Verification:
 
-- build with `dotnet build Orbit.csproj`
+- build with `dotnet build Orbital.csproj`
 - confirm hook setup has an explicit success/failure path in code
 - confirm startup behavior is still sane if hook installation fails
 
@@ -443,7 +443,7 @@ Out of scope:
 
 Verification:
 
-- build with `dotnet build Orbit.csproj`
+- build with `dotnet build Orbital.csproj`
 - confirm service lifetime is clearer and safer in code
 - confirm API failure paths return more actionable messages
 
@@ -475,7 +475,7 @@ Why this exists:
 
 Likely files:
 
-- [Orbit.csproj](C:/Users/CrowKing63/Developments/Orbital/Orbit.csproj)
+- [Orbital.csproj](C:/Users/CrowKing63/Developments/Orbital/Orbital.csproj)
 - [SettingsManager.cs](C:/Users/CrowKing63/Developments/Orbital/SettingsManager.cs)
 - [ActionExecutorService.cs](C:/Users/CrowKing63/Developments/Orbital/Services/ActionExecutorService.cs)
 - any new test project files you add
@@ -496,7 +496,7 @@ Out of scope:
 Verification:
 
 - run the project tests locally
-- keep `dotnet build Orbit.csproj` green
+- keep `dotnet build Orbital.csproj` green
 - include exact commands used in the final summary
 
 Done when:
@@ -598,7 +598,7 @@ Out of scope:
 
 Verification:
 
-- build with `dotnet build Orbit.csproj`
+- build with `dotnet build Orbital.csproj`
 - confirm the typed representation is used end-to-end in code paths you touched
 
 Done when:
@@ -648,7 +648,7 @@ Out of scope:
 
 Verification:
 
-- build with `dotnet build Orbit.csproj`
+- build with `dotnet build Orbital.csproj`
 - confirm exported data excludes API secrets
 - confirm imported action packs validate before mutating settings
 

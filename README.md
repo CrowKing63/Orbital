@@ -50,13 +50,13 @@ Orbital is a lightweight Windows tray app that pops up an AI-powered action bar 
 
 ### Download
 
-Grab the latest release from the [Releases](../../releases) page and run `Orbit.exe`.
+Grab the latest release from the [Releases](../../releases) page and run `Orbital.exe`.
 
 No installer needed — it's a single executable that lives in your system tray.
 
 ### First-time Setup
 
-1. Run `Orbit.exe` — a tray icon appears in the bottom-right corner
+1. Run `Orbital.exe` — a tray icon appears in the bottom-right corner
 2. Double-click the tray icon (or right-click → **Settings**)
 3. Choose your AI provider and enter your API key
 4. Start selecting text anywhere on your desktop
@@ -106,8 +106,8 @@ Output: Replace
 ```bash
 git clone https://github.com/CrowKing63/Orbital.git
 cd Orbital
-"C:\Program Files\dotnet\dotnet.exe" build Orbit.csproj
-./bin/Debug/net8.0-windows/Orbit.exe
+"C:\Program Files\dotnet\dotnet.exe" build Orbital.csproj
+./bin/Debug/net8.0-windows/Orbital.exe
 ```
 
 **Requirements:** .NET 8 SDK, Windows

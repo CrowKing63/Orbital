@@ -7,7 +7,7 @@ user-invocable: false
 다음 명령으로 프로젝트를 빌드하세요:
 
 ```
-"C:\Program Files\dotnet\dotnet.exe" build Orbit.csproj --no-restore 2>&1
+"C:\Program Files\dotnet\dotnet.exe" build Orbital.csproj --no-restore 2>&1
 ```
 
 빌드 성공 시 "빌드 성공"을 출력하고,

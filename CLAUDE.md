@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## App Name
 
-The application is named **Orbital**. Always use "Orbital" — never "Orbit" — when referring to the app by name in UI strings, documentation, commit messages, and comments. (The project build file is `Orbit.csproj` and the binary is `Orbit.exe` for historical reasons, but the display name is Orbital.)
+The application is named **Orbital**. Always use "Orbital" — never "Orbit" — when referring to the app by name in UI strings, documentation, commit messages, and comments.
 
 ## Language Policy
 
@@ -25,10 +25,10 @@ Conversation between the developer and Claude may be in Korean. Code artifacts a
 
 ```bash
 # 빌드 (dotnet이 PATH에 없을 경우 전체 경로 사용)
-"C:\Program Files\dotnet\dotnet.exe" build Orbit.csproj
+"C:\Program Files\dotnet\dotnet.exe" build Orbital.csproj
 
 # 실행 (빌드 후 exe 직접 실행)
-./bin/Debug/net8.0-windows/Orbit.exe
+./bin/Debug/net8.0-windows/Orbital.exe
 
 # Release 빌드
 "C:\Program Files\dotnet\dotnet.exe" build -c Release
@@ -82,7 +82,7 @@ Conversation between the developer and Claude may be in Korean. Code artifacts a
 | `ClipboardHelper.cs` | `SendInput`으로 Ctrl+C/V/Delete 시뮬레이션. 클립보드 백업/복원 포함 |
 | `RadialMenuWindow.xaml.cs` | 투명 WPF 창(SizeToContent pill 바형). StackPanel 수평 배치. 텍스트 없을 때 LLM 버튼 비활성화 |
 | `ResultTooltipWindow.xaml.cs` | AI 결과 팝업. 우측 하단 표시, 20초 자동 닫힘, 복사 버튼 |
-| `SettingsManager.cs` | `ActionProfile`/`AppSettings` 모델. `%APPDATA%\Orbit\settings.json` 저장. DPAPI 암호화 |
+| `SettingsManager.cs` | `ActionProfile`/`AppSettings` 모델. `%APPDATA%\Orbital\settings.json` 저장. DPAPI 암호화 |
 | `Services/LlmApiService.cs` | `ILlmApiService` + `OpenAiApiService`. 전체 URL 직접 조립 방식으로 BaseAddress 경로 버그 방지 |
 | `Services/ActionExecutorService.cs` | ResultAction별 분기 실행. 반드시 백그라운드 스레드에서 호출 |
 | `SettingsWindow.xaml.cs` | 제공자 드롭다운(OpenAI/OpenRouter/사용자지정) → URL·모델 자동 완성. API 키·액션 CRUD |

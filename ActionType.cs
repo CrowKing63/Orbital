@@ -1,4 +1,4 @@
-namespace Orbit
+namespace Orbital
 {
     /// <summary>
     /// Defines the type of action to perform with the result.

@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace Orbit
+namespace Orbital
 {
     public class ActionExecutorService
     {

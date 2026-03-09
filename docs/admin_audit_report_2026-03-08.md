@@ -2,7 +2,7 @@
 
 작성일: 2026-03-08
 대상: 앱 관리자 그룹 -> 구현 에이전트
-범위: 현재 워크스페이스 소스 점검 + `dotnet build Orbit.csproj`
+범위: 현재 워크스페이스 소스 점검 + `dotnet build Orbital.csproj`
 
 ## 요약
 
@@ -20,10 +20,10 @@ Orbital은 이미 방향성이 분명한 MVP입니다. Windows 트레이 상주,
 
 ## 현재 제품 형태
 
-- 기술 스택: 단일 `net8.0-windows` WPF 앱이며 WinForms `NotifyIcon`을 같이 사용합니다. 별도 테스트 프로젝트는 아직 없습니다. [Orbit.csproj](C:/Users/CrowKing63/Developments/Orbital/Orbit.csproj#L1), [.github/workflows/build.yml](C:/Users/CrowKing63/Developments/Orbital/.github/workflows/build.yml#L1)
+- 기술 스택: 단일 `net8.0-windows` WPF 앱이며 WinForms `NotifyIcon`을 같이 사용합니다. 별도 테스트 프로젝트는 아직 없습니다. [Orbital.csproj](C:/Users/CrowKing63/Developments/Orbital/Orbital.csproj#L1), [.github/workflows/build.yml](C:/Users/CrowKing63/Developments/Orbital/.github/workflows/build.yml#L1)
 - 진입 흐름: 앱 시작 시 설정을 읽고, 트레이 아이콘을 띄우고, 전역 마우스 훅을 설치한 뒤, 드래그 선택 또는 롱프레스에 반응해 메뉴를 띄웁니다. [App.xaml.cs](C:/Users/CrowKing63/Developments/Orbital/App.xaml.cs#L16)
 - 액션 모델: `ActionProfile` 하나에 이름, 프롬프트, 결과 방식이 함께 들어 있고, 로컬 액션과 LLM 액션이 같은 실행 경로를 공유합니다. [SettingsManager.cs](C:/Users/CrowKing63/Developments/Orbital/SettingsManager.cs#L10), [ActionExecutorService.cs](C:/Users/CrowKing63/Developments/Orbital/Services/ActionExecutorService.cs#L21)
-- 저장 구조: 설정은 `%APPDATA%\Orbit\settings.json`에 저장되고, API 키는 DPAPI로 보호됩니다. [SettingsManager.cs](C:/Users/CrowKing63/Developments/Orbital/SettingsManager.cs#L25)
+- 저장 구조: 설정은 `%APPDATA%\Orbital\settings.json`에 저장되고, API 키는 DPAPI로 보호됩니다. [SettingsManager.cs](C:/Users/CrowKing63/Developments/Orbital/SettingsManager.cs#L25)
 
 ## 우선순위 이슈
 
@@ -96,7 +96,7 @@ Orbital은 이미 방향성이 분명한 MVP입니다. Windows 트레이 상주,
 
 영향:
 
-- `%APPDATA%\Orbit\settings.json` 하나만 깨져도 앱이 시작되지 않을 수 있습니다.
+- `%APPDATA%\Orbital\settings.json` 하나만 깨져도 앱이 시작되지 않을 수 있습니다.
 - 사용자 입장에서는 복구 경로가 없고, 수동 파일 삭제가 사실상 유일한 해결책이 됩니다.
 - 운영 지원 비용이 불필요하게 올라갑니다.
 
@@ -219,7 +219,7 @@ Orbital은 이미 방향성이 분명한 MVP입니다. Windows 트레이 상주,
 
 - 저장소 구조
 - 주요 소스 경로와 실행 흐름
-- `dotnet build Orbit.csproj` 성공
+- `dotnet build Orbital.csproj` 성공
 
 이번 패스에서 직접 실행 재현하지는 않은 것:
 

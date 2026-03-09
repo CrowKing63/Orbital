@@ -10,7 +10,7 @@
       "Bash(claude mcp:*)",
       "mcp__plugin_github_github__get_me",
       "Bash(\"C:\\\\Program Files\\\\dotnet\\\\dotnet.exe\" build:*)",
-      "Bash(\"C:\\\\Program Files\\\\dotnet\\\\dotnet.exe\" build Orbit.csproj --no-restore)"
+      "Bash(\"C:\\\\Program Files\\\\dotnet\\\\dotnet.exe\" build Orbital.csproj --no-restore)"
     ]
   },
   "hooks": {
@@ -20,7 +20,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "powershell.exe -NoProfile -Command \"$input = $env:CLAUDE_TOOL_INPUT; if ($input -match '\\\\.(cs|csproj|xaml)') { $result = & 'C:\\Program Files\\dotnet\\dotnet.exe' build Orbit.csproj --no-restore -v quiet 2>&1; $errors = $result | Select-String -Pattern ' error ' | Where-Object { $_ -notmatch 'obj\\\\|bin\\\\' }; if ($errors) { Write-Host '=== 빌드 오류 ==='; $errors | ForEach-Object { Write-Host $_ } } }\""
+            "command": "powershell.exe -NoProfile -Command \"$input = $env:CLAUDE_TOOL_INPUT; if ($input -match '\\\\.(cs|csproj|xaml)') { $result = & 'C:\\Program Files\\dotnet\\dotnet.exe' build Orbital.csproj --no-restore -v quiet 2>&1; $errors = $result | Select-String -Pattern ' error ' | Where-Object { $_ -notmatch 'obj\\\\|bin\\\\' }; if ($errors) { Write-Host '=== 빌드 오류 ==='; $errors | ForEach-Object { Write-Host $_ } } }\""
           }
         ]
       }
@@ -31,7 +31,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "powershell.exe -NoProfile -Command \"$input = $env:CLAUDE_TOOL_INPUT; if ($input -match 'AppData.*Orbit.*settings\\.json') { Write-Error 'BLOCK: 런타임 설정 파일(settings.json) 편집 금지. API 키가 포함된 파일입니다.'; exit 1 }\""
+            "command": "powershell.exe -NoProfile -Command \"$input = $env:CLAUDE_TOOL_INPUT; if ($input -match 'AppData.*Orbital.*settings\\.json') { Write-Error 'BLOCK: 런타임 설정 파일(settings.json) 편집 금지. API 키가 포함된 파일입니다.'; exit 1 }\""
           }
         ]
       }

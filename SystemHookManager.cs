@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
 
-namespace Orbit
+namespace Orbital
 {
     public static class SystemHookManager
     {

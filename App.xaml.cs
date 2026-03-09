@@ -5,7 +5,7 @@ using System.Windows;
 using System.Windows.Media;
 using WinForms = System.Windows.Forms;
 
-namespace Orbit
+namespace Orbital
 {
     public partial class App : System.Windows.Application
     {
@@ -23,7 +23,7 @@ namespace Orbit
             bool recovered = SettingsManager.LoadSettings();
             if (recovered)
             {
-                MessageBox.Show("Your settings file was corrupted and has been reset to defaults.\n\nA backup of the corrupted file was saved with a .bak extension.", "Orbit Settings Recovery", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Your settings file was corrupted and has been reset to defaults.\n\nA backup of the corrupted file was saved with a .bak extension.", "Orbital Settings Recovery", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
             RebuildActionExecutor();
             InitializeTrayIcon();
@@ -37,14 +37,14 @@ namespace Orbit
             if (!SystemHookManager.StartMouseHook(out int hookErrorCode))
             {
                 string errorMessage = $"Failed to install global mouse hook (Error code: {hookErrorCode}).\n\n" +
-                                    "Orbit requires this hook to detect text selection gestures.\n" +
+                                    "Orbital requires this hook to detect text selection gestures.\n" +
                                     "The application will now exit.\n\n" +
                                     "Common causes:\n" +
                                     "- Insufficient permissions\n" +
                                     "- Conflicting software (security tools, other hook-based apps)\n" +
                                     "- System resource limitations";
                 
-                MessageBox.Show(errorMessage, "Orbit Startup Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(errorMessage, "Orbital Startup Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 Shutdown();
                 return;
             }
@@ -86,7 +86,7 @@ namespace Orbit
             catch (ArgumentException ex)
             {
                 MessageBox.Show($"Invalid API configuration: {ex.Message}\n\nPlease check your settings.", 
-                    "Orbit Configuration Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    "Orbital Configuration Error", MessageBoxButton.OK, MessageBoxImage.Warning);
                 _actionExecutor = new ActionExecutorService(null);
             }
         }
@@ -95,7 +95,7 @@ namespace Orbit
         {
             _notifyIcon = new WinForms.NotifyIcon
             {
-                Text = "Orbit - Text AI Assistant",
+                Text = "Orbital - Text AI Assistant",
                 Icon = SystemIcons.Application,
                 Visible = true
             };

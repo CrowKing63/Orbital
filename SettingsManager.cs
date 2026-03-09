@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Orbit
+namespace Orbital
 {
     public class ActionProfile
     {
@@ -27,7 +27,7 @@ namespace Orbit
         public bool? RequiresSelection { get; set; }
 
         [JsonIgnore]
-        public bool IsSelectionRequired => RequiresSelection ?? (ActionType != Orbit.ActionType.Paste);
+        public bool IsSelectionRequired => RequiresSelection ?? (ActionType != Orbital.ActionType.Paste);
     }
 
     public class AppSettings
@@ -42,7 +42,7 @@ namespace Orbit
     {
         private static readonly string DefaultConfigPath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), 
-            "Orbit", 
+            "Orbital", 
             "settings.json");
         private static string? _configPathOverride;
 

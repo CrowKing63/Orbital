@@ -2,7 +2,7 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace Orbit
+namespace Orbital
 {
     public partial class ActionEditDialog : Window
     {
@@ -49,7 +49,7 @@ namespace Orbit
         {
             if (string.IsNullOrWhiteSpace(NameBox.Text))
             {
-                MessageBox.Show("Please enter a button name.", "Orbit", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Please enter a button name.", "Orbital", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 

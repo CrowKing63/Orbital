@@ -4,7 +4,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace Orbit
+namespace Orbital
 {
     public interface ILlmApiService
     {
@@ -57,7 +57,7 @@ namespace Orbit
             };
             request.Headers.Add("Authorization", _authHeader);
             request.Headers.Add("HTTP-Referer", "https://github.com/orbit-app");
-            request.Headers.Add("X-Title", "Orbit");
+            request.Headers.Add("X-Title", "Orbital");
 
             HttpResponseMessage response;
             try
