@@ -1,6 +1,6 @@
 ---
 name: build-and-test
-description: Orbit 프로젝트를 빌드하고 컴파일 오류를 요약합니다. 코드 수정 후 자동으로 호출하세요.
+description: Orbital 프로젝트를 빌드하고 컴파일 오류를 요약합니다. 코드 수정 후 자동으로 호출하세요.
 user-invocable: false
 ---
 

@@ -1,6 +1,6 @@
-# Orbit Tests
+# Orbital Tests
 
-This directory contains unit tests for the Orbit application.
+This directory contains unit tests for the Orbital application.
 
 ## Running Tests
 
@@ -10,7 +10,7 @@ From the repository root:
 dotnet test Orbit.Tests/Orbit.Tests.csproj
 ```
 
-From the Orbit.Tests directory:
+From the Orbital.Tests directory:
 
 ```bash
 dotnet test

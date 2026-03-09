@@ -1,16 +1,16 @@
-# Orbit
+# Orbital
 
 **A free, open-source alternative to Snipdo for Windows.**
 
-Orbit is a lightweight Windows tray app that pops up an AI-powered action bar whenever you select text — letting you translate, summarize, rewrite, search, or run any custom prompt in one click, right where you're working.
+Orbital is a lightweight Windows tray app that pops up an AI-powered action bar whenever you select text — letting you translate, summarize, rewrite, search, or run any custom prompt in one click, right where you're working.
 
 ---
 
-## Why Orbit?
+## Why Orbital?
 
-[Snipdo](https://snipdo-app.com/) pioneered the idea of a floating toolbar on text selection, but it's **subscription-only**. Orbit is the free, open-source answer:
+[Snipdo](https://snipdo-app.com/) pioneered the idea of a floating toolbar on text selection, but it's **subscription-only**. Orbital is the free, open-source answer:
 
-| | Orbit | Snipdo |
+| | Orbital | Snipdo |
 |---|---|---|
 | Price | **Free** | Subscription |
 | Source | **Open source** (MIT) | Closed |

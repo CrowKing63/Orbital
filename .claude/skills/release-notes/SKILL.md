@@ -1,6 +1,6 @@
 ---
 name: release-notes
-description: 최근 커밋을 기반으로 Orbit 릴리즈 노트를 한국어로 작성합니다.
+description: 최근 커밋을 기반으로 Orbital 릴리즈 노트를 한국어로 작성합니다.
 disable-model-invocation: true
 ---
 
