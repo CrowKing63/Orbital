@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Orbit
+namespace Orbital
 {
     public class ActionProfile
     {
@@ -28,7 +28,7 @@ namespace Orbit
         public bool? RequiresSelection { get; set; }
 
         [JsonIgnore]
-        public bool IsSelectionRequired => RequiresSelection ?? (ActionType != Orbit.ActionType.Paste);
+        public bool IsSelectionRequired => RequiresSelection ?? (ActionType != Orbital.ActionType.Paste);
     }
 
     public class AppSettings
@@ -42,8 +42,8 @@ namespace Orbit
     public static class SettingsManager
     {
         private static readonly string DefaultConfigPath = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), 
-            "Orbit", 
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "Orbital",
             "settings.json");
         private static string? _configPathOverride;
 
@@ -51,8 +51,21 @@ namespace Orbit
 
         public static AppSettings CurrentSettings { get; private set; } = CreateDefaultSettings();
 
+        private static void MigrateFromLegacyPath()
+        {
+            var oldDir = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Orbit");
+            var newDir = Path.GetDirectoryName(DefaultConfigPath)!;
+            if (!Directory.Exists(newDir) && Directory.Exists(oldDir))
+            {
+                try { Directory.Move(oldDir, newDir); }
+                catch { /* non-fatal, will start fresh */ }
+            }
+        }
+
         public static bool LoadSettings()
         {
+            MigrateFromLegacyPath();
             bool recovered = false;
             if (File.Exists(ConfigPath))
             {

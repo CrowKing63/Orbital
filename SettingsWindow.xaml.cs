@@ -4,7 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
-namespace Orbit
+namespace Orbital
 {
     public partial class SettingsWindow : Window
     {
@@ -209,7 +209,7 @@ namespace Orbit
             if (ActionsList.SelectedItem is not ActionProfile selected) return;
 
             var confirm = MessageBox.Show($"Delete action '{selected.Name}'?",
-                "Orbit", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                "Orbital", MessageBoxButton.YesNo, MessageBoxImage.Question);
 
             if (confirm == MessageBoxResult.Yes)
             {
@@ -229,9 +229,9 @@ namespace Orbit
         {
             var dialog = new Microsoft.Win32.SaveFileDialog
             {
-                Filter = "Orbit Action Pack (*.json)|*.json|All Files (*.*)|*.*",
+                Filter = "Orbital Action Pack (*.json)|*.json|All Files (*.*)|*.*",
                 DefaultExt = ".json",
-                FileName = "orbit-actions.json",
+                FileName = "orbital-actions.json",
                 Title = "Export Action Pack"
             };
 
@@ -241,7 +241,7 @@ namespace Orbit
                 if (error == null)
                 {
                     MessageBox.Show($"Action pack exported successfully to:\n{dialog.FileName}",
-                        "Orbit", MessageBoxButton.OK, MessageBoxImage.Information);
+                        "Orbital", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 else
                 {
@@ -254,7 +254,7 @@ namespace Orbit
         {
             var dialog = new Microsoft.Win32.OpenFileDialog
             {
-                Filter = "Orbit Action Pack (*.json)|*.json|All Files (*.*)|*.*",
+                Filter = "Orbital Action Pack (*.json)|*.json|All Files (*.*)|*.*",
                 DefaultExt = ".json",
                 Title = "Import Action Pack"
             };
@@ -283,7 +283,7 @@ namespace Orbit
                         replaceExisting 
                             ? "Action pack imported successfully. All previous actions were replaced."
                             : "Action pack imported successfully. New actions were merged with existing ones.",
-                        "Orbit",
+                        "Orbital",
                         MessageBoxButton.OK,
                         MessageBoxImage.Information);
                 }

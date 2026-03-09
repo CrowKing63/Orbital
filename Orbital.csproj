@@ -8,6 +8,14 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <DefaultItemExcludes>$(DefaultItemExcludes);Orbit.Tests\**</DefaultItemExcludes>
+    <AssemblyName>Orbital</AssemblyName>
+    <RootNamespace>Orbital</RootNamespace>
+    <Version>1.0.0</Version>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <Product>Orbital</Product>
+    <Company>CrowKing63</Company>
+    <Copyright>Copyright (c) 2026 CrowKing63</Copyright>
   </PropertyGroup>
 
   <ItemGroup>

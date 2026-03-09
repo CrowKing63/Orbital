@@ -113,9 +113,9 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\CrowKing63\\Developments\\Orbital\\Orbit.csproj",
-      "projectName": "Orbit",
-      "projectPath": "C:\\Users\\CrowKing63\\Developments\\Orbital\\Orbit.csproj",
+      "projectUniqueName": "C:\\Users\\CrowKing63\\Developments\\Orbital\\Orbital.csproj",
+      "projectName": "Orbital",
+      "projectPath": "C:\\Users\\CrowKing63\\Developments\\Orbital\\Orbital.csproj",
       "packagesPath": "C:\\Users\\CrowKing63\\.nuget\\packages\\",
       "outputPath": "C:\\Users\\CrowKing63\\Developments\\Orbital\\obj\\",
       "projectStyle": "PackageReference",

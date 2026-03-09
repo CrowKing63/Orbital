@@ -2,7 +2,7 @@ using System;
 using System.Windows;
 using System.Windows.Threading;
 
-namespace Orbit
+namespace Orbital
 {
     public partial class ResultTooltipWindow : Window
     {

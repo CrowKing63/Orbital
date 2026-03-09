@@ -1,6 +1,6 @@
 using Xunit;
 
-namespace Orbit.Tests;
+namespace Orbital.Tests;
 
 public class ActionGatingTests
 {

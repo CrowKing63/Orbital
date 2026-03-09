@@ -5,7 +5,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 
-namespace Orbit
+namespace Orbital
 {
     public partial class RadialMenuWindow : Window
     {
@@ -143,7 +143,7 @@ namespace Orbit
             {
                 MessageBox.Show(
                     "API key is not configured.\nDouble-click the system tray icon to open Settings.",
-                    "Orbit", MessageBoxButton.OK, MessageBoxImage.Information);
+                    "Orbital", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 

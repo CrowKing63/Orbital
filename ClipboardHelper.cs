@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows;
 
-namespace Orbit
+namespace Orbital
 {
     public static class ClipboardHelper
     {

@@ -1,7 +1,7 @@
-<Application x:Class="Orbit.App"
+<Application x:Class="Orbital.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:Orbit">
+             xmlns:local="clr-namespace:Orbital">
     <Application.Resources>
 
         <!-- ══════════════════════ Design Tokens ══════════════════════ -->

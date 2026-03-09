@@ -2,7 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Orbit.Tests;
+namespace Orbital.Tests;
 
 public class ActionExecutorServiceTests
 {

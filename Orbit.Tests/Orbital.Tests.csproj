@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Orbit.csproj" />
+    <ProjectReference Include="..\Orbital.csproj" />
   </ItemGroup>
 
 </Project>

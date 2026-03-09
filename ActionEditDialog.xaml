@@ -1,4 +1,4 @@
-<Window x:Class="Orbit.ActionEditDialog"
+<Window x:Class="Orbital.ActionEditDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Edit Action" Height="320" Width="480"

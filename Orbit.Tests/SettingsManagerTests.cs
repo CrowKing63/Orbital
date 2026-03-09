@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using Xunit;
 
-namespace Orbit.Tests;
+namespace Orbital.Tests;
 
 public class SettingsManagerTests
 {
@@ -17,7 +17,7 @@ public class SettingsManagerTests
 
         public IsolatedSettingsScope()
         {
-            RootDirectory = Path.Combine(Path.GetTempPath(), "Orbit.Tests", Guid.NewGuid().ToString("N"));
+            RootDirectory = Path.Combine(Path.GetTempPath(), "Orbital.Tests", Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(RootDirectory);
             ConfigPath = Path.Combine(RootDirectory, "settings.json");
             _settingsOverride = SettingsManager.OverrideConfigPathForTesting(ConfigPath);
