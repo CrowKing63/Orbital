@@ -85,6 +85,8 @@ begin
 end;
 
 function InitializeSetup(): Boolean;
+var
+  ErrorCode: Integer;
 begin
   Result := True;
   if not IsDotNet8DesktopInstalled() then
@@ -95,7 +97,7 @@ begin
       'Click Cancel to abort installation.',
       mbConfirmation, MB_OKCANCEL) = IDOK then
     begin
-      ShellExec('open', DotNetDownloadURL, '', '', SW_SHOWNORMAL, ewNoWait, Result);
+      ShellExec('open', DotNetDownloadURL, '', '', SW_SHOWNORMAL, ewNoWait, ErrorCode);
     end;
     Result := False;
   end;
