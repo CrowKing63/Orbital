@@ -2,7 +2,10 @@
 ; Requires Inno Setup 6: https://jrsoftware.org/isdl.php
 
 #define MyAppName "Orbital"
-#define MyAppVersion "1.0.0"
+; Allow version to be overridden via /DMyAppVersion=x.y.z on the command line
+#ifndef MyAppVersion
+  #define MyAppVersion "1.0.0"
+#endif
 #define MyAppPublisher "CrowKing63"
 #define MyAppURL "https://github.com/CrowKing63/Orbital"
 #define MyAppExeName "Orbital.exe"
