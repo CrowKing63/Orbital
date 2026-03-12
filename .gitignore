@@ -9,6 +9,7 @@ obj/
 *.userosscache
 *.sln.docstates
 .claude/
+CLAUDE.md
 settings.local.json
 
 # Rider
