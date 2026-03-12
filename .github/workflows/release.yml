@@ -92,7 +92,7 @@ jobs:
         run: |
           $tag = '${{ steps.version.outputs.tag }}'
           $json = gh release view $tag --repo '${{ github.repository }}' --json assets 2>$null
-          if ($json) {
+          if ($LASTEXITCODE -eq 0 -and $json) {
             ($json | ConvertFrom-Json).assets |
               Where-Object { $_.name -like '*-Setup.exe' } |
               ForEach-Object {
@@ -102,6 +102,7 @@ jobs:
           } else {
             Write-Host "No existing release found for $tag — skipping cleanup."
           }
+          $global:LASTEXITCODE = 0
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
