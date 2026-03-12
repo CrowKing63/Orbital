@@ -4,8 +4,8 @@
     Builds the Orbital portable distribution (.zip) using dotnet publish.
 .DESCRIPTION
     1. Reads the version from Orbital.csproj
-    2. Publishes a self-contained single-file build to publish\portable\
-    3. Bundles Orbital.exe + Cleanup.cmd into dist\Orbital-<version>-Portable.zip
+    2. Publishes a self-contained multi-file build to publish\portable\
+    3. Bundles all publish output + Cleanup.cmd into dist\Orbital-<version>-Portable.zip
 .EXAMPLE
     .\scripts\Build-Portable.ps1
 #>
@@ -38,12 +38,8 @@ try {
     $stagingDir  = Join-Path $Root "publish\staging\$folderName"
     New-Item -ItemType Directory -Force -Path $stagingDir | Out-Null
 
-    # Copy Orbital.exe
-    $exeSrc = Join-Path $publishDir 'Orbital.exe'
-    if (-not (Test-Path $exeSrc)) {
-        throw "Orbital.exe not found in $publishDir after publish"
-    }
-    Copy-Item $exeSrc $stagingDir
+    # Copy all published files
+    Copy-Item "$publishDir\*" $stagingDir -Recurse
 
     # Copy Cleanup.cmd
     $cleanupSrc = Join-Path $Root 'portable\Cleanup.cmd'

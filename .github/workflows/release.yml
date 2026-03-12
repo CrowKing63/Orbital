@@ -43,10 +43,10 @@ jobs:
           $content = $content -replace '<FileVersion>.*?</FileVersion>', "<FileVersion>$ver.0</FileVersion>"
           Set-Content Orbital.csproj $content
 
-      # ---------- Build installer (framework-dependent) ----------
+      # ---------- Build installer (self-contained) ----------
       - name: Publish installer build
         run: |
-          dotnet publish Orbital.csproj /p:PublishProfile=installer --configuration Release --no-self-contained --output publish/installer
+          dotnet publish Orbital.csproj /p:PublishProfile=installer --configuration Release --output publish/installer
 
       - name: Install Inno Setup 6
         run: choco install innosetup --yes --no-progress
@@ -58,7 +58,7 @@ jobs:
           & 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe' installer\Orbital.iss /DMyAppVersion=$ver
         shell: pwsh
 
-      # ---------- Build portable (self-contained single-file) ----------
+      # ---------- Build portable (self-contained multi-file) ----------
       - name: Publish portable build
         run: |
           dotnet publish Orbital.csproj /p:PublishProfile=portable --configuration Release --output publish/portable
@@ -70,7 +70,7 @@ jobs:
           $folder = "Orbital-$ver"
           $staging = "publish/staging/$folder"
           New-Item -ItemType Directory -Force -Path $staging | Out-Null
-          Copy-Item publish/portable/Orbital.exe $staging
+          Copy-Item publish/portable/* $staging -Recurse
           Copy-Item portable/Cleanup.cmd $staging
           Compress-Archive -Path "publish/staging/$folder" -DestinationPath "dist/Orbital-$ver-Portable.zip"
 

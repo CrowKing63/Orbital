@@ -4,7 +4,7 @@
     Builds the Orbital installer (.exe) using dotnet publish + Inno Setup 6.
 .DESCRIPTION
     1. Reads the version from Orbital.csproj
-    2. Publishes a framework-dependent build to publish\installer\
+    2. Publishes a self-contained build to publish\installer\
     3. Runs Inno Setup to produce dist\Orbital-<version>-Setup.exe
 .EXAMPLE
     .\scripts\Build-Installer.ps1
@@ -26,11 +26,10 @@ try {
 
     # --- dotnet publish ---
     $publishDir = Join-Path $Root 'publish\installer'
-    Write-Host "Publishing (framework-dependent)..." -ForegroundColor Gray
+    Write-Host "Publishing (self-contained)..." -ForegroundColor Gray
     & 'C:\Program Files\dotnet\dotnet.exe' publish Orbital.csproj `
         /p:PublishProfile=installer `
         --configuration Release `
-        --no-self-contained `
         --output $publishDir
     if ($LASTEXITCODE -ne 0) { throw "dotnet publish failed (exit $LASTEXITCODE)" }
 
