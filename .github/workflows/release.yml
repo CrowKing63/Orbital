@@ -70,6 +70,8 @@ jobs:
           if ($setup -and $setup.Name -ne 'OrbitalSetup.exe') {
             Rename-Item $setup.FullName 'OrbitalSetup.exe'
           }
+          # Remove Velopack's auto-generated portable zip — we provide our own below
+          Remove-Item dist\*-win-Portable.zip -ErrorAction SilentlyContinue
 
       # ---------- Build portable (self-contained multi-file) ----------
       - name: Publish portable build
