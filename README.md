@@ -51,7 +51,7 @@ Click any action button to run it. Click anywhere else to dismiss.
 
 > Select text → action bar appears above cursor → click an action
 
-*![Orbital Demo](C:\Users\CrowKing63\Developments\Orbital\Assets\i-missed-popclip-so-i-built-a-free-alternative-for-windows-v0-fnpifz13qpog1.gif)*
+![Orbital Demo](Assets/i-missed-popclip-so-i-built-a-free-alternative-for-windows-v0-fnpifz13qpog1.gif)
 
 ---
 
