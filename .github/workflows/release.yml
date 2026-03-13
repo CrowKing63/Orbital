@@ -126,6 +126,8 @@ jobs:
           fail_on_unmatched_files: false
           files: |
             dist/RELEASES
+            dist/releases.win.json
+            dist/assets.win.json
             dist/Orbital-*-full.nupkg
             dist/OrbitalSetup.exe
             dist/Orbital-*-Portable.zip
