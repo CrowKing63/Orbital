@@ -43,20 +43,29 @@ jobs:
           $content = $content -replace '<FileVersion>.*?</FileVersion>', "<FileVersion>$ver.0</FileVersion>"
           Set-Content Orbital.csproj $content
 
-      # ---------- Build installer (self-contained) ----------
-      - name: Publish installer build
+      # ---------- Build (self-contained single-file) ----------
+      - name: Publish
         run: |
           dotnet publish Orbital.csproj /p:PublishProfile=installer --configuration Release --output publish/installer
 
-      - name: Install Inno Setup 6
-        run: choco install innosetup --yes --no-progress
+      # ---------- Package with Squirrel ----------
+      - name: Install Squirrel CLI
+        run: dotnet tool install -g csq
 
-      - name: Build installer
+      - name: Package with Squirrel
+        shell: pwsh
         run: |
           $ver = '${{ steps.version.outputs.version }}'
           New-Item -ItemType Directory -Force -Path dist | Out-Null
-          & 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe' installer\Orbital.iss /DMyAppVersion=$ver
-        shell: pwsh
+          csq pack `
+            --packId Orbital `
+            --packVersion $ver `
+            --packDir publish/installer `
+            --packTitle "Orbital" `
+            --packAuthors "CrowKing63" `
+            --mainExe Orbital.exe `
+            --icon Assets/orbit_logo.ico `
+            --releaseDir dist
 
       # ---------- Build portable (self-contained multi-file) ----------
       - name: Publish portable build
@@ -85,7 +94,7 @@ jobs:
             Write-Warning "dist directory does not exist!"
           }
 
-      - name: Delete stale installer assets from existing release
+      - name: Delete stale assets from existing release
         shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -94,9 +103,9 @@ jobs:
           $json = gh release view $tag --repo '${{ github.repository }}' --json assets 2>$null
           if ($LASTEXITCODE -eq 0 -and $json) {
             ($json | ConvertFrom-Json).assets |
-              Where-Object { $_.name -like '*-Setup.exe' } |
+              Where-Object { $_.name -like '*Setup.exe' -or $_.name -like '*.nupkg' -or $_.name -eq 'RELEASES' } |
               ForEach-Object {
-                Write-Host "Removing stale installer asset: $($_.name)"
+                Write-Host "Removing stale asset: $($_.name)"
                 gh release delete-asset $tag $_.name --repo '${{ github.repository }}' --yes
               }
           } else {
@@ -112,5 +121,7 @@ jobs:
           generate_release_notes: true
           fail_on_unmatched_files: true
           files: |
-            dist/Orbital-*-Setup.exe
+            dist/RELEASES
+            dist/Orbital-*-full.nupkg
+            dist/*Setup.exe
             dist/Orbital-*-Portable.zip

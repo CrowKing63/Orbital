@@ -4,9 +4,12 @@ using Microsoft.Win32;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Media;
+using Squirrel;
+using Squirrel.Sources;
 using WinForms = System.Windows.Forms;
 
 namespace Orbital
@@ -44,6 +47,8 @@ namespace Orbital
 
             RebuildActionExecutor();
             InitializeTrayIcon();
+
+            _ = Task.Run(CheckForUpdatesAsync);
 
             _radialMenu = new RadialMenuWindow(_actionExecutor);
 
@@ -112,6 +117,28 @@ namespace Orbital
             {
                 Dispatcher.BeginInvoke(() => ApplyTheme("System"));
             }
+        }
+
+        private async Task CheckForUpdatesAsync()
+        {
+            try
+            {
+                using var mgr = new UpdateManager(
+                    new GithubSource("https://github.com/CrowKing63/Orbital", null, false));
+                var newVersion = await mgr.UpdateApp();
+                if (newVersion != null)
+                {
+                    Dispatcher.Invoke(() =>
+                    {
+                        _notifyIcon.ShowBalloonTip(
+                            8000,
+                            "Orbital Updated",
+                            $"Version {newVersion.Version} has been downloaded. Restart Orbital to apply.",
+                            WinForms.ToolTipIcon.Info);
+                    });
+                }
+            }
+            catch { /* Update check is best-effort — ignore all errors */ }
         }
 
         private void OpenSettingsWindow()
