@@ -1,5 +1,6 @@
 using System;
 using System.Drawing;
+using Microsoft.Win32;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -33,6 +34,7 @@ namespace Orbital
             }
 
             ApplyTheme(SettingsManager.CurrentSettings.Theme);
+            Microsoft.Win32.SystemEvents.UserPreferenceChanged += OnSystemUserPreferenceChanged;
 
             // Sync startup registry with settings
             if (SettingsManager.CurrentSettings.RunAtStartup != SettingsManager.IsStartupRegistryEnabled())
@@ -48,7 +50,8 @@ namespace Orbital
             SystemHookManager.OnAnyMouseDown += SystemHookManager_OnAnyMouseDown;
             SystemHookManager.OnMouseUp += SystemHookManager_OnMouseUp;
             SystemHookManager.OnLongPress += SystemHookManager_OnLongPress;
-            
+            SystemHookManager.OnDoubleClick += SystemHookManager_OnDoubleClick;
+
             if (!SystemHookManager.StartMouseHook(out int hookErrorCode))
             {
                 string errorMessage = $"Failed to install global mouse hook (Error code: {hookErrorCode}).\n\n" +
@@ -67,6 +70,8 @@ namespace Orbital
 
         public static void ApplyTheme(string themeName)
         {
+            string resolved = themeName == "System" ? GetSystemTheme() : themeName;
+
             var dicts = Current.Resources.MergedDictionaries;
             var existing = dicts.FirstOrDefault(d =>
                 d.Source != null &&
@@ -76,10 +81,30 @@ namespace Orbital
             if (existing != null)
                 dicts.Remove(existing);
 
-            string path = themeName == "Light" ? "Themes/Light.xaml" : "Themes/Dark.xaml";
+            string path = resolved == "Light" ? "Themes/Light.xaml" : "Themes/Dark.xaml";
             dicts.Insert(0, new ResourceDictionary { Source = new Uri(path, UriKind.Relative) });
 
-            SettingsManager.CurrentSettings.Theme = themeName;
+            SettingsManager.CurrentSettings.Theme = themeName; // "System" 그대로 저장
+        }
+
+        private static string GetSystemTheme()
+        {
+            try
+            {
+                using var key = Registry.CurrentUser.OpenSubKey(
+                    @"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize");
+                return (key?.GetValue("AppsUseLightTheme") is int v && v == 1) ? "Light" : "Dark";
+            }
+            catch { return "Dark"; }
+        }
+
+        private void OnSystemUserPreferenceChanged(object sender, UserPreferenceChangedEventArgs e)
+        {
+            if (e.Category == UserPreferenceCategory.General &&
+                SettingsManager.CurrentSettings.Theme == "System")
+            {
+                Dispatcher.BeginInvoke(() => ApplyTheme("System"));
+            }
         }
 
         private void OpenSettingsWindow()
@@ -242,6 +267,17 @@ namespace Orbital
             });
         }
 
+        private void SystemHookManager_OnDoubleClick(object? sender, SystemHookManager.MousePoint e)
+        {
+            // Only show popup when double-clicking over an editable control
+            if (!IsOverEditableControl(e.X, e.Y)) return;
+
+            Dispatcher.Invoke(() =>
+            {
+                _radialMenu.ShowAtCursor(e.X, e.Y, string.Empty);
+            });
+        }
+
         private static bool IsOverEditableControl(int screenX, int screenY)
         {
             try
@@ -267,6 +303,7 @@ namespace Orbital
 
         protected override void OnExit(ExitEventArgs e)
         {
+            Microsoft.Win32.SystemEvents.UserPreferenceChanged -= OnSystemUserPreferenceChanged;
             SystemHookManager.StopMouseHook();
             _notifyIcon?.Dispose();
             _selectionCts?.Dispose();

@@ -18,6 +18,10 @@ namespace Orbital
         private const int WM_NCHITTEST = 0x0084;
         private const int HTCLIENT     = 1;
 
+        // System metrics for double-click detection
+        private const int SM_CXDOUBLECLK = 36;
+        private const int SM_CYDOUBLECLK = 37;
+
         // 드래그로 간주할 최소 픽셀 거리
         private const int DragThreshold = 8;
 
@@ -28,6 +32,11 @@ namespace Orbital
         private static bool _mouseDownInClient = false;
         private static Timer? _longPressTimer;
         private static bool _isLongPressed = false;
+        private static bool _isDoubleClick = false;
+
+        // Double-click tracking
+        private static DateTime _lastClickTime = DateTime.MinValue;
+        private static MousePoint _lastClickPos;
 
         public delegate IntPtr HookProc(int nCode, IntPtr wParam, IntPtr lParam);
 
@@ -42,6 +51,9 @@ namespace Orbital
 
         /// <summary>마우스 버튼을 300ms 이상 누르고 있을 때 발생 (선택 없이 팝업 트리거용)</summary>
         public static event EventHandler<MousePoint>? OnLongPress;
+
+        /// <summary>텍스트 필드에서 더블클릭 시 발생 (선택 없이 팝업 트리거용)</summary>
+        public static event EventHandler<MousePoint>? OnDoubleClick;
 
         [StructLayout(LayoutKind.Sequential)]
         public struct MousePoint
@@ -99,6 +111,7 @@ namespace Orbital
 
                     _buttonDownPos = hookStruct.pt;
                     _isLongPressed = false;
+                    _isDoubleClick = false;
 
                     // 클릭한 위치가 창의 콘텐츠 영역인지 확인
                     IntPtr hwnd = WindowFromPoint(hookStruct.pt);
@@ -106,9 +119,41 @@ namespace Orbital
                     IntPtr hitResult = SendMessage(hwnd, WM_NCHITTEST, IntPtr.Zero, hitParam);
                     _mouseDownInClient = hitResult == (IntPtr)HTCLIENT;
 
-                    // 롱프레스 타이머 시작
-                    _longPressTimer?.Dispose();
-                    _longPressTimer = new Timer(LongPressTimerCallback, null, LongPressMs, Timeout.Infinite);
+                    bool startLongPressTimer = true;
+
+                    if (_mouseDownInClient)
+                    {
+                        DateTime now = DateTime.UtcNow;
+                        double msSinceLast = (now - _lastClickTime).TotalMilliseconds;
+                        int ddx = Math.Abs(hookStruct.pt.X - _lastClickPos.X);
+                        int ddy = Math.Abs(hookStruct.pt.Y - _lastClickPos.Y);
+
+                        if (msSinceLast <= GetDoubleClickTime() &&
+                            ddx <= GetSystemMetrics(SM_CXDOUBLECLK) &&
+                            ddy <= GetSystemMetrics(SM_CYDOUBLECLK))
+                        {
+                            // 더블클릭 감지 — 롱프레스 타이머 없이 즉시 이벤트 발생
+                            _isDoubleClick = true;
+                            _lastClickTime = DateTime.MinValue; // 트리플클릭 방지
+                            startLongPressTimer = false;
+                            OnDoubleClick?.Invoke(null, hookStruct.pt);
+                        }
+                        else
+                        {
+                            _lastClickTime = now;
+                            _lastClickPos = hookStruct.pt;
+                        }
+                    }
+                    else
+                    {
+                        _lastClickTime = DateTime.MinValue;
+                    }
+
+                    if (startLongPressTimer)
+                    {
+                        _longPressTimer?.Dispose();
+                        _longPressTimer = new Timer(LongPressTimerCallback, null, LongPressMs, Timeout.Infinite);
+                    }
                 }
                 else if (wParam == (IntPtr)WM_LBUTTONUP)
                 {
@@ -116,7 +161,7 @@ namespace Orbital
                     _longPressTimer?.Dispose();
                     _longPressTimer = null;
 
-                    if (_mouseDownInClient)
+                    if (!_isDoubleClick && _mouseDownInClient)
                     {
                         int dx = Math.Abs(hookStruct.pt.X - _buttonDownPos.X);
                         int dy = Math.Abs(hookStruct.pt.Y - _buttonDownPos.Y);
@@ -134,6 +179,7 @@ namespace Orbital
                     }
 
                     _isLongPressed = false;
+                    _isDoubleClick = false;
                 }
             }
             return CallNextHookEx(_mouseHookID, nCode, wParam, lParam);
@@ -155,6 +201,12 @@ namespace Orbital
                 _isLongPressed = true;
             }
         }
+
+        [DllImport("user32.dll")]
+        private static extern uint GetDoubleClickTime();
+
+        [DllImport("user32.dll")]
+        private static extern int GetSystemMetrics(int nIndex);
 
         [DllImport("user32.dll")]
         private static extern IntPtr WindowFromPoint(MousePoint pt);

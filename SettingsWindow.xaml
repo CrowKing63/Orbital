@@ -8,26 +8,17 @@
 
     <Grid Margin="20">
         <Grid.RowDefinitions>
-            <!-- Title -->
-            <RowDefinition Height="Auto"/>
-            <!-- API settings panel -->
-            <RowDefinition Height="Auto"/>
-            <!-- Startup settings -->
-            <RowDefinition Height="Auto"/>
-            <!-- Theme settings -->
-            <RowDefinition Height="Auto"/>
-            <!-- Actions header -->
-            <RowDefinition Height="Auto"/>
-            <!-- Actions list -->
+            <!-- Scrollable content (title + all panels) -->
             <RowDefinition Height="*"/>
-            <!-- Info / links -->
-            <RowDefinition Height="Auto"/>
             <!-- Bottom buttons -->
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
+        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel>
+
         <!-- ── 타이틀 ── -->
-        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,18">
+        <StackPanel Orientation="Horizontal" Margin="0,0,0,18">
             <Ellipse Width="10" Height="10" Margin="0,0,9,0" VerticalAlignment="Center">
                 <Ellipse.Fill>
                     <RadialGradientBrush>
@@ -46,7 +37,7 @@
         </StackPanel>
 
         <!-- ── API Settings panel ── -->
-        <Border Grid.Row="1" Background="{DynamicResource PanelBgBrush}" CornerRadius="10"
+        <Border Background="{DynamicResource PanelBgBrush}" CornerRadius="10"
                 BorderBrush="{DynamicResource PanelBorderBrush}" BorderThickness="1" Margin="0,0,0,16" Padding="16,14">
             <Border.Effect>
                 <DropShadowEffect Color="#000000" BlurRadius="12" ShadowDepth="2" Opacity="0.3"/>
@@ -111,7 +102,7 @@
         </Border>
 
         <!-- ── Startup ── -->
-        <Border Grid.Row="2" Background="{DynamicResource PanelBgBrush}" CornerRadius="10"
+        <Border Background="{DynamicResource PanelBgBrush}" CornerRadius="10"
                 BorderBrush="{DynamicResource PanelBorderBrush}" BorderThickness="1" Margin="0,0,0,16" Padding="16,12">
             <StackPanel>
                 <TextBlock Text="Startup" FontSize="11" FontWeight="SemiBold"
@@ -125,7 +116,7 @@
         </Border>
 
         <!-- ── Theme ── -->
-        <Border Grid.Row="3" Background="{DynamicResource PanelBgBrush}" CornerRadius="10"
+        <Border Background="{DynamicResource PanelBgBrush}" CornerRadius="10"
                 BorderBrush="{DynamicResource PanelBorderBrush}" BorderThickness="1" Margin="0,0,0,16" Padding="16,12">
             <StackPanel>
                 <TextBlock Text="Appearance" FontSize="11" FontWeight="SemiBold"
@@ -133,16 +124,17 @@
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="Theme" FontSize="12" Foreground="{DynamicResource SubtitleFgBrush}"
                                VerticalAlignment="Center" Margin="0,0,12,0"/>
-                    <ComboBox x:Name="ThemeBox" Width="120" SelectionChanged="ThemeBox_SelectionChanged">
-                        <ComboBoxItem Content="Dark"  Tag="Dark"/>
-                        <ComboBoxItem Content="Light" Tag="Light"/>
+                    <ComboBox x:Name="ThemeBox" Width="180" SelectionChanged="ThemeBox_SelectionChanged">
+                        <ComboBoxItem Content="Dark"              Tag="Dark"/>
+                        <ComboBoxItem Content="Light"             Tag="Light"/>
+                        <ComboBoxItem Content="System (follow Windows)" Tag="System"/>
                     </ComboBox>
                 </StackPanel>
             </StackPanel>
         </Border>
 
         <!-- ── Actions header ── -->
-        <DockPanel Grid.Row="4" Margin="0,0,0,8">
+        <DockPanel Margin="0,0,0,8">
             <TextBlock Text="Actions" FontSize="11" FontWeight="SemiBold"
                        Foreground="{DynamicResource LabelFgBrush}" VerticalAlignment="Center"/>
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
@@ -157,7 +149,7 @@
         </DockPanel>
 
         <!-- ── Actions list ── -->
-        <ListView Grid.Row="5" x:Name="ActionsList" SelectionMode="Single">
+        <ListView x:Name="ActionsList" SelectionMode="Single" MinHeight="150">
             <ListView.View>
                 <GridView>
                     <GridViewColumn Header="Icon" Width="40">
@@ -179,10 +171,10 @@
         </ListView>
 
         <!-- ── Info & GitHub link ── -->
-        <StackPanel Grid.Row="6" Orientation="Vertical" Margin="0,10,0,0">
+        <StackPanel Orientation="Vertical" Margin="0,10,0,0">
             <TextBlock FontSize="10" Foreground="{DynamicResource TextLow}" TextWrapping="Wrap"
                        Margin="0,0,0,4">
-                Popup triggers: drag to select text, or hold left button (≥ 300 ms) in a text field.
+                Popup triggers: drag to select text, double-click in a text field, or hold left button (≥ 300 ms) in a text field.
             </TextBlock>
             <TextBlock FontSize="10">
                 <Hyperlink NavigateUri="https://github.com/CrowKing63/Orbital"
@@ -192,8 +184,11 @@
             </TextBlock>
         </StackPanel>
 
+        </StackPanel>
+        </ScrollViewer>
+
         <!-- ── Bottom buttons ── -->
-        <StackPanel Grid.Row="7" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
             <Button Content="Delete" Width="76" Margin="0,0,8,0"
                     Style="{StaticResource DangerButton}"
                     Click="DeleteAction_Click"/>

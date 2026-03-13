@@ -13,6 +13,7 @@ Orbital watches your mouse globally and shows a floating action bar above your c
 | Trigger | How to activate |
 |---------|----------------|
 | **Text selection** | Click and drag to select text anywhere on screen. When you release the mouse button, Orbital reads the selection and shows the action bar. |
+| **Double-click** | Double-click in a text field. The action bar appears with clipboard/paste actions available. |
 | **Long press** | Hold the left mouse button (≥ 300 ms) without dragging in a text field. The action bar appears with clipboard/paste actions available. |
 
 Click any action button to run it. Click anywhere else to dismiss.
@@ -42,7 +43,8 @@ Click any action button to run it. Click anywhere else to dismiss.
 - **Utility actions** — Copy, Cut, Paste, and Google Search without any AI calls
 - **Bring your own model** — works with OpenAI, OpenRouter (including free models), Ollama, LM Studio, or any OpenAI-compatible endpoint
 - **Custom prompts** — add, edit, and reorder actions with your own prompt templates using `{text}` as a placeholder
-- **Long-press trigger** — hold the mouse button to open the menu without selecting text (great for Paste)
+- **Double-click trigger** — double-click in a text field to open the menu without selecting text
+- **Long-press trigger** — hold the mouse button (≥ 300 ms) in a text field to open the menu without selecting text
 - **Secure key storage** — API keys are encrypted with Windows DPAPI, stored locally
 
 ---
