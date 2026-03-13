@@ -48,24 +48,23 @@ jobs:
         run: |
           dotnet publish Orbital.csproj /p:PublishProfile=installer --configuration Release --output publish/installer
 
-      # ---------- Package with Squirrel ----------
-      - name: Install Squirrel CLI
-        run: dotnet tool install -g csq
+      # ---------- Package with Velopack ----------
+      - name: Install Velopack CLI
+        run: dotnet tool install -g vpk
 
-      - name: Package with Squirrel
+      - name: Package with Velopack
         shell: pwsh
         run: |
           $ver = '${{ steps.version.outputs.version }}'
           New-Item -ItemType Directory -Force -Path dist | Out-Null
-          csq pack `
+          vpk pack `
             --packId Orbital `
             --packVersion $ver `
             --packDir publish/installer `
             --packTitle "Orbital" `
-            --packAuthors "CrowKing63" `
             --mainExe Orbital.exe `
             --icon Assets/orbit_logo.ico `
-            --releaseDir dist
+            --outputDir dist
 
       # ---------- Build portable (self-contained multi-file) ----------
       - name: Publish portable build
@@ -123,5 +122,5 @@ jobs:
           files: |
             dist/RELEASES
             dist/Orbital-*-full.nupkg
-            dist/*Setup.exe
+            dist/OrbitalSetup.exe
             dist/Orbital-*-Portable.zip

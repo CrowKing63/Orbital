@@ -8,8 +8,8 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Media;
-using Squirrel;
-using Squirrel.Sources;
+using Velopack;
+using Velopack.Sources;
 using WinForms = System.Windows.Forms;
 
 namespace Orbital
@@ -123,17 +123,18 @@ namespace Orbital
         {
             try
             {
-                using var mgr = new UpdateManager(
+                var mgr = new UpdateManager(
                     new GithubSource("https://github.com/CrowKing63/Orbital", null, false));
-                var newVersion = await mgr.UpdateApp();
-                if (newVersion != null)
+                var updateInfo = await mgr.CheckForUpdatesAsync();
+                if (updateInfo != null)
                 {
+                    await mgr.DownloadUpdatesAsync(updateInfo);
                     Dispatcher.Invoke(() =>
                     {
                         _notifyIcon.ShowBalloonTip(
                             8000,
                             "Orbital Updated",
-                            $"Version {newVersion.Version} has been downloaded. Restart Orbital to apply.",
+                            $"Version {updateInfo.TargetFullRelease.Version} has been downloaded. Restart Orbital to apply.",
                             WinForms.ToolTipIcon.Info);
                     });
                 }
