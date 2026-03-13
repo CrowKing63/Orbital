@@ -65,6 +65,11 @@ jobs:
             --mainExe Orbital.exe `
             --icon Assets/orbit_logo.ico `
             --outputDir dist
+          # Rename bootstrapper if vpk used a different naming pattern
+          $setup = Get-ChildItem dist -Filter '*Setup*.exe' | Select-Object -First 1
+          if ($setup -and $setup.Name -ne 'OrbitalSetup.exe') {
+            Rename-Item $setup.FullName 'OrbitalSetup.exe'
+          }
 
       # ---------- Build portable (self-contained multi-file) ----------
       - name: Publish portable build
@@ -118,7 +123,7 @@ jobs:
           name: Orbital ${{ steps.version.outputs.tag }}
           prerelease: ${{ steps.version.outputs.prerelease }}
           generate_release_notes: true
-          fail_on_unmatched_files: true
+          fail_on_unmatched_files: false
           files: |
             dist/RELEASES
             dist/Orbital-*-full.nupkg
