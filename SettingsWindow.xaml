@@ -227,6 +227,10 @@
 
         <!-- ── Bottom buttons ── -->
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
+            <Button Content="↑" Width="36" Margin="0,0,4,0" ToolTip="Move Up"
+                    Click="MoveActionUp_Click"/>
+            <Button Content="↓" Width="36" Margin="0,0,12,0" ToolTip="Move Down"
+                    Click="MoveActionDown_Click"/>
             <Button Content="Delete" Width="76" Margin="0,0,8,0"
                     Style="{StaticResource DangerButton}"
                     Click="DeleteAction_Click"/>

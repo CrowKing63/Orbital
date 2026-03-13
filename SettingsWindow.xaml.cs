@@ -248,6 +248,32 @@ namespace Orbital
             }
         }
 
+        private void MoveActionUp_Click(object sender, RoutedEventArgs e)
+        {
+            if (ActionsList.SelectedItem is not ActionProfile selected) return;
+            var actions = SettingsManager.CurrentSettings.Actions;
+            int idx = actions.IndexOf(selected);
+            if (idx <= 0) return;
+            actions.RemoveAt(idx);
+            actions.Insert(idx - 1, selected);
+            SettingsManager.SaveSettings();
+            RefreshActionList();
+            ActionsList.SelectedIndex = idx - 1;
+        }
+
+        private void MoveActionDown_Click(object sender, RoutedEventArgs e)
+        {
+            if (ActionsList.SelectedItem is not ActionProfile selected) return;
+            var actions = SettingsManager.CurrentSettings.Actions;
+            int idx = actions.IndexOf(selected);
+            if (idx < 0 || idx >= actions.Count - 1) return;
+            actions.RemoveAt(idx);
+            actions.Insert(idx + 1, selected);
+            SettingsManager.SaveSettings();
+            RefreshActionList();
+            ActionsList.SelectedIndex = idx + 1;
+        }
+
         private void DeleteAction_Click(object sender, RoutedEventArgs e)
         {
             if (ActionsList.SelectedItem is not ActionProfile selected) return;

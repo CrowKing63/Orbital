@@ -83,7 +83,7 @@
 
         <!-- 버튼 -->
         <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Content="OK" Width="82" Margin="0,0,8,0"
+            <Button Content="Save" Width="82" Margin="0,0,8,0"
                     Style="{StaticResource PrimaryButton}"
                     IsDefault="True" Click="Ok_Click"/>
             <Button Content="Cancel" Width="82"
