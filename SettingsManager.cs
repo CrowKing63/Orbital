@@ -5,9 +5,17 @@ using System.Linq;
 using Newtonsoft.Json;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.Win32;
 
 namespace Orbital
 {
+    public enum ButtonDisplayMode
+    {
+        TextAndIcon,
+        TextOnly,
+        IconOnly
+    }
+
     public class ActionProfile
     {
         public string Name { get; set; } = string.Empty;
@@ -17,6 +25,9 @@ namespace Orbital
         // String property for JSON serialization (backward compatibility)
         public string ResultAction { get; set; } = ActionType.Popup.ToSerializedString();  // "Copy", "Replace", "Popup", etc.
         
+        public bool? RequiresSelection { get; set; }
+        public ButtonDisplayMode DisplayMode { get; set; } = ButtonDisplayMode.TextAndIcon;
+
         // Typed property for code usage
         [JsonIgnore]
         public ActionType ActionType
@@ -25,8 +36,6 @@ namespace Orbital
             set => ResultAction = value.ToSerializedString();
         }
         
-        public bool? RequiresSelection { get; set; }
-
         [JsonIgnore]
         public bool IsSelectionRequired => RequiresSelection ?? (ActionType != Orbital.ActionType.Paste);
     }
@@ -36,6 +45,8 @@ namespace Orbital
         public string EncryptedApiKey { get; set; } = string.Empty;
         public string ApiBaseUrl  { get; set; } = "https://api.openai.com/v1";
         public string ModelName   { get; set; } = "gpt-4o-mini";
+        public bool   RunAtStartup { get; set; } = false;
+        public string Theme        { get; set; } = "Dark";  // "Dark" | "Light"
         public List<ActionProfile> Actions { get; set; } = new List<ActionProfile>();
     }
 
@@ -133,6 +144,41 @@ namespace Orbital
                     new ActionProfile { Name = "Search",    Icon = "\uE721", PromptFormat = "",                                                               ResultAction = "Browser",    RequiresSelection = true }
                 }
             };
+        }
+
+        private const string RunRegistryKey = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Run";
+        private const string RunRegistryValueName = "Orbital";
+
+        public static void ApplyStartupRegistry(bool enable)
+        {
+            try
+            {
+                using RegistryKey? key = Registry.CurrentUser.OpenSubKey(RunRegistryKey, writable: true);
+                if (key == null) return;
+
+                if (enable)
+                {
+                    string exePath = System.Diagnostics.Process.GetCurrentProcess().MainModule?.FileName
+                                     ?? System.Reflection.Assembly.GetExecutingAssembly().Location;
+                    key.SetValue(RunRegistryValueName, $"\"{exePath}\"");
+                }
+                else
+                {
+                    if (key.GetValue(RunRegistryValueName) != null)
+                        key.DeleteValue(RunRegistryValueName, throwOnMissingValue: false);
+                }
+            }
+            catch { /* non-fatal: startup registry is best-effort */ }
+        }
+
+        public static bool IsStartupRegistryEnabled()
+        {
+            try
+            {
+                using RegistryKey? key = Registry.CurrentUser.OpenSubKey(RunRegistryKey, writable: false);
+                return key?.GetValue(RunRegistryValueName) != null;
+            }
+            catch { return false; }
         }
 
         // DPAPI Encryption for API Keys

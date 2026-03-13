@@ -32,10 +32,18 @@ namespace Orbital
             var actions = SettingsManager.CurrentSettings?.Actions;
             if (actions == null || actions.Count == 0) return;
 
-            for (int i = 0; i < actions.Count; i++)
+            bool firstVisible = true;
+
+            foreach (var action in actions)
             {
-                // 구분선 (첫 번째 버튼 앞은 제외)
-                if (i > 0)
+                bool enabled = hasText || !action.IsSelectionRequired;
+
+                // When no text is selected, completely hide buttons that require selection
+                if (!enabled)
+                    continue;
+
+                // Separator before every button except the first visible one
+                if (!firstVisible)
                 {
                     ButtonPanel.Children.Add(new Border
                     {
@@ -47,16 +55,15 @@ namespace Orbital
                     });
                 }
 
-                var action = actions[i];
-                bool enabled = hasText || !action.IsSelectionRequired;
-
                 // Create content with icon if available
                 object content;
-                if (!string.IsNullOrEmpty(action.Icon))
+                bool showIcon = !string.IsNullOrEmpty(action.Icon)
+                    && action.DisplayMode != ButtonDisplayMode.TextOnly;
+                bool showText = action.DisplayMode != ButtonDisplayMode.IconOnly;
+
+                if (showIcon && showText)
                 {
                     var stack = new StackPanel { Orientation = System.Windows.Controls.Orientation.Horizontal };
-                    
-                    // Icon
                     stack.Children.Add(new TextBlock
                     {
                         Text = action.Icon,
@@ -65,15 +72,22 @@ namespace Orbital
                         VerticalAlignment = VerticalAlignment.Center,
                         Margin = new Thickness(0, 0, 8, 0)
                     });
-
-                    // Name
                     stack.Children.Add(new TextBlock
                     {
                         Text = action.Name,
                         VerticalAlignment = VerticalAlignment.Center
                     });
-
                     content = stack;
+                }
+                else if (showIcon)
+                {
+                    content = new TextBlock
+                    {
+                        Text = action.Icon,
+                        FontFamily = _iconFont,
+                        FontSize = 16,
+                        VerticalAlignment = VerticalAlignment.Center
+                    };
                 }
                 else
                 {
@@ -85,12 +99,13 @@ namespace Orbital
                     Content = content,
                     Tag = action,
                     Style = (Style)FindResource("BarButtonStyle"),
-                    IsEnabled = enabled,
-                    Opacity = enabled ? 1.0 : 0.4
+                    IsEnabled = true,
+                    Opacity = 1.0
                 };
 
                 btn.Click += ActionButton_Click;
                 ButtonPanel.Children.Add(btn);
+                firstVisible = false;
             }
         }
 

@@ -1,0 +1,38 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ── Core design tokens (Claude Code Light palette) ── -->
+    <SolidColorBrush x:Key="BgDeep"    Color="#FAFAF7"/>
+    <SolidColorBrush x:Key="BgPanel"   Color="#EFEDE8"/>
+    <SolidColorBrush x:Key="BgElement" Color="#F0EEE9"/>
+    <SolidColorBrush x:Key="BgHover"   Color="#E8E5DF"/>
+    <SolidColorBrush x:Key="Border"    Color="#D4D0C8"/>
+    <SolidColorBrush x:Key="AccentVi"  Color="#DA7756"/>
+    <SolidColorBrush x:Key="AccentCy"  Color="#DA7756"/>
+    <SolidColorBrush x:Key="TextHigh"  Color="#1A1917"/>
+    <SolidColorBrush x:Key="TextMid"   Color="#6B6860"/>
+    <SolidColorBrush x:Key="TextLow"   Color="#9A9590"/>
+    <SolidColorBrush x:Key="Danger"    Color="#DA4040"/>
+
+    <!-- ── Settings window ── -->
+    <SolidColorBrush x:Key="WindowBgBrush"      Color="#FAFAF7"/>
+    <SolidColorBrush x:Key="PanelBgBrush"       Color="#EFEDE8"/>
+    <SolidColorBrush x:Key="PanelBorderBrush"   Color="#D4D0C8"/>
+    <SolidColorBrush x:Key="LabelFgBrush"       Color="#6B6860"/>
+    <SolidColorBrush x:Key="TitleFgBrush"       Color="#1A1917"/>
+    <SolidColorBrush x:Key="SubtitleFgBrush"    Color="#6B6860"/>
+    <SolidColorBrush x:Key="AccentBrush"        Color="#DA7756"/>
+
+    <!-- ── Popup pill ── -->
+    <SolidColorBrush x:Key="PillBgBrush"        Color="#F0F5F4EF"/>
+    <SolidColorBrush x:Key="PillBorderBrush"    Color="#80D4D0C8"/>
+    <Color           x:Key="PillGlowColor">#DA7756</Color>
+
+    <!-- ── Bar buttons ── -->
+    <SolidColorBrush x:Key="BtnFgBrush"         Color="#1A1917"/>
+    <SolidColorBrush x:Key="BtnHoverBgBrush"    Color="#40EDE9E3"/>
+    <SolidColorBrush x:Key="BtnPressedBgBrush"  Color="#60E0DBD3"/>
+    <SolidColorBrush x:Key="BtnHoverFgBrush"    Color="#DA7756"/>
+    <SolidColorBrush x:Key="BtnDisabledFgBrush" Color="#80B0B0A8"/>
+
+</ResourceDictionary>

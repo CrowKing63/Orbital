@@ -70,7 +70,7 @@ jobs:
           $folder = "Orbital-$ver"
           $staging = "publish/staging/$folder"
           New-Item -ItemType Directory -Force -Path $staging | Out-Null
-          Copy-Item publish/portable/* $staging -Recurse
+          Copy-Item publish/portable/Orbital.exe $staging
           Copy-Item portable/Cleanup.cmd $staging
           Compress-Archive -Path "publish/staging/$folder" -DestinationPath "dist/Orbital-$ver-Portable.zip"
 

@@ -25,6 +25,8 @@
 
   <ItemGroup>
     <Resource Include="Assets\orbit_logo.png" />
+    <Resource Include="Themes\Dark.xaml" />
+    <Resource Include="Themes\Light.xaml" />
   </ItemGroup>
 
 </Project>

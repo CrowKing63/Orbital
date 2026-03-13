@@ -1,22 +1,28 @@
 <Window x:Class="Orbital.SettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Orbital Settings" Height="620" Width="640"
+        Title="Orbital Settings" Height="660" Width="640"
         Icon="Assets/orbit_logo.png"
-        Background="#0A0A18"
+        Background="{DynamicResource WindowBgBrush}"
         WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize">
 
     <Grid Margin="20">
         <Grid.RowDefinitions>
-            <!-- 타이틀 -->
+            <!-- Title -->
             <RowDefinition Height="Auto"/>
-            <!-- API 설정 패널 -->
+            <!-- API settings panel -->
             <RowDefinition Height="Auto"/>
-            <!-- 액션 헤더 -->
+            <!-- Startup settings -->
             <RowDefinition Height="Auto"/>
-            <!-- 액션 리스트 -->
+            <!-- Theme settings -->
+            <RowDefinition Height="Auto"/>
+            <!-- Actions header -->
+            <RowDefinition Height="Auto"/>
+            <!-- Actions list -->
             <RowDefinition Height="*"/>
-            <!-- 하단 버튼 -->
+            <!-- Info / links -->
+            <RowDefinition Height="Auto"/>
+            <!-- Bottom buttons -->
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
@@ -34,21 +40,21 @@
                 </Ellipse.Effect>
             </Ellipse>
             <TextBlock Text="Orbital" FontSize="18" FontWeight="Bold"
-                       Foreground="#8090FF" VerticalAlignment="Center"/>
+                       Foreground="{DynamicResource TitleFgBrush}" VerticalAlignment="Center"/>
             <TextBlock Text="  Settings" FontSize="16" FontWeight="Light"
-                       Foreground="#9898C8" VerticalAlignment="Center"/>
+                       Foreground="{DynamicResource SubtitleFgBrush}" VerticalAlignment="Center"/>
         </StackPanel>
 
-        <!-- ── API 설정 패널 ── -->
-        <Border Grid.Row="1" Background="#11112A" CornerRadius="10"
-                BorderBrush="#28285A" BorderThickness="1" Margin="0,0,0,16" Padding="16,14">
+        <!-- ── API Settings panel ── -->
+        <Border Grid.Row="1" Background="{DynamicResource PanelBgBrush}" CornerRadius="10"
+                BorderBrush="{DynamicResource PanelBorderBrush}" BorderThickness="1" Margin="0,0,0,16" Padding="16,14">
             <Border.Effect>
                 <DropShadowEffect Color="#000000" BlurRadius="12" ShadowDepth="2" Opacity="0.3"/>
             </Border.Effect>
             <StackPanel>
                 <!-- 섹션 헤더 -->
                 <TextBlock Text="API Settings" FontSize="11" FontWeight="SemiBold"
-                           Foreground="#5A5A90" Margin="0,0,0,12"/>
+                           Foreground="{DynamicResource LabelFgBrush}" Margin="0,0,0,12"/>
 
                 <Grid>
                     <Grid.RowDefinitions>
@@ -64,7 +70,7 @@
 
                     <!-- 제공자 -->
                     <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,8,10">
-                        <TextBlock Text="Provider" FontSize="11" Foreground="#5A5A90" Margin="0,0,0,5"/>
+                        <TextBlock Text="Provider" FontSize="11" Foreground="{DynamicResource LabelFgBrush}" Margin="0,0,0,5"/>
                         <ComboBox x:Name="ProviderBox" SelectionChanged="ProviderBox_SelectionChanged">
                             <ComboBoxItem Tag="openai"     Content="OpenAI"/>
                             <ComboBoxItem Tag="openrouter" Content="OpenRouter"/>
@@ -74,19 +80,19 @@
 
                     <!-- 모델 -->
                     <StackPanel Grid.Row="0" Grid.Column="1" Margin="8,0,0,10">
-                        <TextBlock Text="Model" FontSize="11" Foreground="#5A5A90" Margin="0,0,0,5"/>
+                        <TextBlock Text="Model" FontSize="11" Foreground="{DynamicResource LabelFgBrush}" Margin="0,0,0,5"/>
                         <ComboBox x:Name="ModelBox" IsEditable="True" IsTextSearchEnabled="False"/>
                     </StackPanel>
 
                     <!-- Base URL -->
                     <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Margin="0,0,0,10">
-                        <TextBlock Text="API Base URL" FontSize="11" Foreground="#5A5A90" Margin="0,0,0,5"/>
+                        <TextBlock Text="API Base URL" FontSize="11" Foreground="{DynamicResource LabelFgBrush}" Margin="0,0,0,5"/>
                         <TextBox x:Name="BaseUrlBox"/>
                     </StackPanel>
 
                     <!-- API 키 -->
                     <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Margin="0,0,0,6">
-                        <TextBlock Text="API Key" FontSize="11" Foreground="#5A5A90" Margin="0,0,0,5"/>
+                        <TextBlock Text="API Key" FontSize="11" Foreground="{DynamicResource LabelFgBrush}" Margin="0,0,0,5"/>
                         <DockPanel>
                             <Button DockPanel.Dock="Right" Content="Save" Width="72" Margin="8,0,0,0"
                                     Style="{StaticResource PrimaryButton}"
@@ -99,15 +105,46 @@
                     <!-- 상태 -->
                     <TextBlock Grid.Row="3" Grid.ColumnSpan="2"
                                x:Name="ApiKeyStatus" FontSize="11"
-                               Foreground="#5A5A90" TextWrapping="Wrap"/>
+                               Foreground="{DynamicResource LabelFgBrush}" TextWrapping="Wrap"/>
                 </Grid>
             </StackPanel>
         </Border>
 
-        <!-- ── 액션 버튼 헤더 ── -->
-        <DockPanel Grid.Row="2" Margin="0,0,0,8">
+        <!-- ── Startup ── -->
+        <Border Grid.Row="2" Background="{DynamicResource PanelBgBrush}" CornerRadius="10"
+                BorderBrush="{DynamicResource PanelBorderBrush}" BorderThickness="1" Margin="0,0,0,16" Padding="16,12">
+            <StackPanel>
+                <TextBlock Text="Startup" FontSize="11" FontWeight="SemiBold"
+                           Foreground="{DynamicResource LabelFgBrush}" Margin="0,0,0,10"/>
+                <CheckBox x:Name="RunAtStartupCheck"
+                          Content="Launch Orbital when Windows starts"
+                          Foreground="{DynamicResource TextMid}" FontSize="12"
+                          Checked="RunAtStartupCheck_Changed"
+                          Unchecked="RunAtStartupCheck_Changed"/>
+            </StackPanel>
+        </Border>
+
+        <!-- ── Theme ── -->
+        <Border Grid.Row="3" Background="{DynamicResource PanelBgBrush}" CornerRadius="10"
+                BorderBrush="{DynamicResource PanelBorderBrush}" BorderThickness="1" Margin="0,0,0,16" Padding="16,12">
+            <StackPanel>
+                <TextBlock Text="Appearance" FontSize="11" FontWeight="SemiBold"
+                           Foreground="{DynamicResource LabelFgBrush}" Margin="0,0,0,10"/>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Theme" FontSize="12" Foreground="{DynamicResource SubtitleFgBrush}"
+                               VerticalAlignment="Center" Margin="0,0,12,0"/>
+                    <ComboBox x:Name="ThemeBox" Width="120" SelectionChanged="ThemeBox_SelectionChanged">
+                        <ComboBoxItem Content="Dark"  Tag="Dark"/>
+                        <ComboBoxItem Content="Light" Tag="Light"/>
+                    </ComboBox>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- ── Actions header ── -->
+        <DockPanel Grid.Row="4" Margin="0,0,0,8">
             <TextBlock Text="Actions" FontSize="11" FontWeight="SemiBold"
-                       Foreground="#5A5A90" VerticalAlignment="Center"/>
+                       Foreground="{DynamicResource LabelFgBrush}" VerticalAlignment="Center"/>
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
                 <Button Content="Import" Width="76" Margin="0,0,8,0"
                         Click="ImportActions_Click"/>
@@ -119,8 +156,8 @@
             </StackPanel>
         </DockPanel>
 
-        <!-- ── 액션 리스트 ── -->
-        <ListView Grid.Row="3" x:Name="ActionsList" SelectionMode="Single">
+        <!-- ── Actions list ── -->
+        <ListView Grid.Row="5" x:Name="ActionsList" SelectionMode="Single">
             <ListView.View>
                 <GridView>
                     <GridViewColumn Header="Icon" Width="40">
@@ -130,7 +167,7 @@
                                            FontFamily="Segoe MDL2 Assets" 
                                            FontSize="13" 
                                            HorizontalAlignment="Center" 
-                                           Foreground="#80A0FF"/>
+                                           Foreground="{DynamicResource AccentBrush}"/>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
@@ -141,8 +178,22 @@
             </ListView.View>
         </ListView>
 
-        <!-- ── 하단 버튼 ── -->
-        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
+        <!-- ── Info & GitHub link ── -->
+        <StackPanel Grid.Row="6" Orientation="Vertical" Margin="0,10,0,0">
+            <TextBlock FontSize="10" Foreground="{DynamicResource TextLow}" TextWrapping="Wrap"
+                       Margin="0,0,0,4">
+                Popup triggers: drag to select text, or hold left button (≥ 300 ms) in a text field.
+            </TextBlock>
+            <TextBlock FontSize="10">
+                <Hyperlink NavigateUri="https://github.com/CrowKing63/Orbital"
+                           RequestNavigate="Hyperlink_RequestNavigate">
+                    GitHub — CrowKing63/Orbital
+                </Hyperlink>
+            </TextBlock>
+        </StackPanel>
+
+        <!-- ── Bottom buttons ── -->
+        <StackPanel Grid.Row="7" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
             <Button Content="Delete" Width="76" Margin="0,0,8,0"
                     Style="{StaticResource DangerButton}"
                     Click="DeleteAction_Click"/>

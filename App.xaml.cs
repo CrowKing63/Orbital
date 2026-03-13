@@ -1,8 +1,10 @@
 using System;
 using System.Drawing;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows;
+using System.Windows.Automation;
 using System.Windows.Media;
 using WinForms = System.Windows.Forms;
 
@@ -29,6 +31,15 @@ namespace Orbital
             {
                 MessageBox.Show("Your settings file was corrupted and has been reset to defaults.\n\nA backup of the corrupted file was saved with a .bak extension.", "Orbital Settings Recovery", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
+
+            ApplyTheme(SettingsManager.CurrentSettings.Theme);
+
+            // Sync startup registry with settings
+            if (SettingsManager.CurrentSettings.RunAtStartup != SettingsManager.IsStartupRegistryEnabled())
+            {
+                SettingsManager.ApplyStartupRegistry(SettingsManager.CurrentSettings.RunAtStartup);
+            }
+
             RebuildActionExecutor();
             InitializeTrayIcon();
 
@@ -52,6 +63,23 @@ namespace Orbital
                 Shutdown();
                 return;
             }
+        }
+
+        public static void ApplyTheme(string themeName)
+        {
+            var dicts = Current.Resources.MergedDictionaries;
+            var existing = dicts.FirstOrDefault(d =>
+                d.Source != null &&
+                (d.Source.OriginalString.Contains("Dark.xaml") ||
+                 d.Source.OriginalString.Contains("Light.xaml")));
+
+            if (existing != null)
+                dicts.Remove(existing);
+
+            string path = themeName == "Light" ? "Themes/Light.xaml" : "Themes/Dark.xaml";
+            dicts.Insert(0, new ResourceDictionary { Source = new Uri(path, UriKind.Relative) });
+
+            SettingsManager.CurrentSettings.Theme = themeName;
         }
 
         private void OpenSettingsWindow()
@@ -205,11 +233,36 @@ namespace Orbital
 
         private void SystemHookManager_OnLongPress(object? sender, SystemHookManager.MousePoint e)
         {
-            // 롱프레스: 텍스트 선택 없이 팝업 표시 (붙여넣기 등 비-LLM 액션용)
+            // Only show popup when long-pressing over an editable control
+            if (!IsOverEditableControl(e.X, e.Y)) return;
+
             Dispatcher.Invoke(() =>
             {
                 _radialMenu.ShowAtCursor(e.X, e.Y, string.Empty);
             });
+        }
+
+        private static bool IsOverEditableControl(int screenX, int screenY)
+        {
+            try
+            {
+                var element = AutomationElement.FromPoint(new System.Windows.Point(screenX, screenY));
+                if (element == null) return false;
+
+                var controlType = element.GetCurrentPropertyValue(AutomationElement.ControlTypeProperty) as ControlType;
+                if (controlType == ControlType.Edit || controlType == ControlType.Document)
+                    return true;
+
+                if (element.TryGetCurrentPattern(ValuePattern.Pattern, out var valuePatternObj)
+                    && valuePatternObj is ValuePattern vp && !vp.Current.IsReadOnly)
+                    return true;
+
+                if (element.TryGetCurrentPattern(TextPattern.Pattern, out _))
+                    return true;
+
+                return false;
+            }
+            catch { return false; }
         }
 
         protected override void OnExit(ExitEventArgs e)

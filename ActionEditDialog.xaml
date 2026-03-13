@@ -1,13 +1,14 @@
 <Window x:Class="Orbital.ActionEditDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Edit Action" Height="320" Width="480"
+        Title="Edit Action" Height="380" Width="480"
         Icon="Assets/orbit_logo.png"
         Background="#0A0A18"
         WindowStartupLocation="CenterOwner" ResizeMode="NoResize">
 
     <Grid Margin="20">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -63,14 +64,25 @@
             </ComboBox>
         </StackPanel>
 
-        <!-- 옵션 -->
+        <!-- Display mode -->
         <StackPanel Grid.Row="3" Margin="0,0,0,14">
+            <TextBlock Text="Button Display" FontSize="11" FontWeight="SemiBold"
+                       Foreground="#5A5A90" Margin="0,0,0,6"/>
+            <ComboBox x:Name="DisplayModeBox" SelectedIndex="0">
+                <ComboBoxItem Content="Text + Icon" Tag="TextAndIcon"/>
+                <ComboBoxItem Content="Text Only"   Tag="TextOnly"/>
+                <ComboBoxItem Content="Icon Only"   Tag="IconOnly"/>
+            </ComboBox>
+        </StackPanel>
+
+        <!-- 옵션 -->
+        <StackPanel Grid.Row="4" Margin="0,0,0,14">
             <CheckBox x:Name="RequiresSelectionCheck" Content="Requires selected text to run" 
                       Foreground="#A0A0C0" FontSize="11" IsChecked="True"/>
         </StackPanel>
 
         <!-- 버튼 -->
-        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
+        <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Content="OK" Width="82" Margin="0,0,8,0"
                     Style="{StaticResource PrimaryButton}"
                     IsDefault="True" Click="Ok_Click"/>

@@ -1,3 +1,4 @@
+using System;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
@@ -43,6 +44,16 @@ namespace Orbital
                         break;
                     }
                 }
+
+                // Set DisplayModeBox selection
+                foreach (ComboBoxItem item in DisplayModeBox.Items)
+                {
+                    if (item.Tag?.ToString() == existing.DisplayMode.ToString())
+                    {
+                        DisplayModeBox.SelectedItem = item;
+                        break;
+                    }
+                }
             }
         }
 
@@ -55,6 +66,7 @@ namespace Orbital
             }
 
             string selectedActionString = (ResultActionBox.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Popup";
+            var selectedMode = (DisplayModeBox.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "TextAndIcon";
             
             Result = new ActionProfile
             {
@@ -62,7 +74,8 @@ namespace Orbital
                 Icon = IconBox.Text.Trim(),
                 PromptFormat = PromptBox.Text,
                 ActionType = ActionTypeExtensions.FromString(selectedActionString),
-                RequiresSelection = RequiresSelectionCheck.IsChecked
+                RequiresSelection = RequiresSelectionCheck.IsChecked,
+                DisplayMode = Enum.TryParse<ButtonDisplayMode>(selectedMode, out var mode) ? mode : ButtonDisplayMode.TextAndIcon
             };
 
             DialogResult = true;

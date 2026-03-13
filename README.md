@@ -6,6 +6,20 @@ Orbital is a lightweight Windows tray app that pops up an AI-powered action bar 
 
 ---
 
+## How It Works
+
+Orbital watches your mouse globally and shows a floating action bar above your cursor in two situations:
+
+| Trigger | How to activate |
+|---------|----------------|
+| **Text selection** | Click and drag to select text anywhere on screen. When you release the mouse button, Orbital reads the selection and shows the action bar. |
+| **Long press** | Hold the left mouse button (≥ 300 ms) without dragging in a text field. The action bar appears with clipboard/paste actions available. |
+
+Click any action button to run it. Click anywhere else to dismiss.
+
+---
+
+
 ## Why Orbital?
 
 [Snipdo](https://snipdo-app.com/) pioneered the idea of a floating toolbar on text selection, but it's **subscription-only**. Orbital is the free, open-source answer:

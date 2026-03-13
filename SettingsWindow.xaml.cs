@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Navigation;
 
 namespace Orbital
 {
@@ -78,6 +79,19 @@ namespace Orbital
                 ? "API key not configured."
                 : $"API key saved. (Last 4: ...{(key.Length >= 4 ? key[^4..] : key)})";
 
+            RunAtStartupCheck.IsChecked = SettingsManager.CurrentSettings.RunAtStartup;
+
+            // Theme selector
+            string currentTheme = SettingsManager.CurrentSettings.Theme ?? "Dark";
+            foreach (ComboBoxItem item in ThemeBox.Items)
+            {
+                if (item.Tag?.ToString() == currentTheme)
+                {
+                    ThemeBox.SelectedItem = item;
+                    break;
+                }
+            }
+
             _suppressEvents = false;
 
             RefreshActionList();
@@ -138,6 +152,25 @@ namespace Orbital
 
                 string prevModel = ModelBox.Text;
                 UpdateModelList(tag, info.Models.Length > 0 ? info.Models[0] : prevModel);
+            }
+        }
+
+        private void RunAtStartupCheck_Changed(object sender, RoutedEventArgs e)
+        {
+            if (_suppressEvents) return;
+            bool enable = RunAtStartupCheck.IsChecked == true;
+            SettingsManager.CurrentSettings.RunAtStartup = enable;
+            SettingsManager.ApplyStartupRegistry(enable);
+            SettingsManager.SaveSettings();
+        }
+
+        private void ThemeBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_suppressEvents) return;
+            if (ThemeBox.SelectedItem is ComboBoxItem item && item.Tag is string tag)
+            {
+                App.ApplyTheme(tag);
+                SettingsManager.SaveSettings();
             }
         }
 
@@ -292,6 +325,16 @@ namespace Orbital
                     MessageBox.Show(error, "Import Failed", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
+        }
+
+        private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
+        {
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = e.Uri.AbsoluteUri,
+                UseShellExecute = true
+            });
+            e.Handled = true;
         }
     }
 }

@@ -22,7 +22,7 @@ namespace Orbital
         private const int DragThreshold = 8;
 
         // 롱프레스 시간 (ms)
-        private const int LongPressMs = 500;
+        private const int LongPressMs = 300;
 
         private static MousePoint _buttonDownPos;
         private static bool _mouseDownInClient = false;
@@ -40,7 +40,7 @@ namespace Orbital
         /// <summary>마우스 드래그(텍스트 선택) 완료 시 발생</summary>
         public static event EventHandler<MousePoint>? OnMouseUp;
 
-        /// <summary>마우스 버튼을 500ms 이상 누르고 있을 때 발생 (선택 없이 팝업 트리거용)</summary>
+        /// <summary>마우스 버튼을 300ms 이상 누르고 있을 때 발생 (선택 없이 팝업 트리거용)</summary>
         public static event EventHandler<MousePoint>? OnLongPress;
 
         [StructLayout(LayoutKind.Sequential)]
@@ -123,7 +123,7 @@ namespace Orbital
 
                         if (_isLongPressed && dx <= DragThreshold && dy <= DragThreshold)
                         {
-                            // 500ms 이상 누른 후 움직임 없이 릴리즈 → 롱프레스
+                            // 300ms 이상 누른 후 움직임 없이 릴리즈 → 롱프레스
                             OnLongPress?.Invoke(null, hookStruct.pt);
                         }
                         else if (!_isLongPressed && (dx > DragThreshold || dy > DragThreshold))

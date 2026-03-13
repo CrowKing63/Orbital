@@ -9,15 +9,15 @@
         Deactivated="Window_Deactivated">
 
     <Window.Resources>
-        <!-- TextBlock 기본 스타일 재정의 — 버튼 내부 텍스트가 부모 Foreground를 상속하도록 -->
+        <!-- TextBlock default style override — buttons inherit parent Foreground -->
         <Style TargetType="TextBlock"/>
 
-        <!-- 바형 버튼 스타일 — 오르트 구름 컨셉: 딥 스페이스 + 네뷸라 글로우 -->
+        <!-- Bar button style -->
         <Style TargetType="Button" x:Key="BarButtonStyle">
             <Setter Property="Height"     Value="36"/>
             <Setter Property="MinWidth"   Value="44"/>
             <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="#C8C8FF"/>
+            <Setter Property="Foreground" Value="{DynamicResource BtnFgBrush}"/>
             <Setter Property="FontSize"   Value="11"/>
             <Setter Property="Cursor"     Value="Hand"/>
             <Setter Property="Padding"    Value="10,0"/>
@@ -32,10 +32,10 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#2800D4FF"/>
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource BtnHoverBgBrush}"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#4000D4FF"/>
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource BtnPressedBgBrush}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -43,25 +43,25 @@
             </Setter>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Foreground" Value="#00D4FF"/>
+                    <Setter Property="Foreground" Value="{DynamicResource BtnHoverFgBrush}"/>
                 </Trigger>
                 <Trigger Property="IsEnabled" Value="False">
-                    <Setter Property="Foreground" Value="#30506080"/>
+                    <Setter Property="Foreground" Value="{DynamicResource BtnDisabledFgBrush}"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
     </Window.Resources>
 
-    <!-- Pill 배경 — 글라스모피즘 + 네뷸라 글로우 -->
+    <!-- Pill background -->
     <Border x:Name="PillBorder"
             CornerRadius="22"
-            Background="#CC0D0D22"
-            BorderBrush="#507080FF"
+            Background="{DynamicResource PillBgBrush}"
+            BorderBrush="{DynamicResource PillBorderBrush}"
             BorderThickness="1"
             Padding="6,4"
             MouseDown="PillBorder_MouseDown">
         <Border.Effect>
-            <DropShadowEffect Color="#7080FF" BlurRadius="18" ShadowDepth="0" Opacity="0.45"/>
+            <DropShadowEffect Color="{DynamicResource PillGlowColor}" BlurRadius="18" ShadowDepth="0" Opacity="0.45"/>
         </Border.Effect>
         <StackPanel x:Name="ButtonPanel" Orientation="Horizontal" VerticalAlignment="Center"/>
     </Border>
