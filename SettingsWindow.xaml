@@ -133,6 +133,44 @@
             </StackPanel>
         </Border>
 
+        <!-- ── Keyboard Shortcut ── -->
+        <Border Background="{DynamicResource PanelBgBrush}" CornerRadius="10"
+                BorderBrush="{DynamicResource PanelBorderBrush}" BorderThickness="1" Margin="0,0,0,16" Padding="16,12">
+            <StackPanel>
+                <TextBlock Text="Keyboard Shortcut" FontSize="11" FontWeight="SemiBold"
+                           Foreground="{DynamicResource LabelFgBrush}" Margin="0,0,0,10"/>
+                <TextBlock FontSize="11" Foreground="{DynamicResource SubtitleFgBrush}"
+                           TextWrapping="Wrap" Margin="0,0,0,10">
+                    Trigger the popup for the currently selected text using a hotkey.
+                    Select modifiers, then click the key field and press a key.
+                </TextBlock>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <CheckBox x:Name="HotkeyCtrlCheck"  Content="Ctrl"  FontSize="12" Margin="0,0,10,0"
+                              Foreground="{DynamicResource TextMid}"
+                              Checked="Hotkey_Changed" Unchecked="Hotkey_Changed"/>
+                    <CheckBox x:Name="HotkeyAltCheck"   Content="Alt"   FontSize="12" Margin="0,0,10,0"
+                              Foreground="{DynamicResource TextMid}"
+                              Checked="Hotkey_Changed" Unchecked="Hotkey_Changed"/>
+                    <CheckBox x:Name="HotkeyShiftCheck" Content="Shift" FontSize="12" Margin="0,0,12,0"
+                              Foreground="{DynamicResource TextMid}"
+                              Checked="Hotkey_Changed" Unchecked="Hotkey_Changed"/>
+                    <TextBlock Text="+" VerticalAlignment="Center"
+                               Foreground="{DynamicResource SubtitleFgBrush}" Margin="0,0,12,0"/>
+                    <TextBox x:Name="HotkeyKeyBox" Width="80" IsReadOnly="True"
+                             TextAlignment="Center" VerticalContentAlignment="Center"
+                             FontSize="12"
+                             ToolTip="Click here, then press a key. Delete/Backspace to clear."
+                             PreviewKeyDown="HotkeyKeyBox_PreviewKeyDown"
+                             GotFocus="HotkeyKeyBox_GotFocus"
+                             LostFocus="HotkeyKeyBox_LostFocus"/>
+                    <Button Content="Clear" Width="56" Margin="8,0,0,0"
+                            Click="HotkeyKey_Clear"/>
+                </StackPanel>
+                <TextBlock x:Name="HotkeyHint" FontSize="10" Margin="0,6,0,0"
+                           Foreground="{DynamicResource TextLow}" TextWrapping="Wrap"/>
+            </StackPanel>
+        </Border>
+
         <!-- ── Actions header ── -->
         <DockPanel Margin="0,0,0,8">
             <TextBlock Text="Actions" FontSize="11" FontWeight="SemiBold"
@@ -174,7 +212,7 @@
         <StackPanel Orientation="Vertical" Margin="0,10,0,0">
             <TextBlock FontSize="10" Foreground="{DynamicResource TextLow}" TextWrapping="Wrap"
                        Margin="0,0,0,4">
-                Popup triggers: drag to select text, double-click in a text field, or hold left button (≥ 300 ms) in a text field.
+                Popup triggers: drag to select · double-click (word) · Shift+arrow keys / Ctrl+A · hold left button (≥ 300 ms) in a text field · custom hotkey above. Dismiss with Esc, right-click, or clicking outside.
             </TextBlock>
             <TextBlock FontSize="10">
                 <Hyperlink NavigateUri="https://github.com/CrowKing63/Orbital"

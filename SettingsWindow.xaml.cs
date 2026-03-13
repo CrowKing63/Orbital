@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Navigation;
 
 namespace Orbital
@@ -41,6 +42,7 @@ namespace Orbital
         };
 
         private bool _suppressEvents = false;
+        private uint _capturedVk = 0;
 
         [DllImport("dwmapi.dll")]
         private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int value, int size);
@@ -91,6 +93,15 @@ namespace Orbital
                     break;
                 }
             }
+
+            // Hotkey
+            uint mods = SettingsManager.CurrentSettings.HotkeyModifiers;
+            _capturedVk = SettingsManager.CurrentSettings.HotkeyVirtualKey;
+            HotkeyCtrlCheck.IsChecked  = (mods & 0x02) != 0;
+            HotkeyAltCheck.IsChecked   = (mods & 0x01) != 0;
+            HotkeyShiftCheck.IsChecked = (mods & 0x04) != 0;
+            HotkeyKeyBox.Text = VkToLabel(_capturedVk);
+            UpdateHotkeyHint();
 
             _suppressEvents = false;
 
@@ -335,6 +346,113 @@ namespace Orbital
                 UseShellExecute = true
             });
             e.Handled = true;
+        }
+
+        // ── Keyboard shortcut UI ─────────────────────────────────────────────────
+
+        private void HotkeyKeyBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            var res = FindResource("AccentBrush");
+            if (res is SolidColorBrush accent)
+            {
+                var c = accent.Color;
+                HotkeyKeyBox.Background = new SolidColorBrush(
+                    System.Windows.Media.Color.FromArgb(0x22, c.R, c.G, c.B));
+            }
+            else
+            {
+                HotkeyKeyBox.Background = System.Windows.SystemColors.HighlightBrush;
+            }
+        }
+
+        private void HotkeyKeyBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            HotkeyKeyBox.ClearValue(System.Windows.Controls.TextBox.BackgroundProperty);
+        }
+
+        private void HotkeyKeyBox_PreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            e.Handled = true;
+
+            // Clear on Delete / Backspace
+            if (e.Key == Key.Back || e.Key == Key.Delete)
+            {
+                _capturedVk = 0;
+                HotkeyKeyBox.Text = string.Empty;
+                SaveHotkeySettings();
+                return;
+            }
+
+            // Ignore standalone modifier keys
+            if (e.Key is Key.LeftCtrl or Key.RightCtrl or
+                         Key.LeftAlt  or Key.RightAlt  or
+                         Key.LeftShift or Key.RightShift or
+                         Key.LWin or Key.RWin or
+                         Key.System)
+                return;
+
+            Key key = e.Key == Key.ImeProcessed ? e.ImeProcessedKey : e.Key;
+            _capturedVk = (uint)KeyInterop.VirtualKeyFromKey(key);
+            HotkeyKeyBox.Text = VkToLabel(_capturedVk);
+            SaveHotkeySettings();
+        }
+
+        private void Hotkey_Changed(object sender, RoutedEventArgs e)
+        {
+            if (_suppressEvents) return;
+            SaveHotkeySettings();
+        }
+
+        private void HotkeyKey_Clear(object sender, RoutedEventArgs e)
+        {
+            _capturedVk = 0;
+            HotkeyKeyBox.Text = string.Empty;
+            SaveHotkeySettings();
+        }
+
+        private void SaveHotkeySettings()
+        {
+            uint mods = 0;
+            if (HotkeyCtrlCheck.IsChecked  == true) mods |= 0x02;
+            if (HotkeyAltCheck.IsChecked   == true) mods |= 0x01;
+            if (HotkeyShiftCheck.IsChecked == true) mods |= 0x04;
+
+            SettingsManager.CurrentSettings.HotkeyModifiers  = mods;
+            SettingsManager.CurrentSettings.HotkeyVirtualKey = _capturedVk;
+            SettingsManager.SaveSettings();
+            App.ApplyHotkeySettings();
+            UpdateHotkeyHint();
+        }
+
+        private void UpdateHotkeyHint()
+        {
+            if (_capturedVk == 0)
+            {
+                HotkeyHint.Text = "No hotkey configured.";
+                return;
+            }
+
+            var parts = new List<string>();
+            if (HotkeyCtrlCheck.IsChecked  == true) parts.Add("Ctrl");
+            if (HotkeyAltCheck.IsChecked   == true) parts.Add("Alt");
+            if (HotkeyShiftCheck.IsChecked == true) parts.Add("Shift");
+            parts.Add(VkToLabel(_capturedVk));
+            HotkeyHint.Text = $"Active shortcut: {string.Join(" + ", parts)}";
+        }
+
+        private static string VkToLabel(uint vk)
+        {
+            if (vk == 0) return string.Empty;
+            Key key = KeyInterop.KeyFromVirtualKey((int)vk);
+            // Return a human-readable label for common keys
+            return key switch
+            {
+                Key.Space  => "Space",
+                Key.Return => "Enter",
+                Key.Escape => "Esc",
+                Key.Tab    => "Tab",
+                _ => key.ToString()
+            };
         }
     }
 }

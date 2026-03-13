@@ -48,6 +48,10 @@ namespace Orbital
         public bool   RunAtStartup { get; set; } = false;
         public string Theme        { get; set; } = "Dark";  // "Dark" | "Light"
         public List<ActionProfile> Actions { get; set; } = new List<ActionProfile>();
+
+        // Custom hotkey: Ctrl=0x02, Alt=0x01, Shift=0x04. VirtualKey=0 means disabled.
+        public uint HotkeyModifiers  { get; set; } = 0;
+        public uint HotkeyVirtualKey { get; set; } = 0;
     }
 
     public static class SettingsManager

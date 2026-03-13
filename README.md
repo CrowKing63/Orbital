@@ -8,15 +8,17 @@ Orbital is a lightweight Windows tray app that pops up an AI-powered action bar 
 
 ## How It Works
 
-Orbital watches your mouse globally and shows a floating action bar above your cursor in two situations:
+Orbital watches your mouse and keyboard globally and shows a floating action bar above your cursor whenever text is selected.
 
 | Trigger | How to activate |
 |---------|----------------|
-| **Text selection** | Click and drag to select text anywhere on screen. When you release the mouse button, Orbital reads the selection and shows the action bar. |
-| **Double-click** | Double-click in a text field. The action bar appears with clipboard/paste actions available. |
+| **Mouse drag** | Click and drag to select text anywhere on screen. When you release the mouse button, Orbital reads the selection and shows the action bar. |
+| **Double-click** | Double-click a word in a text field. Orbital detects the word selection and shows the action bar. |
+| **Keyboard selection** | Select text with **Shift + arrow keys**, **Shift + Home/End/Page Up/Down**, or **Ctrl+A** — Orbital shows the action bar when you release Shift. |
+| **Custom hotkey** | Press your configured shortcut (set in Settings) to trigger the bar for whatever text is currently selected. |
 | **Long press** | Hold the left mouse button (≥ 300 ms) without dragging in a text field. The action bar appears with clipboard/paste actions available. |
 
-Click any action button to run it. Click anywhere else to dismiss.
+Click any action button to run it. Dismiss with **Esc**, a **right-click**, or clicking outside the bar.
 
 ---
 
@@ -39,12 +41,14 @@ Click any action button to run it. Click anywhere else to dismiss.
 ## Features
 
 - **Instant action bar** — select any text anywhere on Windows, get a floating pill menu above your cursor
+- **Multiple trigger methods** — mouse drag, double-click, keyboard selection (Shift+arrows / Ctrl+A), long-press, or a custom hotkey
 - **AI actions** — Replace, Copy to clipboard, or Popup with AI-generated results
 - **Utility actions** — Copy, Cut, Paste, and Google Search without any AI calls
+- **Keyboard-friendly** — works with Shift+arrow key selection and Ctrl+A; Paste/Cut automatically hidden in read-only contexts
 - **Bring your own model** — works with OpenAI, OpenRouter (including free models), Ollama, LM Studio, or any OpenAI-compatible endpoint
 - **Custom prompts** — add, edit, and reorder actions with your own prompt templates using `{text}` as a placeholder
-- **Double-click trigger** — double-click in a text field to open the menu without selecting text
-- **Long-press trigger** — hold the mouse button (≥ 300 ms) in a text field to open the menu without selecting text
+- **Custom hotkey** — configure any key combination (e.g. Ctrl+Shift+Space) in Settings to trigger the bar on demand
+- **Privacy** — API keys encrypted with Windows DPAPI; fully offline with local models (Ollama / LM Studio)
 - **Secure key storage** — API keys are encrypted with Windows DPAPI, stored locally
 
 ---

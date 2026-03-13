@@ -25,7 +25,7 @@ namespace Orbital
             _actionExecutor = executor;
         }
 
-        private void PopulateBarButtons(bool hasText)
+        private void PopulateBarButtons(bool hasText, bool isEditable)
         {
             ButtonPanel.Children.Clear();
 
@@ -40,6 +40,12 @@ namespace Orbital
 
                 // When no text is selected, completely hide buttons that require selection
                 if (!enabled)
+                    continue;
+
+                // Hide write-only actions (Paste / Cut) when the target is read-only
+                bool requiresWrite = action.ActionType == ActionType.Paste ||
+                                     action.ActionType == ActionType.Cut;
+                if (requiresWrite && !isEditable)
                     continue;
 
                 // Separator before every button except the first visible one
@@ -109,10 +115,10 @@ namespace Orbital
             }
         }
 
-        public void ShowAtCursor(int mouseX, int mouseY, string text)
+        public void ShowAtCursor(int mouseX, int mouseY, string text, bool isEditable = true)
         {
             SelectedText = text;
-            PopulateBarButtons(!string.IsNullOrEmpty(text));
+            PopulateBarButtons(!string.IsNullOrEmpty(text), isEditable);
 
             // 측정을 위해 화면 밖에서 불투명도 0으로 먼저 표시
             Opacity = 0;

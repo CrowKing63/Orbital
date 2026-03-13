@@ -47,25 +47,32 @@ namespace Orbital
 
             _radialMenu = new RadialMenuWindow(_actionExecutor);
 
-            SystemHookManager.OnAnyMouseDown += SystemHookManager_OnAnyMouseDown;
-            SystemHookManager.OnMouseUp += SystemHookManager_OnMouseUp;
-            SystemHookManager.OnLongPress += SystemHookManager_OnLongPress;
-            SystemHookManager.OnDoubleClick += SystemHookManager_OnDoubleClick;
+            SystemHookManager.OnAnyMouseDown       += SystemHookManager_OnAnyMouseDown;
+            SystemHookManager.OnMouseUp             += SystemHookManager_OnMouseUp;
+            SystemHookManager.OnLongPress           += SystemHookManager_OnLongPress;
+            SystemHookManager.OnDoubleClickRelease  += SystemHookManager_OnDoubleClickRelease;
+            SystemHookManager.OnKeyboardSelection   += SystemHookManager_OnKeyboardSelection;
+            SystemHookManager.OnEscapePressed       += SystemHookManager_OnEscapePressed;
+            SystemHookManager.OnCustomHotkey        += SystemHookManager_OnCustomHotkey;
 
-            if (!SystemHookManager.StartMouseHook(out int hookErrorCode))
+            ApplyHotkeySettings();
+
+            if (!SystemHookManager.StartMouseHook(out int mouseErrCode))
             {
-                string errorMessage = $"Failed to install global mouse hook (Error code: {hookErrorCode}).\n\n" +
+                string errorMessage = $"Failed to install global mouse hook (Error code: {mouseErrCode}).\n\n" +
                                     "Orbital requires this hook to detect text selection gestures.\n" +
                                     "The application will now exit.\n\n" +
                                     "Common causes:\n" +
                                     "- Insufficient permissions\n" +
                                     "- Conflicting software (security tools, other hook-based apps)\n" +
                                     "- System resource limitations";
-                
                 MessageBox.Show(errorMessage, "Orbital Startup Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 Shutdown();
                 return;
             }
+
+            // Keyboard hook is best-effort; failures are non-fatal (mouse-only mode still works)
+            SystemHookManager.StartKeyboardHook(out _);
         }
 
         public static void ApplyTheme(string themeName)
@@ -112,6 +119,7 @@ namespace Orbital
             var win = new SettingsWindow();
             win.ShowDialog();
             RebuildActionExecutor();
+            ApplyHotkeySettings();
             _radialMenu.UpdateActionExecutor(_actionExecutor);
         }
 
@@ -135,17 +143,24 @@ namespace Orbital
             string modelName = string.IsNullOrWhiteSpace(SettingsManager.CurrentSettings.ModelName)
                 ? "gpt-4o-mini"
                 : SettingsManager.CurrentSettings.ModelName;
-            
+
             try
             {
                 _actionExecutor = new ActionExecutorService(new OpenAiApiService(apiKey, baseUrl, modelName));
             }
             catch (ArgumentException ex)
             {
-                MessageBox.Show($"Invalid API configuration: {ex.Message}\n\nPlease check your settings.", 
+                MessageBox.Show($"Invalid API configuration: {ex.Message}\n\nPlease check your settings.",
                     "Orbital Configuration Error", MessageBoxButton.OK, MessageBoxImage.Warning);
                 _actionExecutor = new ActionExecutorService(null);
             }
+        }
+
+        /// <summary>Pushes current hotkey settings from AppSettings into SystemHookManager.</summary>
+        public static void ApplyHotkeySettings()
+        {
+            SystemHookManager.HotkeyModifiers  = SettingsManager.CurrentSettings.HotkeyModifiers;
+            SystemHookManager.HotkeyVirtualKey = SettingsManager.CurrentSettings.HotkeyVirtualKey;
         }
 
         private void InitializeTrayIcon()
@@ -158,18 +173,13 @@ namespace Orbital
 
             try
             {
-                // WPF 리소스로부터 이미지 로드하여 트레이 아이콘으로 설정
-                var uri = new Uri("pack://application:,,,/Assets/orbit_logo.png");
+                var uri = new Uri("pack://application:,,,/Assets/orbit_logo.ico");
                 var streamInfo = System.Windows.Application.GetResourceStream(uri);
                 if (streamInfo != null)
                 {
                     using (var stream = streamInfo.Stream)
-                    using (var bitmap = new Bitmap(stream))
                     {
-                        // Bitmap을 Icon으로 변환. Clone()으로 소유권을 가진 Icon을 만든 뒤 원본 HICON 해제.
-                        IntPtr hIcon = bitmap.GetHicon();
-                        _notifyIcon.Icon = (System.Drawing.Icon)System.Drawing.Icon.FromHandle(hIcon).Clone();
-                        DestroyIcon(hIcon);
+                        _notifyIcon.Icon = new System.Drawing.Icon(stream);
                     }
                 }
                 else
@@ -183,11 +193,8 @@ namespace Orbital
             }
 
             var menu = new WinForms.ContextMenuStrip();
-
             menu.Items.Add("Settings", null, (s, e) => Dispatcher.Invoke(OpenSettingsWindow));
-
             menu.Items.Add(new WinForms.ToolStripSeparator());
-
             menu.Items.Add("Exit", null, (s, e) =>
             {
                 _notifyIcon.Visible = false;
@@ -195,14 +202,13 @@ namespace Orbital
             });
 
             _notifyIcon.ContextMenuStrip = menu;
-
-            // 더블클릭으로도 설정 열기
             _notifyIcon.DoubleClick += (s, e) => Dispatcher.Invoke(OpenSettingsWindow);
         }
 
+        // ── Event handlers ───────────────────────────────────────────────────────
+
         private void SystemHookManager_OnAnyMouseDown(object? sender, SystemHookManager.MousePoint e)
         {
-            // BeginInvoke: 훅 콜백은 UI 스레드에서 실행되므로 Invoke 대신 BeginInvoke 사용
             Dispatcher.BeginInvoke(() =>
             {
                 if (!_radialMenu.IsVisible) return;
@@ -217,8 +223,8 @@ namespace Orbital
 
                 bool insideWindow = mouseXDip >= _radialMenu.Left &&
                                     mouseXDip <= _radialMenu.Left + _radialMenu.Width &&
-                                    mouseYDip >= _radialMenu.Top &&
-                                    mouseYDip <= _radialMenu.Top + _radialMenu.Height;
+                                    mouseYDip >= _radialMenu.Top  &&
+                                    mouseYDip <= _radialMenu.Top  + _radialMenu.Height;
 
                 if (!insideWindow)
                     _radialMenu.Hide();
@@ -226,6 +232,52 @@ namespace Orbital
         }
 
         private void SystemHookManager_OnMouseUp(object? sender, SystemHookManager.MousePoint e)
+        {
+            TriggerSelectionMenu(e.X, e.Y, isKeyboard: false);
+        }
+
+        private void SystemHookManager_OnDoubleClickRelease(object? sender, SystemHookManager.MousePoint e)
+        {
+            // Only show popup for double-click in editable controls (same guard as long-press)
+            if (!IsOverEditableControl(e.X, e.Y)) return;
+            TriggerSelectionMenu(e.X, e.Y, isKeyboard: false);
+        }
+
+        private void SystemHookManager_OnKeyboardSelection(object? sender, SystemHookManager.MousePoint e)
+        {
+            TriggerSelectionMenu(e.X, e.Y, isKeyboard: true);
+        }
+
+        private void SystemHookManager_OnCustomHotkey(object? sender, SystemHookManager.MousePoint e)
+        {
+            TriggerSelectionMenu(e.X, e.Y, isKeyboard: true);
+        }
+
+        private void SystemHookManager_OnLongPress(object? sender, SystemHookManager.MousePoint e)
+        {
+            if (!IsOverEditableControl(e.X, e.Y)) return;
+
+            Dispatcher.Invoke(() =>
+            {
+                _radialMenu.ShowAtCursor(e.X, e.Y, string.Empty, isEditable: true);
+            });
+        }
+
+        private void SystemHookManager_OnEscapePressed(object? sender, EventArgs e)
+        {
+            Dispatcher.BeginInvoke(() =>
+            {
+                if (_radialMenu.IsVisible)
+                    _radialMenu.Hide();
+            });
+        }
+
+        /// <summary>
+        /// Common path: wait 50 ms, extract selected text via Ctrl+C, show popup.
+        /// <paramref name="isKeyboard"/> = true skips the editable-control check for Paste/Cut
+        /// (keyboard selection always implies an editable control was focused).
+        /// </summary>
+        private void TriggerSelectionMenu(int screenX, int screenY, bool isKeyboard)
         {
             CancellationToken token;
             lock (_selectionLock)
@@ -244,38 +296,17 @@ namespace Orbital
                 if (token.IsCancellationRequested) return;
 
                 string selectedText = ClipboardHelper.GetSelectedText();
+                bool   isEditable   = isKeyboard || IsOverEditableControl(screenX, screenY);
 
                 if (!string.IsNullOrWhiteSpace(selectedText) && !token.IsCancellationRequested)
                 {
                     Dispatcher.Invoke(() =>
                     {
                         if (!token.IsCancellationRequested)
-                            _radialMenu.ShowAtCursor(e.X, e.Y, selectedText);
+                            _radialMenu.ShowAtCursor(screenX, screenY, selectedText, isEditable);
                     });
                 }
             }, token);
-        }
-
-        private void SystemHookManager_OnLongPress(object? sender, SystemHookManager.MousePoint e)
-        {
-            // Only show popup when long-pressing over an editable control
-            if (!IsOverEditableControl(e.X, e.Y)) return;
-
-            Dispatcher.Invoke(() =>
-            {
-                _radialMenu.ShowAtCursor(e.X, e.Y, string.Empty);
-            });
-        }
-
-        private void SystemHookManager_OnDoubleClick(object? sender, SystemHookManager.MousePoint e)
-        {
-            // Only show popup when double-clicking over an editable control
-            if (!IsOverEditableControl(e.X, e.Y)) return;
-
-            Dispatcher.Invoke(() =>
-            {
-                _radialMenu.ShowAtCursor(e.X, e.Y, string.Empty);
-            });
         }
 
         private static bool IsOverEditableControl(int screenX, int screenY)
@@ -304,16 +335,15 @@ namespace Orbital
         protected override void OnExit(ExitEventArgs e)
         {
             Microsoft.Win32.SystemEvents.UserPreferenceChanged -= OnSystemUserPreferenceChanged;
-            SystemHookManager.StopMouseHook();
+            SystemHookManager.StopHooks();
             _notifyIcon?.Dispose();
             _selectionCts?.Dispose();
-            
-            // Dispose LLM service if it implements IDisposable
+
             if (_actionExecutor?.LlmService is IDisposable disposable)
             {
                 disposable.Dispose();
             }
-            
+
             base.OnExit(e);
         }
     }
