@@ -1,0 +1,116 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:s="clr-namespace:System;assembly=mscorlib">
+
+    <s:String x:Key="Str_AppTitle">Orbital</s:String>
+    <s:String x:Key="Str_Cancel">취소</s:String>
+    <s:String x:Key="Str_Save">저장</s:String>
+    <s:String x:Key="Str_Delete">삭제</s:String>
+    <s:String x:Key="Str_Edit">편집</s:String>
+    <s:String x:Key="Str_Settings">설정</s:String>
+    <s:String x:Key="Str_ApiSettings">API 설정</s:String>
+    <s:String x:Key="Str_Provider">제공자</s:String>
+    <s:String x:Key="Str_ProviderOpenAI">OpenAI</s:String>
+    <s:String x:Key="Str_ProviderOpenRouter">OpenRouter</s:String>
+    <s:String x:Key="Str_ProviderCustom">사용자 지정</s:String>
+    <s:String x:Key="Str_Model">모델</s:String>
+    <s:String x:Key="Str_ApiBaseUrl">API 기본 URL</s:String>
+    <s:String x:Key="Str_ApiKey">API 키</s:String>
+    <s:String x:Key="Str_Startup">시작 프로그램</s:String>
+    <s:String x:Key="Str_RunAtStartup">Windows 시작 시 Orbital 자동 실행</s:String>
+    <s:String x:Key="Str_Appearance">외관</s:String>
+    <s:String x:Key="Str_Theme">테마</s:String>
+    <s:String x:Key="Str_ThemeDark">어두운 테마</s:String>
+    <s:String x:Key="Str_ThemeLight">밝은 테마</s:String>
+    <s:String x:Key="Str_ThemeSystem">시스템 (Windows 설정 따름)</s:String>
+    <s:String x:Key="Str_Language">언어</s:String>
+    <s:String x:Key="Str_KeyboardShortcut">키보드 단축키</s:String>
+    <s:String x:Key="Str_HotkeyDescription">단축키를 사용하여 현재 선택된 텍스트에 대한 팝업을 트리거합니다. 보조 키를 선택한 후 키 입력 필드를 클릭하고 키를 누르세요.</s:String>
+    <s:String x:Key="Str_HotkeyKeyboxTooltip">여기를 클릭한 후 키를 누르세요. Delete/Backspace로 지웁니다.</s:String>
+    <s:String x:Key="Str_Clear">지우기</s:String>
+    <s:String x:Key="Str_Actions">액션</s:String>
+    <s:String x:Key="Str_Import">가져오기</s:String>
+    <s:String x:Key="Str_Export">내보내기</s:String>
+    <s:String x:Key="Str_AddAction">+ 추가</s:String>
+    <s:String x:Key="Str_ColIcon">아이콘</s:String>
+    <s:String x:Key="Str_ColName">이름</s:String>
+    <s:String x:Key="Str_ColPrompt">프롬프트</s:String>
+    <s:String x:Key="Str_ColOutput">출력</s:String>
+    <s:String x:Key="Str_PopupTriggerHint">팝업 트리거: 드래그 선택 · 더블클릭(단어) · Shift+방향키 / Ctrl+A · 텍스트 필드에서 왼쪽 버튼 길게 누르기(≥ 300ms) · 사용자 지정 단축키. Esc, 우클릭, 또는 바깥 클릭으로 닫습니다.</s:String>
+    <s:String x:Key="Str_GitHubLink">GitHub — CrowKing63/Orbital</s:String>
+    <s:String x:Key="Str_MoveUp">위로 이동</s:String>
+    <s:String x:Key="Str_MoveDown">아래로 이동</s:String>
+    <s:String x:Key="Str_SaveAndClose">저장 &amp; 닫기</s:String>
+    <s:String x:Key="Str_EditAction">액션 편집</s:String>
+    <s:String x:Key="Str_ButtonName">버튼 이름</s:String>
+    <s:String x:Key="Str_IconHint">아이콘 (Hex 또는 이모지)</s:String>
+    <s:String x:Key="Str_Prompt">프롬프트</s:String>
+    <s:String x:Key="Str_PromptHint">— 선택한 텍스트는 {text} 위치에 삽입됩니다</s:String>
+    <s:String x:Key="Str_OutputMode">출력 모드</s:String>
+    <s:String x:Key="Str_ActionReplace">대체</s:String>
+    <s:String x:Key="Str_ActionCopy">복사</s:String>
+    <s:String x:Key="Str_ActionPopup">팝업</s:String>
+    <s:String x:Key="Str_ActionBrowser">브라우저</s:String>
+    <s:String x:Key="Str_ActionDirectCopy">직접 복사</s:String>
+    <s:String x:Key="Str_ActionCut">잘라내기</s:String>
+    <s:String x:Key="Str_ActionPaste">붙여넣기</s:String>
+    <s:String x:Key="Str_ActionReplaceTooltip">선택한 텍스트를 AI 결과로 대체</s:String>
+    <s:String x:Key="Str_ActionCopyTooltip">AI 결과를 클립보드에 복사</s:String>
+    <s:String x:Key="Str_ActionPopupTooltip">팝업 창에 AI 결과 표시</s:String>
+    <s:String x:Key="Str_ActionBrowserTooltip">선택한 텍스트로 Google 검색 열기 (AI 미사용)</s:String>
+    <s:String x:Key="Str_ActionDirectCopyTooltip">선택한 텍스트를 클립보드에 복사 (AI 미사용)</s:String>
+    <s:String x:Key="Str_ActionCutTooltip">선택한 텍스트 잘라내기 (AI 미사용)</s:String>
+    <s:String x:Key="Str_ActionPasteTooltip">커서 위치에 클립보드 내용 붙여넣기 (AI 미사용)</s:String>
+    <s:String x:Key="Str_ButtonDisplay">버튼 표시 방식</s:String>
+    <s:String x:Key="Str_DisplayTextAndIcon">텍스트 + 아이콘</s:String>
+    <s:String x:Key="Str_DisplayTextOnly">텍스트만</s:String>
+    <s:String x:Key="Str_DisplayIconOnly">아이콘만</s:String>
+    <s:String x:Key="Str_RequiresSelection">실행하려면 텍스트를 선택해야 합니다</s:String>
+    <s:String x:Key="Str_CopyToClipboard">클립보드에 복사</s:String>
+    <s:String x:Key="Str_SettingsRecoveryMsg" xml:space="preserve">설정 파일이 손상되어 기본값으로 초기화되었습니다.
+
+손상된 파일의 백업이 .bak 확장자로 저장되었습니다.</s:String>
+    <s:String x:Key="Str_SettingsRecoveryTitle">Orbital 설정 복구</s:String>
+    <s:String x:Key="Str_HookErrorMsg" xml:space="preserve">전역 마우스 훅 설치에 실패했습니다 (오류 코드: {0}).
+
+Orbital은 텍스트 선택 제스처를 감지하기 위해 이 훅이 필요합니다.
+응용 프로그램이 종료됩니다.
+
+일반적인 원인:
+- 권한 부족
+- 충돌하는 소프트웨어 (보안 도구, 다른 훅 기반 앱)
+- 시스템 리소스 부족</s:String>
+    <s:String x:Key="Str_HookErrorTitle">Orbital 시작 오류</s:String>
+    <s:String x:Key="Str_TrayTooltip">Orbital - 텍스트 AI 어시스턴트</s:String>
+    <s:String x:Key="Str_TraySettings">설정</s:String>
+    <s:String x:Key="Str_TrayExit">종료</s:String>
+    <s:String x:Key="Str_UpdateBalloonTitle">Orbital 업데이트됨</s:String>
+    <s:String x:Key="Str_UpdateBalloonMsg">버전 {0}이 다운로드되었습니다. Orbital을 재시작하여 적용하세요.</s:String>
+    <s:String x:Key="Str_InvalidApiConfigMsg" xml:space="preserve">잘못된 API 구성: {0}
+
+설정을 확인해 주세요.</s:String>
+    <s:String x:Key="Str_InvalidApiConfigTitle">Orbital 구성 오류</s:String>
+    <s:String x:Key="Str_ApiKeyNotConfigured">API 키가 설정되지 않았습니다.</s:String>
+    <s:String x:Key="Str_ApiKeySaved">API 키가 저장되었습니다. (끝 4자리: ...{0})</s:String>
+    <s:String x:Key="Str_DeleteActionConfirm">액션 '{0}'을(를) 삭제하시겠습니까?</s:String>
+    <s:String x:Key="Str_ExportSuccess" xml:space="preserve">액션 팩을 성공적으로 내보냈습니다:
+{0}</s:String>
+    <s:String x:Key="Str_ExportFailed">내보내기 실패</s:String>
+    <s:String x:Key="Str_ImportModeMsg" xml:space="preserve">기존 액션을 대체하거나 현재 액션과 병합하시겠습니까?
+
+예 = 모든 기존 액션 대체
+아니오 = 병합 (이름 중복 건너뜀)
+취소 = 가져오기 중단</s:String>
+    <s:String x:Key="Str_ImportModeTitle">가져오기 모드</s:String>
+    <s:String x:Key="Str_ImportSuccessReplace">액션 팩을 성공적으로 가져왔습니다. 기존 액션이 모두 대체되었습니다.</s:String>
+    <s:String x:Key="Str_ImportSuccessMerge">액션 팩을 성공적으로 가져왔습니다. 새 액션이 기존 액션과 병합되었습니다.</s:String>
+    <s:String x:Key="Str_ImportFailed">가져오기 실패</s:String>
+    <s:String x:Key="Str_HotkeyNone">설정된 단축키가 없습니다.</s:String>
+    <s:String x:Key="Str_HotkeyActive">활성 단축키: {0}</s:String>
+    <s:String x:Key="Str_ButtonNameRequired">버튼 이름을 입력해 주세요.</s:String>
+    <s:String x:Key="Str_ApiKeyNotConfiguredDetail" xml:space="preserve">API 키가 설정되지 않았습니다.
+시스템 트레이 아이콘을 더블클릭하여 설정을 여세요.</s:String>
+    <s:String x:Key="Str_ErrorOccurred" xml:space="preserve">오류가 발생했습니다:
+{0}</s:String>
+
+</ResourceDictionary>

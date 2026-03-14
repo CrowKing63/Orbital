@@ -1,0 +1,116 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:s="clr-namespace:System;assembly=mscorlib">
+
+    <s:String x:Key="Str_AppTitle">Orbital</s:String>
+    <s:String x:Key="Str_Cancel">Отмена</s:String>
+    <s:String x:Key="Str_Save">Сохранить</s:String>
+    <s:String x:Key="Str_Delete">Удалить</s:String>
+    <s:String x:Key="Str_Edit">Изменить</s:String>
+    <s:String x:Key="Str_Settings">Настройки</s:String>
+    <s:String x:Key="Str_ApiSettings">Настройки API</s:String>
+    <s:String x:Key="Str_Provider">Провайдер</s:String>
+    <s:String x:Key="Str_ProviderOpenAI">OpenAI</s:String>
+    <s:String x:Key="Str_ProviderOpenRouter">OpenRouter</s:String>
+    <s:String x:Key="Str_ProviderCustom">Пользовательский</s:String>
+    <s:String x:Key="Str_Model">Модель</s:String>
+    <s:String x:Key="Str_ApiBaseUrl">Базовый URL API</s:String>
+    <s:String x:Key="Str_ApiKey">Ключ API</s:String>
+    <s:String x:Key="Str_Startup">Автозапуск</s:String>
+    <s:String x:Key="Str_RunAtStartup">Запускать Orbital при старте Windows</s:String>
+    <s:String x:Key="Str_Appearance">Внешний вид</s:String>
+    <s:String x:Key="Str_Theme">Тема</s:String>
+    <s:String x:Key="Str_ThemeDark">Тёмная</s:String>
+    <s:String x:Key="Str_ThemeLight">Светлая</s:String>
+    <s:String x:Key="Str_ThemeSystem">Системная (следовать Windows)</s:String>
+    <s:String x:Key="Str_Language">Язык</s:String>
+    <s:String x:Key="Str_KeyboardShortcut">Горячие клавиши</s:String>
+    <s:String x:Key="Str_HotkeyDescription">Вызывает всплывающее меню для выделенного текста с помощью горячих клавиш. Выберите клавиши-модификаторы, затем щёлкните поле ввода клавиши и нажмите нужную клавишу.</s:String>
+    <s:String x:Key="Str_HotkeyKeyboxTooltip">Щёлкните здесь, затем нажмите клавишу. Delete/Backspace для очистки.</s:String>
+    <s:String x:Key="Str_Clear">Очистить</s:String>
+    <s:String x:Key="Str_Actions">Действия</s:String>
+    <s:String x:Key="Str_Import">Импорт</s:String>
+    <s:String x:Key="Str_Export">Экспорт</s:String>
+    <s:String x:Key="Str_AddAction">+ Добавить</s:String>
+    <s:String x:Key="Str_ColIcon">Иконка</s:String>
+    <s:String x:Key="Str_ColName">Название</s:String>
+    <s:String x:Key="Str_ColPrompt">Промпт</s:String>
+    <s:String x:Key="Str_ColOutput">Вывод</s:String>
+    <s:String x:Key="Str_PopupTriggerHint">Способы вызова меню: выделение перетаскиванием · двойной клик (слово) · Shift+стрелки / Ctrl+A · удерживание левой кнопки (≥ 300 мс) в текстовом поле · пользовательские горячие клавиши. Закрыть: Esc, правый клик или клик за пределами.</s:String>
+    <s:String x:Key="Str_GitHubLink">GitHub — CrowKing63/Orbital</s:String>
+    <s:String x:Key="Str_MoveUp">Переместить вверх</s:String>
+    <s:String x:Key="Str_MoveDown">Переместить вниз</s:String>
+    <s:String x:Key="Str_SaveAndClose">Сохранить &amp; Закрыть</s:String>
+    <s:String x:Key="Str_EditAction">Изменить действие</s:String>
+    <s:String x:Key="Str_ButtonName">Название кнопки</s:String>
+    <s:String x:Key="Str_IconHint">Иконка (Hex или Emoji)</s:String>
+    <s:String x:Key="Str_Prompt">Промпт</s:String>
+    <s:String x:Key="Str_PromptHint">— выделенный текст вставляется в позицию {text}</s:String>
+    <s:String x:Key="Str_OutputMode">Режим вывода</s:String>
+    <s:String x:Key="Str_ActionReplace">Заменить</s:String>
+    <s:String x:Key="Str_ActionCopy">Копировать</s:String>
+    <s:String x:Key="Str_ActionPopup">Всплывающее окно</s:String>
+    <s:String x:Key="Str_ActionBrowser">Браузер</s:String>
+    <s:String x:Key="Str_ActionDirectCopy">Прямое копирование</s:String>
+    <s:String x:Key="Str_ActionCut">Вырезать</s:String>
+    <s:String x:Key="Str_ActionPaste">Вставить</s:String>
+    <s:String x:Key="Str_ActionReplaceTooltip">Заменить выделенный текст результатом ИИ</s:String>
+    <s:String x:Key="Str_ActionCopyTooltip">Скопировать результат ИИ в буфер обмена</s:String>
+    <s:String x:Key="Str_ActionPopupTooltip">Показать результат ИИ во всплывающем окне</s:String>
+    <s:String x:Key="Str_ActionBrowserTooltip">Открыть поиск Google с выделенным текстом (без ИИ)</s:String>
+    <s:String x:Key="Str_ActionDirectCopyTooltip">Скопировать выделенный текст в буфер обмена (без ИИ)</s:String>
+    <s:String x:Key="Str_ActionCutTooltip">Вырезать выделенный текст (без ИИ)</s:String>
+    <s:String x:Key="Str_ActionPasteTooltip">Вставить содержимое буфера обмена в позицию курсора (без ИИ)</s:String>
+    <s:String x:Key="Str_ButtonDisplay">Отображение кнопки</s:String>
+    <s:String x:Key="Str_DisplayTextAndIcon">Текст + Иконка</s:String>
+    <s:String x:Key="Str_DisplayTextOnly">Только текст</s:String>
+    <s:String x:Key="Str_DisplayIconOnly">Только иконка</s:String>
+    <s:String x:Key="Str_RequiresSelection">Для запуска необходимо выделить текст</s:String>
+    <s:String x:Key="Str_CopyToClipboard">Копировать в буфер обмена</s:String>
+    <s:String x:Key="Str_SettingsRecoveryMsg" xml:space="preserve">Файл настроек повреждён и сброшен до значений по умолчанию.
+
+Резервная копия повреждённого файла сохранена с расширением .bak.</s:String>
+    <s:String x:Key="Str_SettingsRecoveryTitle">Восстановление настроек Orbital</s:String>
+    <s:String x:Key="Str_HookErrorMsg" xml:space="preserve">Не удалось установить глобальный перехватчик мыши (код ошибки: {0}).
+
+Orbital требует этот перехватчик для обнаружения жестов выделения текста.
+Приложение будет закрыто.
+
+Возможные причины:
+- Недостаточно прав доступа
+- Конфликтующее программное обеспечение (средства безопасности, другие приложения на основе хуков)
+- Нехватка системных ресурсов</s:String>
+    <s:String x:Key="Str_HookErrorTitle">Ошибка запуска Orbital</s:String>
+    <s:String x:Key="Str_TrayTooltip">Orbital - текстовый ИИ-ассистент</s:String>
+    <s:String x:Key="Str_TraySettings">Настройки</s:String>
+    <s:String x:Key="Str_TrayExit">Выход</s:String>
+    <s:String x:Key="Str_UpdateBalloonTitle">Orbital обновлён</s:String>
+    <s:String x:Key="Str_UpdateBalloonMsg">Версия {0} загружена. Перезапустите Orbital для применения обновления.</s:String>
+    <s:String x:Key="Str_InvalidApiConfigMsg" xml:space="preserve">Неверная конфигурация API: {0}
+
+Пожалуйста, проверьте ваши настройки.</s:String>
+    <s:String x:Key="Str_InvalidApiConfigTitle">Ошибка конфигурации Orbital</s:String>
+    <s:String x:Key="Str_ApiKeyNotConfigured">Ключ API не настроен.</s:String>
+    <s:String x:Key="Str_ApiKeySaved">Ключ API сохранён. (Последние 4: ...{0})</s:String>
+    <s:String x:Key="Str_DeleteActionConfirm">Удалить действие «{0}»?</s:String>
+    <s:String x:Key="Str_ExportSuccess" xml:space="preserve">Пакет действий успешно экспортирован в:
+{0}</s:String>
+    <s:String x:Key="Str_ExportFailed">Ошибка экспорта</s:String>
+    <s:String x:Key="Str_ImportModeMsg" xml:space="preserve">Заменить существующие действия или объединить с текущими?
+
+Да = Заменить все существующие действия
+Нет = Объединить (пропустить дубликаты по имени)
+Отмена = Прервать импорт</s:String>
+    <s:String x:Key="Str_ImportModeTitle">Режим импорта</s:String>
+    <s:String x:Key="Str_ImportSuccessReplace">Пакет действий успешно импортирован. Все предыдущие действия были заменены.</s:String>
+    <s:String x:Key="Str_ImportSuccessMerge">Пакет действий успешно импортирован. Новые действия объединены с существующими.</s:String>
+    <s:String x:Key="Str_ImportFailed">Ошибка импорта</s:String>
+    <s:String x:Key="Str_HotkeyNone">Горячие клавиши не настроены.</s:String>
+    <s:String x:Key="Str_HotkeyActive">Активный ярлык: {0}</s:String>
+    <s:String x:Key="Str_ButtonNameRequired">Пожалуйста, введите название кнопки.</s:String>
+    <s:String x:Key="Str_ApiKeyNotConfiguredDetail" xml:space="preserve">Ключ API не настроен.
+Дважды щёлкните значок в системном лотке, чтобы открыть Настройки.</s:String>
+    <s:String x:Key="Str_ErrorOccurred" xml:space="preserve">Произошла ошибка:
+{0}</s:String>
+
+</ResourceDictionary>

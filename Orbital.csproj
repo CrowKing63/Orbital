@@ -31,6 +31,16 @@
     <Resource Include="Assets\orbit_logo.ico" />
     <Resource Include="Themes\Dark.xaml" />
     <Resource Include="Themes\Light.xaml" />
+    <Resource Include="Strings\Strings.en.xaml" />
+    <Resource Include="Strings\Strings.ko.xaml" />
+    <Resource Include="Strings\Strings.ja.xaml" />
+    <Resource Include="Strings\Strings.zh.xaml" />
+    <Resource Include="Strings\Strings.es.xaml" />
+    <Resource Include="Strings\Strings.fr.xaml" />
+    <Resource Include="Strings\Strings.de.xaml" />
+    <Resource Include="Strings\Strings.pt.xaml" />
+    <Resource Include="Strings\Strings.ru.xaml" />
+    <Resource Include="Strings\Strings.it.xaml" />
   </ItemGroup>
 
 </Project>

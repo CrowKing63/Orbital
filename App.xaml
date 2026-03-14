@@ -7,6 +7,8 @@
             <ResourceDictionary.MergedDictionaries>
                 <!-- Active theme — swapped at runtime by App.ApplyTheme() -->
                 <ResourceDictionary Source="Themes/Dark.xaml"/>
+                <!-- Active language — swapped at runtime by App.ApplyLanguage() -->
+                <ResourceDictionary Source="Strings/Strings.en.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
         <!-- ══════════════════════ Window ══════════════════════ -->

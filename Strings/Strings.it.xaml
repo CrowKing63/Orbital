@@ -1,0 +1,116 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:s="clr-namespace:System;assembly=mscorlib">
+
+    <s:String x:Key="Str_AppTitle">Orbital</s:String>
+    <s:String x:Key="Str_Cancel">Annulla</s:String>
+    <s:String x:Key="Str_Save">Salva</s:String>
+    <s:String x:Key="Str_Delete">Elimina</s:String>
+    <s:String x:Key="Str_Edit">Modifica</s:String>
+    <s:String x:Key="Str_Settings">Impostazioni</s:String>
+    <s:String x:Key="Str_ApiSettings">Impostazioni API</s:String>
+    <s:String x:Key="Str_Provider">Provider</s:String>
+    <s:String x:Key="Str_ProviderOpenAI">OpenAI</s:String>
+    <s:String x:Key="Str_ProviderOpenRouter">OpenRouter</s:String>
+    <s:String x:Key="Str_ProviderCustom">Personalizzato</s:String>
+    <s:String x:Key="Str_Model">Modello</s:String>
+    <s:String x:Key="Str_ApiBaseUrl">URL base API</s:String>
+    <s:String x:Key="Str_ApiKey">Chiave API</s:String>
+    <s:String x:Key="Str_Startup">Avvio</s:String>
+    <s:String x:Key="Str_RunAtStartup">Avvia Orbital all'avvio di Windows</s:String>
+    <s:String x:Key="Str_Appearance">Aspetto</s:String>
+    <s:String x:Key="Str_Theme">Tema</s:String>
+    <s:String x:Key="Str_ThemeDark">Scuro</s:String>
+    <s:String x:Key="Str_ThemeLight">Chiaro</s:String>
+    <s:String x:Key="Str_ThemeSystem">Sistema (segui Windows)</s:String>
+    <s:String x:Key="Str_Language">Lingua</s:String>
+    <s:String x:Key="Str_KeyboardShortcut">Scorciatoia da tastiera</s:String>
+    <s:String x:Key="Str_HotkeyDescription">Attiva il menu contestuale per il testo selezionato tramite una scorciatoia. Seleziona i tasti modificatori, poi fai clic nel campo tasto e premi un tasto.</s:String>
+    <s:String x:Key="Str_HotkeyKeyboxTooltip">Fai clic qui, poi premi un tasto. Canc/Backspace per cancellare.</s:String>
+    <s:String x:Key="Str_Clear">Cancella</s:String>
+    <s:String x:Key="Str_Actions">Azioni</s:String>
+    <s:String x:Key="Str_Import">Importa</s:String>
+    <s:String x:Key="Str_Export">Esporta</s:String>
+    <s:String x:Key="Str_AddAction">+ Aggiungi</s:String>
+    <s:String x:Key="Str_ColIcon">Icona</s:String>
+    <s:String x:Key="Str_ColName">Nome</s:String>
+    <s:String x:Key="Str_ColPrompt">Prompt</s:String>
+    <s:String x:Key="Str_ColOutput">Output</s:String>
+    <s:String x:Key="Str_PopupTriggerHint">Trigger del menu: trascina per selezionare · doppio clic (parola) · Shift+frecce / Ctrl+A · tieni premuto il tasto sinistro (≥ 300 ms) in un campo di testo · scorciatoia personalizzata. Chiudi con Esc, clic destro o clic fuori.</s:String>
+    <s:String x:Key="Str_GitHubLink">GitHub — CrowKing63/Orbital</s:String>
+    <s:String x:Key="Str_MoveUp">Sposta su</s:String>
+    <s:String x:Key="Str_MoveDown">Sposta giù</s:String>
+    <s:String x:Key="Str_SaveAndClose">Salva &amp; Chiudi</s:String>
+    <s:String x:Key="Str_EditAction">Modifica azione</s:String>
+    <s:String x:Key="Str_ButtonName">Nome pulsante</s:String>
+    <s:String x:Key="Str_IconHint">Icona (Hex o Emoji)</s:String>
+    <s:String x:Key="Str_Prompt">Prompt</s:String>
+    <s:String x:Key="Str_PromptHint">— il testo selezionato viene inserito in {text}</s:String>
+    <s:String x:Key="Str_OutputMode">Modalità output</s:String>
+    <s:String x:Key="Str_ActionReplace">Sostituisci</s:String>
+    <s:String x:Key="Str_ActionCopy">Copia</s:String>
+    <s:String x:Key="Str_ActionPopup">Popup</s:String>
+    <s:String x:Key="Str_ActionBrowser">Browser</s:String>
+    <s:String x:Key="Str_ActionDirectCopy">Copia diretta</s:String>
+    <s:String x:Key="Str_ActionCut">Taglia</s:String>
+    <s:String x:Key="Str_ActionPaste">Incolla</s:String>
+    <s:String x:Key="Str_ActionReplaceTooltip">Sostituisce il testo selezionato con il risultato dell'IA</s:String>
+    <s:String x:Key="Str_ActionCopyTooltip">Copia il risultato dell'IA negli appunti</s:String>
+    <s:String x:Key="Str_ActionPopupTooltip">Mostra il risultato dell'IA in una finestra popup</s:String>
+    <s:String x:Key="Str_ActionBrowserTooltip">Apre la ricerca Google con il testo selezionato (senza IA)</s:String>
+    <s:String x:Key="Str_ActionDirectCopyTooltip">Copia il testo selezionato negli appunti (senza IA)</s:String>
+    <s:String x:Key="Str_ActionCutTooltip">Taglia il testo selezionato (senza IA)</s:String>
+    <s:String x:Key="Str_ActionPasteTooltip">Incolla il contenuto degli appunti nel cursore (senza IA)</s:String>
+    <s:String x:Key="Str_ButtonDisplay">Visualizzazione pulsante</s:String>
+    <s:String x:Key="Str_DisplayTextAndIcon">Testo + Icona</s:String>
+    <s:String x:Key="Str_DisplayTextOnly">Solo testo</s:String>
+    <s:String x:Key="Str_DisplayIconOnly">Solo icona</s:String>
+    <s:String x:Key="Str_RequiresSelection">Richiede testo selezionato per l'esecuzione</s:String>
+    <s:String x:Key="Str_CopyToClipboard">Copia negli appunti</s:String>
+    <s:String x:Key="Str_SettingsRecoveryMsg" xml:space="preserve">Il file delle impostazioni era danneggiato ed è stato ripristinato ai valori predefiniti.
+
+Un backup del file danneggiato è stato salvato con estensione .bak.</s:String>
+    <s:String x:Key="Str_SettingsRecoveryTitle">Ripristino impostazioni Orbital</s:String>
+    <s:String x:Key="Str_HookErrorMsg" xml:space="preserve">Impossibile installare l'hook globale del mouse (codice errore: {0}).
+
+Orbital richiede questo hook per rilevare i gesti di selezione del testo.
+L'applicazione verrà chiusa.
+
+Cause comuni:
+- Autorizzazioni insufficienti
+- Software in conflitto (strumenti di sicurezza, altre app basate su hook)
+- Risorse di sistema insufficienti</s:String>
+    <s:String x:Key="Str_HookErrorTitle">Errore di avvio di Orbital</s:String>
+    <s:String x:Key="Str_TrayTooltip">Orbital - Assistente testo IA</s:String>
+    <s:String x:Key="Str_TraySettings">Impostazioni</s:String>
+    <s:String x:Key="Str_TrayExit">Esci</s:String>
+    <s:String x:Key="Str_UpdateBalloonTitle">Orbital aggiornato</s:String>
+    <s:String x:Key="Str_UpdateBalloonMsg">La versione {0} è stata scaricata. Riavvia Orbital per applicare l'aggiornamento.</s:String>
+    <s:String x:Key="Str_InvalidApiConfigMsg" xml:space="preserve">Configurazione API non valida: {0}
+
+Controlla le tue impostazioni.</s:String>
+    <s:String x:Key="Str_InvalidApiConfigTitle">Errore di configurazione Orbital</s:String>
+    <s:String x:Key="Str_ApiKeyNotConfigured">Chiave API non configurata.</s:String>
+    <s:String x:Key="Str_ApiKeySaved">Chiave API salvata. (Ultimi 4: ...{0})</s:String>
+    <s:String x:Key="Str_DeleteActionConfirm">Eliminare l'azione '{0}'?</s:String>
+    <s:String x:Key="Str_ExportSuccess" xml:space="preserve">Pacchetto azioni esportato con successo in:
+{0}</s:String>
+    <s:String x:Key="Str_ExportFailed">Esportazione non riuscita</s:String>
+    <s:String x:Key="Str_ImportModeMsg" xml:space="preserve">Sostituire le azioni esistenti o unirle con quelle attuali?
+
+Sì = Sostituisce tutte le azioni esistenti
+No = Unisci (salta i duplicati per nome)
+Annulla = Interrompi importazione</s:String>
+    <s:String x:Key="Str_ImportModeTitle">Modalità importazione</s:String>
+    <s:String x:Key="Str_ImportSuccessReplace">Pacchetto azioni importato con successo. Tutte le azioni precedenti sono state sostituite.</s:String>
+    <s:String x:Key="Str_ImportSuccessMerge">Pacchetto azioni importato con successo. Le nuove azioni sono state unite con quelle esistenti.</s:String>
+    <s:String x:Key="Str_ImportFailed">Importazione non riuscita</s:String>
+    <s:String x:Key="Str_HotkeyNone">Nessuna scorciatoia configurata.</s:String>
+    <s:String x:Key="Str_HotkeyActive">Scorciatoia attiva: {0}</s:String>
+    <s:String x:Key="Str_ButtonNameRequired">Inserisci un nome per il pulsante.</s:String>
+    <s:String x:Key="Str_ApiKeyNotConfiguredDetail" xml:space="preserve">La chiave API non è configurata.
+Fai doppio clic sull'icona nella barra delle applicazioni per aprire le Impostazioni.</s:String>
+    <s:String x:Key="Str_ErrorOccurred" xml:space="preserve">Si è verificato un errore:
+{0}</s:String>
+
+</ResourceDictionary>

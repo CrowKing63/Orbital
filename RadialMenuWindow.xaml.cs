@@ -163,8 +163,8 @@ namespace Orbital
             if (isLlmAction && (_actionExecutor == null || !_actionExecutor.HasLlmService))
             {
                 MessageBox.Show(
-                    "API key is not configured.\nDouble-click the system tray icon to open Settings.",
-                    "Orbital", MessageBoxButton.OK, MessageBoxImage.Information);
+                    Loc.Get("Str_ApiKeyNotConfiguredDetail"),
+                    Loc.Get("Str_AppTitle"), MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
@@ -179,7 +179,7 @@ namespace Orbital
             {
                 Dispatcher.Invoke(() =>
                 {
-                    var tooltip = new ResultTooltipWindow($"An error occurred:\n{ex.Message}");
+                    var tooltip = new ResultTooltipWindow(string.Format(Loc.Get("Str_ErrorOccurred"), ex.Message));
                     tooltip.Show();
                 });
             }

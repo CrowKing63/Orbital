@@ -78,8 +78,8 @@ namespace Orbital
 
             string key = SettingsManager.GetApiKey();
             ApiKeyStatus.Text = string.IsNullOrEmpty(key)
-                ? "API key not configured."
-                : $"API key saved. (Last 4: ...{(key.Length >= 4 ? key[^4..] : key)})";
+                ? Loc.Get("Str_ApiKeyNotConfigured")
+                : string.Format(Loc.Get("Str_ApiKeySaved"), key.Length >= 4 ? key[^4..] : key);
 
             RunAtStartupCheck.IsChecked = SettingsManager.CurrentSettings.RunAtStartup;
 
@@ -90,6 +90,17 @@ namespace Orbital
                 if (item.Tag?.ToString() == currentTheme)
                 {
                     ThemeBox.SelectedItem = item;
+                    break;
+                }
+            }
+
+            // Language selector
+            string currentLang = SettingsManager.CurrentSettings.Language ?? "en";
+            foreach (ComboBoxItem item in LanguageBox.Items)
+            {
+                if (item.Tag?.ToString() == currentLang)
+                {
+                    LanguageBox.SelectedItem = item;
                     break;
                 }
             }
@@ -185,6 +196,23 @@ namespace Orbital
             }
         }
 
+        private void LanguageBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_suppressEvents) return;
+            if (LanguageBox.SelectedItem is ComboBoxItem item && item.Tag is string tag)
+            {
+                App.ApplyLanguage(tag);
+                SettingsManager.SaveSettings();
+                // Refresh hotkey hint text in new language
+                UpdateHotkeyHint();
+                // Refresh API key status in new language
+                string key = SettingsManager.GetApiKey();
+                ApiKeyStatus.Text = string.IsNullOrEmpty(key)
+                    ? Loc.Get("Str_ApiKeyNotConfigured")
+                    : string.Format(Loc.Get("Str_ApiKeySaved"), key.Length >= 4 ? key[^4..] : key);
+            }
+        }
+
         private void SaveApiKey_Click(object sender, RoutedEventArgs e)
         {
             // Base URL 저장
@@ -203,7 +231,8 @@ namespace Orbital
             {
                 SettingsManager.SetApiKey(key);
                 ApiKeyBox.Password = string.Empty;
-                ApiKeyStatus.Text = $"API key saved. (Last 4: ...{(key.Length >= 4 ? key[^4..] : key)})";
+                ApiKeyStatus.Text = string.Format(Loc.Get("Str_ApiKeySaved"),
+                    key.Length >= 4 ? key[^4..] : key);
             }
 
             SettingsManager.SaveSettings();
@@ -278,8 +307,9 @@ namespace Orbital
         {
             if (ActionsList.SelectedItem is not ActionProfile selected) return;
 
-            var confirm = MessageBox.Show($"Delete action '{selected.Name}'?",
-                "Orbital", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            var confirm = MessageBox.Show(
+                string.Format(Loc.Get("Str_DeleteActionConfirm"), selected.Name),
+                Loc.Get("Str_AppTitle"), MessageBoxButton.YesNo, MessageBoxImage.Question);
 
             if (confirm == MessageBoxResult.Yes)
             {
@@ -310,12 +340,12 @@ namespace Orbital
                 string? error = SettingsManager.ExportActionPack(dialog.FileName);
                 if (error == null)
                 {
-                    MessageBox.Show($"Action pack exported successfully to:\n{dialog.FileName}",
-                        "Orbital", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show(string.Format(Loc.Get("Str_ExportSuccess"), dialog.FileName),
+                        Loc.Get("Str_AppTitle"), MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 else
                 {
-                    MessageBox.Show(error, "Export Failed", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show(error, Loc.Get("Str_ExportFailed"), MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
@@ -332,11 +362,8 @@ namespace Orbital
             if (dialog.ShowDialog() == true)
             {
                 var result = MessageBox.Show(
-                    "Replace existing actions or merge with current actions?\n\n" +
-                    "Yes = Replace all existing actions\n" +
-                    "No = Merge (skip duplicates by name)\n" +
-                    "Cancel = Abort import",
-                    "Import Mode",
+                    Loc.Get("Str_ImportModeMsg"),
+                    Loc.Get("Str_ImportModeTitle"),
                     MessageBoxButton.YesNoCancel,
                     MessageBoxImage.Question);
 
@@ -350,16 +377,16 @@ namespace Orbital
                 {
                     RefreshActionList();
                     MessageBox.Show(
-                        replaceExisting 
-                            ? "Action pack imported successfully. All previous actions were replaced."
-                            : "Action pack imported successfully. New actions were merged with existing ones.",
-                        "Orbital",
+                        replaceExisting
+                            ? Loc.Get("Str_ImportSuccessReplace")
+                            : Loc.Get("Str_ImportSuccessMerge"),
+                        Loc.Get("Str_AppTitle"),
                         MessageBoxButton.OK,
                         MessageBoxImage.Information);
                 }
                 else
                 {
-                    MessageBox.Show(error, "Import Failed", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show(error, Loc.Get("Str_ImportFailed"), MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
@@ -454,7 +481,7 @@ namespace Orbital
         {
             if (_capturedVk == 0)
             {
-                HotkeyHint.Text = "No hotkey configured.";
+                HotkeyHint.Text = Loc.Get("Str_HotkeyNone");
                 return;
             }
 
@@ -463,14 +490,14 @@ namespace Orbital
             if (HotkeyAltCheck.IsChecked   == true) parts.Add("Alt");
             if (HotkeyShiftCheck.IsChecked == true) parts.Add("Shift");
             parts.Add(VkToLabel(_capturedVk));
-            HotkeyHint.Text = $"Active shortcut: {string.Join(" + ", parts)}";
+            HotkeyHint.Text = string.Format(Loc.Get("Str_HotkeyActive"), string.Join(" + ", parts));
         }
 
         private static string VkToLabel(uint vk)
         {
             if (vk == 0) return string.Empty;
             Key key = KeyInterop.KeyFromVirtualKey((int)vk);
-            // Return a human-readable label for common keys
+            // Return a human-readable label for common keys (key names stay in English)
             return key switch
             {
                 Key.Space  => "Space",

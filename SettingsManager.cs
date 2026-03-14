@@ -46,7 +46,8 @@ namespace Orbital
         public string ApiBaseUrl  { get; set; } = "https://api.openai.com/v1";
         public string ModelName   { get; set; } = "gpt-4o-mini";
         public bool   RunAtStartup { get; set; } = false;
-        public string Theme        { get; set; } = "Dark";  // "Dark" | "Light"
+        public string Theme        { get; set; } = "Dark";  // "Dark" | "Light" | "System"
+        public string Language     { get; set; } = "en";   // "en" | "ko" | "ja" | "zh" | "es" | "fr" | "de" | "pt" | "ru" | "it"
         public List<ActionProfile> Actions { get; set; } = new List<ActionProfile>();
 
         // Custom hotkey: Ctrl=0x02, Alt=0x01, Shift=0x04. VirtualKey=0 means disabled.

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using Microsoft.Win32;
 using System.Linq;
@@ -25,19 +26,25 @@ namespace Orbital
         private CancellationTokenSource? _selectionCts;
         private readonly object _selectionLock = new object();
 
+        private static readonly HashSet<string> _supportedLanguages =
+            new() { "en", "ko", "ja", "zh", "es", "fr", "de", "pt", "ru", "it" };
+
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
             ShutdownMode = ShutdownMode.OnExplicitShutdown;
 
             bool recovered = SettingsManager.LoadSettings();
-            if (recovered)
-            {
-                MessageBox.Show("Your settings file was corrupted and has been reset to defaults.\n\nA backup of the corrupted file was saved with a .bak extension.", "Orbital Settings Recovery", MessageBoxButton.OK, MessageBoxImage.Warning);
-            }
 
             ApplyTheme(SettingsManager.CurrentSettings.Theme);
+            ApplyLanguage(SettingsManager.CurrentSettings.Language);
             Microsoft.Win32.SystemEvents.UserPreferenceChanged += OnSystemUserPreferenceChanged;
+
+            if (recovered)
+            {
+                MessageBox.Show(Loc.Get("Str_SettingsRecoveryMsg"),
+                    Loc.Get("Str_SettingsRecoveryTitle"), MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
 
             // Sync startup registry with settings
             if (SettingsManager.CurrentSettings.RunAtStartup != SettingsManager.IsStartupRegistryEnabled())
@@ -64,14 +71,8 @@ namespace Orbital
 
             if (!SystemHookManager.StartMouseHook(out int mouseErrCode))
             {
-                string errorMessage = $"Failed to install global mouse hook (Error code: {mouseErrCode}).\n\n" +
-                                    "Orbital requires this hook to detect text selection gestures.\n" +
-                                    "The application will now exit.\n\n" +
-                                    "Common causes:\n" +
-                                    "- Insufficient permissions\n" +
-                                    "- Conflicting software (security tools, other hook-based apps)\n" +
-                                    "- System resource limitations";
-                MessageBox.Show(errorMessage, "Orbital Startup Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                string errorMessage = string.Format(Loc.Get("Str_HookErrorMsg"), mouseErrCode);
+                MessageBox.Show(errorMessage, Loc.Get("Str_HookErrorTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
                 Shutdown();
                 return;
             }
@@ -97,6 +98,27 @@ namespace Orbital
             dicts.Insert(0, new ResourceDictionary { Source = new Uri(path, UriKind.Relative) });
 
             SettingsManager.CurrentSettings.Theme = themeName; // "System" 그대로 저장
+        }
+
+        public static void ApplyLanguage(string languageCode)
+        {
+            string lang = _supportedLanguages.Contains(languageCode) ? languageCode : "en";
+
+            var dicts = Current.Resources.MergedDictionaries;
+            var existing = dicts.FirstOrDefault(d =>
+                d.Source != null &&
+                d.Source.OriginalString.Contains("Strings/Strings."));
+
+            if (existing != null)
+                dicts.Remove(existing);
+
+            string path = $"Strings/Strings.{lang}.xaml";
+            dicts.Insert(0, new ResourceDictionary { Source = new Uri(path, UriKind.Relative) });
+
+            SettingsManager.CurrentSettings.Language = lang;
+
+            // Rebuild WinForms tray menu (DynamicResource doesn't apply to WinForms)
+            (Current as App)?.RebuildTrayMenu();
         }
 
         private static string GetSystemTheme()
@@ -133,8 +155,8 @@ namespace Orbital
                     {
                         _notifyIcon.ShowBalloonTip(
                             8000,
-                            "Orbital Updated",
-                            $"Version {updateInfo.TargetFullRelease.Version} has been downloaded. Restart Orbital to apply.",
+                            Loc.Get("Str_UpdateBalloonTitle"),
+                            string.Format(Loc.Get("Str_UpdateBalloonMsg"), updateInfo.TargetFullRelease.Version),
                             WinForms.ToolTipIcon.Info);
                     });
                 }
@@ -178,8 +200,8 @@ namespace Orbital
             }
             catch (ArgumentException ex)
             {
-                MessageBox.Show($"Invalid API configuration: {ex.Message}\n\nPlease check your settings.",
-                    "Orbital Configuration Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(string.Format(Loc.Get("Str_InvalidApiConfigMsg"), ex.Message),
+                    Loc.Get("Str_InvalidApiConfigTitle"), MessageBoxButton.OK, MessageBoxImage.Warning);
                 _actionExecutor = new ActionExecutorService(null);
             }
         }
@@ -195,7 +217,6 @@ namespace Orbital
         {
             _notifyIcon = new WinForms.NotifyIcon
             {
-                Text = "Orbital - Text AI Assistant",
                 Visible = true
             };
 
@@ -220,17 +241,34 @@ namespace Orbital
                 _notifyIcon.Icon = SystemIcons.Application;
             }
 
-            var menu = new WinForms.ContextMenuStrip();
-            menu.Items.Add("Settings", null, (s, e) => Dispatcher.Invoke(OpenSettingsWindow));
+            _notifyIcon.ContextMenuStrip = new WinForms.ContextMenuStrip();
+            _notifyIcon.DoubleClick += (s, e) => Dispatcher.Invoke(OpenSettingsWindow);
+
+            RebuildTrayMenu();
+        }
+
+        /// <summary>
+        /// Rebuilds the WinForms tray context menu with the currently active language strings.
+        /// Called on startup and whenever the language is changed.
+        /// </summary>
+        internal void RebuildTrayMenu()
+        {
+            if (_notifyIcon == null) return;
+
+            _notifyIcon.Text = Loc.Get("Str_TrayTooltip");
+
+            var menu = _notifyIcon.ContextMenuStrip;
+            if (menu == null) return;
+
+            menu.Items.Clear();
+            menu.Items.Add(Loc.Get("Str_TraySettings"), null,
+                (s, e) => Dispatcher.Invoke(OpenSettingsWindow));
             menu.Items.Add(new WinForms.ToolStripSeparator());
-            menu.Items.Add("Exit", null, (s, e) =>
+            menu.Items.Add(Loc.Get("Str_TrayExit"), null, (s, e) =>
             {
                 _notifyIcon.Visible = false;
                 Dispatcher.Invoke(Shutdown);
             });
-
-            _notifyIcon.ContextMenuStrip = menu;
-            _notifyIcon.DoubleClick += (s, e) => Dispatcher.Invoke(OpenSettingsWindow);
         }
 
         // ── Event handlers ───────────────────────────────────────────────────────

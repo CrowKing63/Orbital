@@ -1,0 +1,116 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:s="clr-namespace:System;assembly=mscorlib">
+
+    <s:String x:Key="Str_AppTitle">Orbital</s:String>
+    <s:String x:Key="Str_Cancel">キャンセル</s:String>
+    <s:String x:Key="Str_Save">保存</s:String>
+    <s:String x:Key="Str_Delete">削除</s:String>
+    <s:String x:Key="Str_Edit">編集</s:String>
+    <s:String x:Key="Str_Settings">設定</s:String>
+    <s:String x:Key="Str_ApiSettings">API 設定</s:String>
+    <s:String x:Key="Str_Provider">プロバイダー</s:String>
+    <s:String x:Key="Str_ProviderOpenAI">OpenAI</s:String>
+    <s:String x:Key="Str_ProviderOpenRouter">OpenRouter</s:String>
+    <s:String x:Key="Str_ProviderCustom">カスタム</s:String>
+    <s:String x:Key="Str_Model">モデル</s:String>
+    <s:String x:Key="Str_ApiBaseUrl">API ベース URL</s:String>
+    <s:String x:Key="Str_ApiKey">API キー</s:String>
+    <s:String x:Key="Str_Startup">スタートアップ</s:String>
+    <s:String x:Key="Str_RunAtStartup">Windows 起動時に Orbital を自動起動する</s:String>
+    <s:String x:Key="Str_Appearance">外観</s:String>
+    <s:String x:Key="Str_Theme">テーマ</s:String>
+    <s:String x:Key="Str_ThemeDark">ダーク</s:String>
+    <s:String x:Key="Str_ThemeLight">ライト</s:String>
+    <s:String x:Key="Str_ThemeSystem">システム (Windows に従う)</s:String>
+    <s:String x:Key="Str_Language">言語</s:String>
+    <s:String x:Key="Str_KeyboardShortcut">キーボードショートカット</s:String>
+    <s:String x:Key="Str_HotkeyDescription">ホットキーを使用して、現在選択中のテキストのポップアップを起動します。修飾キーを選択してから、キーフィールドをクリックしてキーを押してください。</s:String>
+    <s:String x:Key="Str_HotkeyKeyboxTooltip">ここをクリックしてからキーを押してください。Delete/Backspace でクリアします。</s:String>
+    <s:String x:Key="Str_Clear">クリア</s:String>
+    <s:String x:Key="Str_Actions">アクション</s:String>
+    <s:String x:Key="Str_Import">インポート</s:String>
+    <s:String x:Key="Str_Export">エクスポート</s:String>
+    <s:String x:Key="Str_AddAction">+ 追加</s:String>
+    <s:String x:Key="Str_ColIcon">アイコン</s:String>
+    <s:String x:Key="Str_ColName">名前</s:String>
+    <s:String x:Key="Str_ColPrompt">プロンプト</s:String>
+    <s:String x:Key="Str_ColOutput">出力</s:String>
+    <s:String x:Key="Str_PopupTriggerHint">ポップアップのトリガー: ドラッグ選択 · ダブルクリック(単語) · Shift+矢印キー / Ctrl+A · テキストフィールドで左ボタン長押し(≥ 300ms) · カスタムホットキー。Esc、右クリック、または外側をクリックで閉じます。</s:String>
+    <s:String x:Key="Str_GitHubLink">GitHub — CrowKing63/Orbital</s:String>
+    <s:String x:Key="Str_MoveUp">上へ移動</s:String>
+    <s:String x:Key="Str_MoveDown">下へ移動</s:String>
+    <s:String x:Key="Str_SaveAndClose">保存 &amp; 閉じる</s:String>
+    <s:String x:Key="Str_EditAction">アクションを編集</s:String>
+    <s:String x:Key="Str_ButtonName">ボタン名</s:String>
+    <s:String x:Key="Str_IconHint">アイコン (Hex または絵文字)</s:String>
+    <s:String x:Key="Str_Prompt">プロンプト</s:String>
+    <s:String x:Key="Str_PromptHint">— 選択したテキストは {text} の位置に挿入されます</s:String>
+    <s:String x:Key="Str_OutputMode">出力モード</s:String>
+    <s:String x:Key="Str_ActionReplace">置換</s:String>
+    <s:String x:Key="Str_ActionCopy">コピー</s:String>
+    <s:String x:Key="Str_ActionPopup">ポップアップ</s:String>
+    <s:String x:Key="Str_ActionBrowser">ブラウザー</s:String>
+    <s:String x:Key="Str_ActionDirectCopy">直接コピー</s:String>
+    <s:String x:Key="Str_ActionCut">切り取り</s:String>
+    <s:String x:Key="Str_ActionPaste">貼り付け</s:String>
+    <s:String x:Key="Str_ActionReplaceTooltip">選択したテキストを AI の結果で置換</s:String>
+    <s:String x:Key="Str_ActionCopyTooltip">AI の結果をクリップボードにコピー</s:String>
+    <s:String x:Key="Str_ActionPopupTooltip">ポップアップウィンドウに AI の結果を表示</s:String>
+    <s:String x:Key="Str_ActionBrowserTooltip">選択したテキストで Google 検索を開く (AI なし)</s:String>
+    <s:String x:Key="Str_ActionDirectCopyTooltip">選択したテキストをクリップボードにコピー (AI なし)</s:String>
+    <s:String x:Key="Str_ActionCutTooltip">選択したテキストを切り取り (AI なし)</s:String>
+    <s:String x:Key="Str_ActionPasteTooltip">カーソル位置にクリップボードの内容を貼り付け (AI なし)</s:String>
+    <s:String x:Key="Str_ButtonDisplay">ボタン表示</s:String>
+    <s:String x:Key="Str_DisplayTextAndIcon">テキスト + アイコン</s:String>
+    <s:String x:Key="Str_DisplayTextOnly">テキストのみ</s:String>
+    <s:String x:Key="Str_DisplayIconOnly">アイコンのみ</s:String>
+    <s:String x:Key="Str_RequiresSelection">実行にはテキストの選択が必要です</s:String>
+    <s:String x:Key="Str_CopyToClipboard">クリップボードにコピー</s:String>
+    <s:String x:Key="Str_SettingsRecoveryMsg" xml:space="preserve">設定ファイルが破損したため、デフォルト値にリセットされました。
+
+破損したファイルのバックアップが .bak 拡張子で保存されました。</s:String>
+    <s:String x:Key="Str_SettingsRecoveryTitle">Orbital 設定の復元</s:String>
+    <s:String x:Key="Str_HookErrorMsg" xml:space="preserve">グローバルマウスフックのインストールに失敗しました (エラーコード: {0})。
+
+Orbital はテキスト選択ジェスチャーを検出するためにこのフックが必要です。
+アプリケーションを終了します。
+
+一般的な原因:
+- 権限が不足している
+- 競合するソフトウェア (セキュリティツール、他のフックベースのアプリ)
+- システムリソースの不足</s:String>
+    <s:String x:Key="Str_HookErrorTitle">Orbital 起動エラー</s:String>
+    <s:String x:Key="Str_TrayTooltip">Orbital - テキスト AI アシスタント</s:String>
+    <s:String x:Key="Str_TraySettings">設定</s:String>
+    <s:String x:Key="Str_TrayExit">終了</s:String>
+    <s:String x:Key="Str_UpdateBalloonTitle">Orbital が更新されました</s:String>
+    <s:String x:Key="Str_UpdateBalloonMsg">バージョン {0} がダウンロードされました。Orbital を再起動して適用してください。</s:String>
+    <s:String x:Key="Str_InvalidApiConfigMsg" xml:space="preserve">無効な API 構成: {0}
+
+設定を確認してください。</s:String>
+    <s:String x:Key="Str_InvalidApiConfigTitle">Orbital 構成エラー</s:String>
+    <s:String x:Key="Str_ApiKeyNotConfigured">API キーが設定されていません。</s:String>
+    <s:String x:Key="Str_ApiKeySaved">API キーが保存されました。(末尾 4 桁: ...{0})</s:String>
+    <s:String x:Key="Str_DeleteActionConfirm">アクション '{0}' を削除しますか？</s:String>
+    <s:String x:Key="Str_ExportSuccess" xml:space="preserve">アクションパックを正常にエクスポートしました:
+{0}</s:String>
+    <s:String x:Key="Str_ExportFailed">エクスポート失敗</s:String>
+    <s:String x:Key="Str_ImportModeMsg" xml:space="preserve">既存のアクションを置換するか、現在のアクションと統合しますか？
+
+はい = 既存のアクションをすべて置換
+いいえ = 統合 (名前が重複するものはスキップ)
+キャンセル = インポートを中止</s:String>
+    <s:String x:Key="Str_ImportModeTitle">インポートモード</s:String>
+    <s:String x:Key="Str_ImportSuccessReplace">アクションパックを正常にインポートしました。すべての既存アクションが置換されました。</s:String>
+    <s:String x:Key="Str_ImportSuccessMerge">アクションパックを正常にインポートしました。新しいアクションが既存のアクションと統合されました。</s:String>
+    <s:String x:Key="Str_ImportFailed">インポート失敗</s:String>
+    <s:String x:Key="Str_HotkeyNone">ホットキーが設定されていません。</s:String>
+    <s:String x:Key="Str_HotkeyActive">有効なショートカット: {0}</s:String>
+    <s:String x:Key="Str_ButtonNameRequired">ボタン名を入力してください。</s:String>
+    <s:String x:Key="Str_ApiKeyNotConfiguredDetail" xml:space="preserve">API キーが設定されていません。
+システムトレイアイコンをダブルクリックして設定を開いてください。</s:String>
+    <s:String x:Key="Str_ErrorOccurred" xml:space="preserve">エラーが発生しました:
+{0}</s:String>
+
+</ResourceDictionary>

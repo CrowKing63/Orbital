@@ -1,0 +1,131 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:s="clr-namespace:System;assembly=mscorlib">
+
+    <!-- ══ App / Shared ══ -->
+    <s:String x:Key="Str_AppTitle">Orbital</s:String>
+    <s:String x:Key="Str_Cancel">Cancel</s:String>
+    <s:String x:Key="Str_Save">Save</s:String>
+    <s:String x:Key="Str_Delete">Delete</s:String>
+    <s:String x:Key="Str_Edit">Edit</s:String>
+
+    <!-- ══ SettingsWindow — XAML ══ -->
+    <s:String x:Key="Str_Settings">Settings</s:String>
+    <s:String x:Key="Str_ApiSettings">API Settings</s:String>
+    <s:String x:Key="Str_Provider">Provider</s:String>
+    <s:String x:Key="Str_ProviderOpenAI">OpenAI</s:String>
+    <s:String x:Key="Str_ProviderOpenRouter">OpenRouter</s:String>
+    <s:String x:Key="Str_ProviderCustom">Custom</s:String>
+    <s:String x:Key="Str_Model">Model</s:String>
+    <s:String x:Key="Str_ApiBaseUrl">API Base URL</s:String>
+    <s:String x:Key="Str_ApiKey">API Key</s:String>
+    <s:String x:Key="Str_Startup">Startup</s:String>
+    <s:String x:Key="Str_RunAtStartup">Launch Orbital when Windows starts</s:String>
+    <s:String x:Key="Str_Appearance">Appearance</s:String>
+    <s:String x:Key="Str_Theme">Theme</s:String>
+    <s:String x:Key="Str_ThemeDark">Dark</s:String>
+    <s:String x:Key="Str_ThemeLight">Light</s:String>
+    <s:String x:Key="Str_ThemeSystem">System (follow Windows)</s:String>
+    <s:String x:Key="Str_Language">Language</s:String>
+    <s:String x:Key="Str_KeyboardShortcut">Keyboard Shortcut</s:String>
+    <s:String x:Key="Str_HotkeyDescription">Trigger the popup for the currently selected text using a hotkey. Select modifiers, then click the key field and press a key.</s:String>
+    <s:String x:Key="Str_HotkeyKeyboxTooltip">Click here, then press a key. Delete/Backspace to clear.</s:String>
+    <s:String x:Key="Str_Clear">Clear</s:String>
+    <s:String x:Key="Str_Actions">Actions</s:String>
+    <s:String x:Key="Str_Import">Import</s:String>
+    <s:String x:Key="Str_Export">Export</s:String>
+    <s:String x:Key="Str_AddAction">+ Add</s:String>
+    <s:String x:Key="Str_ColIcon">Icon</s:String>
+    <s:String x:Key="Str_ColName">Name</s:String>
+    <s:String x:Key="Str_ColPrompt">Prompt</s:String>
+    <s:String x:Key="Str_ColOutput">Output</s:String>
+    <s:String x:Key="Str_PopupTriggerHint">Popup triggers: drag to select · double-click (word) · Shift+arrow keys / Ctrl+A · hold left button (≥ 300 ms) in a text field · custom hotkey above. Dismiss with Esc, right-click, or clicking outside.</s:String>
+    <s:String x:Key="Str_GitHubLink">GitHub — CrowKing63/Orbital</s:String>
+    <s:String x:Key="Str_MoveUp">Move Up</s:String>
+    <s:String x:Key="Str_MoveDown">Move Down</s:String>
+    <s:String x:Key="Str_SaveAndClose">Save &amp; Close</s:String>
+
+    <!-- ══ ActionEditDialog — XAML ══ -->
+    <s:String x:Key="Str_EditAction">Edit Action</s:String>
+    <s:String x:Key="Str_ButtonName">Button Name</s:String>
+    <s:String x:Key="Str_IconHint">Icon (Hex or Emoji)</s:String>
+    <s:String x:Key="Str_Prompt">Prompt</s:String>
+    <s:String x:Key="Str_PromptHint">— selected text is inserted at {text}</s:String>
+    <s:String x:Key="Str_OutputMode">Output Mode</s:String>
+    <s:String x:Key="Str_ActionReplace">Replace</s:String>
+    <s:String x:Key="Str_ActionCopy">Copy</s:String>
+    <s:String x:Key="Str_ActionPopup">Popup</s:String>
+    <s:String x:Key="Str_ActionBrowser">Browser</s:String>
+    <s:String x:Key="Str_ActionDirectCopy">DirectCopy</s:String>
+    <s:String x:Key="Str_ActionCut">Cut</s:String>
+    <s:String x:Key="Str_ActionPaste">Paste</s:String>
+    <s:String x:Key="Str_ActionReplaceTooltip">Replace selected text with AI result</s:String>
+    <s:String x:Key="Str_ActionCopyTooltip">Copy AI result to clipboard</s:String>
+    <s:String x:Key="Str_ActionPopupTooltip">Show AI result in a popup window</s:String>
+    <s:String x:Key="Str_ActionBrowserTooltip">Open Google search with selected text (no AI)</s:String>
+    <s:String x:Key="Str_ActionDirectCopyTooltip">Copy selected text to clipboard (no AI)</s:String>
+    <s:String x:Key="Str_ActionCutTooltip">Cut selected text (no AI)</s:String>
+    <s:String x:Key="Str_ActionPasteTooltip">Paste clipboard content at cursor (no AI)</s:String>
+    <s:String x:Key="Str_ButtonDisplay">Button Display</s:String>
+    <s:String x:Key="Str_DisplayTextAndIcon">Text + Icon</s:String>
+    <s:String x:Key="Str_DisplayTextOnly">Text Only</s:String>
+    <s:String x:Key="Str_DisplayIconOnly">Icon Only</s:String>
+    <s:String x:Key="Str_RequiresSelection">Requires selected text to run</s:String>
+
+    <!-- ══ ResultTooltipWindow — XAML ══ -->
+    <s:String x:Key="Str_CopyToClipboard">Copy to Clipboard</s:String>
+
+    <!-- ══ Code-behind: App.xaml.cs ══ -->
+    <s:String x:Key="Str_SettingsRecoveryMsg" xml:space="preserve">Your settings file was corrupted and has been reset to defaults.
+
+A backup of the corrupted file was saved with a .bak extension.</s:String>
+    <s:String x:Key="Str_SettingsRecoveryTitle">Orbital Settings Recovery</s:String>
+    <s:String x:Key="Str_HookErrorMsg" xml:space="preserve">Failed to install global mouse hook (Error code: {0}).
+
+Orbital requires this hook to detect text selection gestures.
+The application will now exit.
+
+Common causes:
+- Insufficient permissions
+- Conflicting software (security tools, other hook-based apps)
+- System resource limitations</s:String>
+    <s:String x:Key="Str_HookErrorTitle">Orbital Startup Error</s:String>
+    <s:String x:Key="Str_TrayTooltip">Orbital - Text AI Assistant</s:String>
+    <s:String x:Key="Str_TraySettings">Settings</s:String>
+    <s:String x:Key="Str_TrayExit">Exit</s:String>
+    <s:String x:Key="Str_UpdateBalloonTitle">Orbital Updated</s:String>
+    <s:String x:Key="Str_UpdateBalloonMsg">Version {0} has been downloaded. Restart Orbital to apply.</s:String>
+    <s:String x:Key="Str_InvalidApiConfigMsg" xml:space="preserve">Invalid API configuration: {0}
+
+Please check your settings.</s:String>
+    <s:String x:Key="Str_InvalidApiConfigTitle">Orbital Configuration Error</s:String>
+
+    <!-- ══ Code-behind: SettingsWindow.xaml.cs ══ -->
+    <s:String x:Key="Str_ApiKeyNotConfigured">API key not configured.</s:String>
+    <s:String x:Key="Str_ApiKeySaved">API key saved. (Last 4: ...{0})</s:String>
+    <s:String x:Key="Str_DeleteActionConfirm">Delete action '{0}'?</s:String>
+    <s:String x:Key="Str_ExportSuccess" xml:space="preserve">Action pack exported successfully to:
+{0}</s:String>
+    <s:String x:Key="Str_ExportFailed">Export Failed</s:String>
+    <s:String x:Key="Str_ImportModeMsg" xml:space="preserve">Replace existing actions or merge with current actions?
+
+Yes = Replace all existing actions
+No = Merge (skip duplicates by name)
+Cancel = Abort import</s:String>
+    <s:String x:Key="Str_ImportModeTitle">Import Mode</s:String>
+    <s:String x:Key="Str_ImportSuccessReplace">Action pack imported successfully. All previous actions were replaced.</s:String>
+    <s:String x:Key="Str_ImportSuccessMerge">Action pack imported successfully. New actions were merged with existing ones.</s:String>
+    <s:String x:Key="Str_ImportFailed">Import Failed</s:String>
+    <s:String x:Key="Str_HotkeyNone">No hotkey configured.</s:String>
+    <s:String x:Key="Str_HotkeyActive">Active shortcut: {0}</s:String>
+
+    <!-- ══ Code-behind: ActionEditDialog.xaml.cs ══ -->
+    <s:String x:Key="Str_ButtonNameRequired">Please enter a button name.</s:String>
+
+    <!-- ══ Code-behind: RadialMenuWindow.xaml.cs ══ -->
+    <s:String x:Key="Str_ApiKeyNotConfiguredDetail" xml:space="preserve">API key is not configured.
+Double-click the system tray icon to open Settings.</s:String>
+    <s:String x:Key="Str_ErrorOccurred" xml:space="preserve">An error occurred:
+{0}</s:String>
+
+</ResourceDictionary>

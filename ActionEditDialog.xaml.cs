@@ -18,7 +18,14 @@ namespace Orbital
             try
             {
                 var hwnd = new System.Windows.Interop.WindowInteropHelper(this).Handle;
-                int dark = 1;
+                string theme = SettingsManager.CurrentSettings.Theme;
+                if (theme == "System")
+                {
+                    using var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(
+                        @"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize");
+                    theme = (key?.GetValue("AppsUseLightTheme") is int v && v == 1) ? "Light" : "Dark";
+                }
+                int dark = theme == "Light" ? 0 : 1;
                 DwmSetWindowAttribute(hwnd, 20, ref dark, sizeof(int));
             }
             catch { }
@@ -35,10 +42,10 @@ namespace Orbital
                 PromptBox.Text = existing.PromptFormat;
                 RequiresSelectionCheck.IsChecked = existing.IsSelectionRequired;
 
-                // Use typed ActionType instead of string comparison
+                // Match by Tag (serialized value) so localized Content doesn't break selection
                 foreach (ComboBoxItem item in ResultActionBox.Items)
                 {
-                    if (item.Content?.ToString() == existing.ActionType.ToSerializedString())
+                    if (item.Tag?.ToString() == existing.ActionType.ToSerializedString())
                     {
                         ResultActionBox.SelectedItem = item;
                         break;
@@ -61,11 +68,11 @@ namespace Orbital
         {
             if (string.IsNullOrWhiteSpace(NameBox.Text))
             {
-                MessageBox.Show("Please enter a button name.", "Orbital", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(Loc.Get("Str_ButtonNameRequired"), Loc.Get("Str_AppTitle"), MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            string selectedActionString = (ResultActionBox.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Popup";
+            string selectedActionString = (ResultActionBox.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "Popup";
             var selectedMode = (DisplayModeBox.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "TextAndIcon";
             
             Result = new ActionProfile

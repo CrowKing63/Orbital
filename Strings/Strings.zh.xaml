@@ -1,0 +1,116 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:s="clr-namespace:System;assembly=mscorlib">
+
+    <s:String x:Key="Str_AppTitle">Orbital</s:String>
+    <s:String x:Key="Str_Cancel">取消</s:String>
+    <s:String x:Key="Str_Save">保存</s:String>
+    <s:String x:Key="Str_Delete">删除</s:String>
+    <s:String x:Key="Str_Edit">编辑</s:String>
+    <s:String x:Key="Str_Settings">设置</s:String>
+    <s:String x:Key="Str_ApiSettings">API 设置</s:String>
+    <s:String x:Key="Str_Provider">服务商</s:String>
+    <s:String x:Key="Str_ProviderOpenAI">OpenAI</s:String>
+    <s:String x:Key="Str_ProviderOpenRouter">OpenRouter</s:String>
+    <s:String x:Key="Str_ProviderCustom">自定义</s:String>
+    <s:String x:Key="Str_Model">模型</s:String>
+    <s:String x:Key="Str_ApiBaseUrl">API 基础 URL</s:String>
+    <s:String x:Key="Str_ApiKey">API 密钥</s:String>
+    <s:String x:Key="Str_Startup">开机启动</s:String>
+    <s:String x:Key="Str_RunAtStartup">Windows 启动时自动运行 Orbital</s:String>
+    <s:String x:Key="Str_Appearance">外观</s:String>
+    <s:String x:Key="Str_Theme">主题</s:String>
+    <s:String x:Key="Str_ThemeDark">深色</s:String>
+    <s:String x:Key="Str_ThemeLight">浅色</s:String>
+    <s:String x:Key="Str_ThemeSystem">系统（跟随 Windows）</s:String>
+    <s:String x:Key="Str_Language">语言</s:String>
+    <s:String x:Key="Str_KeyboardShortcut">键盘快捷键</s:String>
+    <s:String x:Key="Str_HotkeyDescription">使用快捷键为当前选中的文本触发弹出菜单。选择修饰键后，单击按键输入框并按下一个键。</s:String>
+    <s:String x:Key="Str_HotkeyKeyboxTooltip">单击此处，然后按下一个键。按 Delete/Backspace 清除。</s:String>
+    <s:String x:Key="Str_Clear">清除</s:String>
+    <s:String x:Key="Str_Actions">操作</s:String>
+    <s:String x:Key="Str_Import">导入</s:String>
+    <s:String x:Key="Str_Export">导出</s:String>
+    <s:String x:Key="Str_AddAction">+ 添加</s:String>
+    <s:String x:Key="Str_ColIcon">图标</s:String>
+    <s:String x:Key="Str_ColName">名称</s:String>
+    <s:String x:Key="Str_ColPrompt">提示词</s:String>
+    <s:String x:Key="Str_ColOutput">输出</s:String>
+    <s:String x:Key="Str_PopupTriggerHint">弹出触发方式：拖动选择 · 双击（单词）· Shift+方向键 / Ctrl+A · 在文本框中长按左键（≥ 300ms）· 自定义快捷键。按 Esc、右键单击或单击外部关闭。</s:String>
+    <s:String x:Key="Str_GitHubLink">GitHub — CrowKing63/Orbital</s:String>
+    <s:String x:Key="Str_MoveUp">上移</s:String>
+    <s:String x:Key="Str_MoveDown">下移</s:String>
+    <s:String x:Key="Str_SaveAndClose">保存 &amp; 关闭</s:String>
+    <s:String x:Key="Str_EditAction">编辑操作</s:String>
+    <s:String x:Key="Str_ButtonName">按钮名称</s:String>
+    <s:String x:Key="Str_IconHint">图标（十六进制或表情符号）</s:String>
+    <s:String x:Key="Str_Prompt">提示词</s:String>
+    <s:String x:Key="Str_PromptHint">— 选中的文本将插入到 {text} 位置</s:String>
+    <s:String x:Key="Str_OutputMode">输出模式</s:String>
+    <s:String x:Key="Str_ActionReplace">替换</s:String>
+    <s:String x:Key="Str_ActionCopy">复制</s:String>
+    <s:String x:Key="Str_ActionPopup">弹窗</s:String>
+    <s:String x:Key="Str_ActionBrowser">浏览器</s:String>
+    <s:String x:Key="Str_ActionDirectCopy">直接复制</s:String>
+    <s:String x:Key="Str_ActionCut">剪切</s:String>
+    <s:String x:Key="Str_ActionPaste">粘贴</s:String>
+    <s:String x:Key="Str_ActionReplaceTooltip">用 AI 结果替换选中的文本</s:String>
+    <s:String x:Key="Str_ActionCopyTooltip">将 AI 结果复制到剪贴板</s:String>
+    <s:String x:Key="Str_ActionPopupTooltip">在弹窗中显示 AI 结果</s:String>
+    <s:String x:Key="Str_ActionBrowserTooltip">用选中的文本打开 Google 搜索（不使用 AI）</s:String>
+    <s:String x:Key="Str_ActionDirectCopyTooltip">将选中的文本复制到剪贴板（不使用 AI）</s:String>
+    <s:String x:Key="Str_ActionCutTooltip">剪切选中的文本（不使用 AI）</s:String>
+    <s:String x:Key="Str_ActionPasteTooltip">在光标处粘贴剪贴板内容（不使用 AI）</s:String>
+    <s:String x:Key="Str_ButtonDisplay">按钮显示</s:String>
+    <s:String x:Key="Str_DisplayTextAndIcon">文字 + 图标</s:String>
+    <s:String x:Key="Str_DisplayTextOnly">仅文字</s:String>
+    <s:String x:Key="Str_DisplayIconOnly">仅图标</s:String>
+    <s:String x:Key="Str_RequiresSelection">运行时需要先选中文本</s:String>
+    <s:String x:Key="Str_CopyToClipboard">复制到剪贴板</s:String>
+    <s:String x:Key="Str_SettingsRecoveryMsg" xml:space="preserve">设置文件已损坏，已重置为默认值。
+
+损坏文件的备份已以 .bak 扩展名保存。</s:String>
+    <s:String x:Key="Str_SettingsRecoveryTitle">Orbital 设置恢复</s:String>
+    <s:String x:Key="Str_HookErrorMsg" xml:space="preserve">安装全局鼠标钩子失败（错误代码：{0}）。
+
+Orbital 需要此钩子来检测文本选择手势。
+应用程序即将退出。
+
+常见原因：
+- 权限不足
+- 冲突软件（安全工具、其他钩子类应用）
+- 系统资源不足</s:String>
+    <s:String x:Key="Str_HookErrorTitle">Orbital 启动错误</s:String>
+    <s:String x:Key="Str_TrayTooltip">Orbital - 文本 AI 助手</s:String>
+    <s:String x:Key="Str_TraySettings">设置</s:String>
+    <s:String x:Key="Str_TrayExit">退出</s:String>
+    <s:String x:Key="Str_UpdateBalloonTitle">Orbital 已更新</s:String>
+    <s:String x:Key="Str_UpdateBalloonMsg">版本 {0} 已下载完成。请重启 Orbital 以应用更新。</s:String>
+    <s:String x:Key="Str_InvalidApiConfigMsg" xml:space="preserve">无效的 API 配置：{0}
+
+请检查您的设置。</s:String>
+    <s:String x:Key="Str_InvalidApiConfigTitle">Orbital 配置错误</s:String>
+    <s:String x:Key="Str_ApiKeyNotConfigured">未配置 API 密钥。</s:String>
+    <s:String x:Key="Str_ApiKeySaved">API 密钥已保存。（末尾 4 位：...{0}）</s:String>
+    <s:String x:Key="Str_DeleteActionConfirm">删除操作"{0}"？</s:String>
+    <s:String x:Key="Str_ExportSuccess" xml:space="preserve">操作包已成功导出至：
+{0}</s:String>
+    <s:String x:Key="Str_ExportFailed">导出失败</s:String>
+    <s:String x:Key="Str_ImportModeMsg" xml:space="preserve">替换现有操作还是与当前操作合并？
+
+是 = 替换所有现有操作
+否 = 合并（按名称跳过重复项）
+取消 = 中止导入</s:String>
+    <s:String x:Key="Str_ImportModeTitle">导入模式</s:String>
+    <s:String x:Key="Str_ImportSuccessReplace">操作包已成功导入。所有原有操作已被替换。</s:String>
+    <s:String x:Key="Str_ImportSuccessMerge">操作包已成功导入。新操作已与现有操作合并。</s:String>
+    <s:String x:Key="Str_ImportFailed">导入失败</s:String>
+    <s:String x:Key="Str_HotkeyNone">未配置快捷键。</s:String>
+    <s:String x:Key="Str_HotkeyActive">当前快捷键：{0}</s:String>
+    <s:String x:Key="Str_ButtonNameRequired">请输入按钮名称。</s:String>
+    <s:String x:Key="Str_ApiKeyNotConfiguredDetail" xml:space="preserve">未配置 API 密钥。
+请双击系统托盘图标打开设置。</s:String>
+    <s:String x:Key="Str_ErrorOccurred" xml:space="preserve">发生错误：
+{0}</s:String>
+
+</ResourceDictionary>

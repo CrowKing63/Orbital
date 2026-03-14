@@ -1,7 +1,7 @@
 <Window x:Class="Orbital.SettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Orbital Settings" Height="660" Width="640"
+        Title="Orbital Settings" Height="700" Width="640"
         Icon="Assets/orbit_logo.png"
         Background="{DynamicResource WindowBgBrush}"
         WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize">
@@ -32,7 +32,9 @@
             </Ellipse>
             <TextBlock Text="Orbital" FontSize="18" FontWeight="Bold"
                        Foreground="{DynamicResource TitleFgBrush}" VerticalAlignment="Center"/>
-            <TextBlock Text="  Settings" FontSize="16" FontWeight="Light"
+            <TextBlock Text="  " FontSize="16" FontWeight="Light"
+                       Foreground="{DynamicResource SubtitleFgBrush}" VerticalAlignment="Center"/>
+            <TextBlock Text="{DynamicResource Str_Settings}" FontSize="16" FontWeight="Light"
                        Foreground="{DynamicResource SubtitleFgBrush}" VerticalAlignment="Center"/>
         </StackPanel>
 
@@ -44,7 +46,7 @@
             </Border.Effect>
             <StackPanel>
                 <!-- 섹션 헤더 -->
-                <TextBlock Text="API Settings" FontSize="11" FontWeight="SemiBold"
+                <TextBlock Text="{DynamicResource Str_ApiSettings}" FontSize="11" FontWeight="SemiBold"
                            Foreground="{DynamicResource LabelFgBrush}" Margin="0,0,0,12"/>
 
                 <Grid>
@@ -61,31 +63,35 @@
 
                     <!-- 제공자 -->
                     <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,8,10">
-                        <TextBlock Text="Provider" FontSize="11" Foreground="{DynamicResource LabelFgBrush}" Margin="0,0,0,5"/>
+                        <TextBlock Text="{DynamicResource Str_Provider}" FontSize="11"
+                                   Foreground="{DynamicResource LabelFgBrush}" Margin="0,0,0,5"/>
                         <ComboBox x:Name="ProviderBox" SelectionChanged="ProviderBox_SelectionChanged">
-                            <ComboBoxItem Tag="openai"     Content="OpenAI"/>
-                            <ComboBoxItem Tag="openrouter" Content="OpenRouter"/>
-                            <ComboBoxItem Tag="custom"     Content="Custom"/>
+                            <ComboBoxItem Tag="openai"     Content="{DynamicResource Str_ProviderOpenAI}"/>
+                            <ComboBoxItem Tag="openrouter" Content="{DynamicResource Str_ProviderOpenRouter}"/>
+                            <ComboBoxItem Tag="custom"     Content="{DynamicResource Str_ProviderCustom}"/>
                         </ComboBox>
                     </StackPanel>
 
                     <!-- 모델 -->
                     <StackPanel Grid.Row="0" Grid.Column="1" Margin="8,0,0,10">
-                        <TextBlock Text="Model" FontSize="11" Foreground="{DynamicResource LabelFgBrush}" Margin="0,0,0,5"/>
+                        <TextBlock Text="{DynamicResource Str_Model}" FontSize="11"
+                                   Foreground="{DynamicResource LabelFgBrush}" Margin="0,0,0,5"/>
                         <ComboBox x:Name="ModelBox" IsEditable="True" IsTextSearchEnabled="False"/>
                     </StackPanel>
 
                     <!-- Base URL -->
                     <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Margin="0,0,0,10">
-                        <TextBlock Text="API Base URL" FontSize="11" Foreground="{DynamicResource LabelFgBrush}" Margin="0,0,0,5"/>
+                        <TextBlock Text="{DynamicResource Str_ApiBaseUrl}" FontSize="11"
+                                   Foreground="{DynamicResource LabelFgBrush}" Margin="0,0,0,5"/>
                         <TextBox x:Name="BaseUrlBox"/>
                     </StackPanel>
 
                     <!-- API 키 -->
                     <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Margin="0,0,0,6">
-                        <TextBlock Text="API Key" FontSize="11" Foreground="{DynamicResource LabelFgBrush}" Margin="0,0,0,5"/>
+                        <TextBlock Text="{DynamicResource Str_ApiKey}" FontSize="11"
+                                   Foreground="{DynamicResource LabelFgBrush}" Margin="0,0,0,5"/>
                         <DockPanel>
-                            <Button DockPanel.Dock="Right" Content="Save" Width="72" Margin="8,0,0,0"
+                            <Button DockPanel.Dock="Right" Content="{DynamicResource Str_Save}" Width="72" Margin="8,0,0,0"
                                     Style="{StaticResource PrimaryButton}"
                                     Click="SaveApiKey_Click"/>
                             <PasswordBox x:Name="ApiKeyBox" PasswordChar="●"
@@ -105,29 +111,51 @@
         <Border Background="{DynamicResource PanelBgBrush}" CornerRadius="10"
                 BorderBrush="{DynamicResource PanelBorderBrush}" BorderThickness="1" Margin="0,0,0,16" Padding="16,12">
             <StackPanel>
-                <TextBlock Text="Startup" FontSize="11" FontWeight="SemiBold"
+                <TextBlock Text="{DynamicResource Str_Startup}" FontSize="11" FontWeight="SemiBold"
                            Foreground="{DynamicResource LabelFgBrush}" Margin="0,0,0,10"/>
                 <CheckBox x:Name="RunAtStartupCheck"
-                          Content="Launch Orbital when Windows starts"
+                          Content="{DynamicResource Str_RunAtStartup}"
                           Foreground="{DynamicResource TextMid}" FontSize="12"
                           Checked="RunAtStartupCheck_Changed"
                           Unchecked="RunAtStartupCheck_Changed"/>
             </StackPanel>
         </Border>
 
-        <!-- ── Theme ── -->
+        <!-- ── Appearance (Theme + Language) ── -->
         <Border Background="{DynamicResource PanelBgBrush}" CornerRadius="10"
                 BorderBrush="{DynamicResource PanelBorderBrush}" BorderThickness="1" Margin="0,0,0,16" Padding="16,12">
             <StackPanel>
-                <TextBlock Text="Appearance" FontSize="11" FontWeight="SemiBold"
+                <TextBlock Text="{DynamicResource Str_Appearance}" FontSize="11" FontWeight="SemiBold"
                            Foreground="{DynamicResource LabelFgBrush}" Margin="0,0,0,10"/>
+
+                <!-- Theme row -->
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                    <TextBlock Text="{DynamicResource Str_Theme}" FontSize="12"
+                               Foreground="{DynamicResource SubtitleFgBrush}"
+                               VerticalAlignment="Center" Width="70" Margin="0,0,12,0"/>
+                    <ComboBox x:Name="ThemeBox" Width="200" SelectionChanged="ThemeBox_SelectionChanged">
+                        <ComboBoxItem Content="{DynamicResource Str_ThemeDark}"   Tag="Dark"/>
+                        <ComboBoxItem Content="{DynamicResource Str_ThemeLight}"  Tag="Light"/>
+                        <ComboBoxItem Content="{DynamicResource Str_ThemeSystem}" Tag="System"/>
+                    </ComboBox>
+                </StackPanel>
+
+                <!-- Language row -->
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="Theme" FontSize="12" Foreground="{DynamicResource SubtitleFgBrush}"
-                               VerticalAlignment="Center" Margin="0,0,12,0"/>
-                    <ComboBox x:Name="ThemeBox" Width="180" SelectionChanged="ThemeBox_SelectionChanged">
-                        <ComboBoxItem Content="Dark"              Tag="Dark"/>
-                        <ComboBoxItem Content="Light"             Tag="Light"/>
-                        <ComboBoxItem Content="System (follow Windows)" Tag="System"/>
+                    <TextBlock Text="{DynamicResource Str_Language}" FontSize="12"
+                               Foreground="{DynamicResource SubtitleFgBrush}"
+                               VerticalAlignment="Center" Width="70" Margin="0,0,12,0"/>
+                    <ComboBox x:Name="LanguageBox" Width="200" SelectionChanged="LanguageBox_SelectionChanged">
+                        <ComboBoxItem Content="English"        Tag="en"/>
+                        <ComboBoxItem Content="한국어"          Tag="ko"/>
+                        <ComboBoxItem Content="日本語"          Tag="ja"/>
+                        <ComboBoxItem Content="中文（简体）"    Tag="zh"/>
+                        <ComboBoxItem Content="Español"        Tag="es"/>
+                        <ComboBoxItem Content="Français"       Tag="fr"/>
+                        <ComboBoxItem Content="Deutsch"        Tag="de"/>
+                        <ComboBoxItem Content="Português"      Tag="pt"/>
+                        <ComboBoxItem Content="Русский"        Tag="ru"/>
+                        <ComboBoxItem Content="Italiano"       Tag="it"/>
                     </ComboBox>
                 </StackPanel>
             </StackPanel>
@@ -137,13 +165,11 @@
         <Border Background="{DynamicResource PanelBgBrush}" CornerRadius="10"
                 BorderBrush="{DynamicResource PanelBorderBrush}" BorderThickness="1" Margin="0,0,0,16" Padding="16,12">
             <StackPanel>
-                <TextBlock Text="Keyboard Shortcut" FontSize="11" FontWeight="SemiBold"
+                <TextBlock Text="{DynamicResource Str_KeyboardShortcut}" FontSize="11" FontWeight="SemiBold"
                            Foreground="{DynamicResource LabelFgBrush}" Margin="0,0,0,10"/>
-                <TextBlock FontSize="11" Foreground="{DynamicResource SubtitleFgBrush}"
-                           TextWrapping="Wrap" Margin="0,0,0,10">
-                    Trigger the popup for the currently selected text using a hotkey.
-                    Select modifiers, then click the key field and press a key.
-                </TextBlock>
+                <TextBlock Text="{DynamicResource Str_HotkeyDescription}" FontSize="11"
+                           Foreground="{DynamicResource SubtitleFgBrush}"
+                           TextWrapping="Wrap" Margin="0,0,0,10"/>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <CheckBox x:Name="HotkeyCtrlCheck"  Content="Ctrl"  FontSize="12" Margin="0,0,10,0"
                               Foreground="{DynamicResource TextMid}"
@@ -159,11 +185,11 @@
                     <TextBox x:Name="HotkeyKeyBox" Width="80" IsReadOnly="True"
                              TextAlignment="Center" VerticalContentAlignment="Center"
                              FontSize="12"
-                             ToolTip="Click here, then press a key. Delete/Backspace to clear."
+                             ToolTip="{DynamicResource Str_HotkeyKeyboxTooltip}"
                              PreviewKeyDown="HotkeyKeyBox_PreviewKeyDown"
                              GotFocus="HotkeyKeyBox_GotFocus"
                              LostFocus="HotkeyKeyBox_LostFocus"/>
-                    <Button Content="Clear" Width="56" Margin="8,0,0,0"
+                    <Button Content="{DynamicResource Str_Clear}" Width="56" Margin="8,0,0,0"
                             Click="HotkeyKey_Clear"/>
                 </StackPanel>
                 <TextBlock x:Name="HotkeyHint" FontSize="10" Margin="0,6,0,0"
@@ -173,14 +199,14 @@
 
         <!-- ── Actions header ── -->
         <DockPanel Margin="0,0,0,8">
-            <TextBlock Text="Actions" FontSize="11" FontWeight="SemiBold"
+            <TextBlock Text="{DynamicResource Str_Actions}" FontSize="11" FontWeight="SemiBold"
                        Foreground="{DynamicResource LabelFgBrush}" VerticalAlignment="Center"/>
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
-                <Button Content="Import" Width="76" Margin="0,0,8,0"
+                <Button Content="{DynamicResource Str_Import}" Width="76" Margin="0,0,8,0"
                         Click="ImportActions_Click"/>
-                <Button Content="Export" Width="76" Margin="0,0,8,0"
+                <Button Content="{DynamicResource Str_Export}" Width="76" Margin="0,0,8,0"
                         Click="ExportActions_Click"/>
-                <Button Content="+ Add" Width="76"
+                <Button Content="{DynamicResource Str_AddAction}" Width="76"
                         Style="{StaticResource PrimaryButton}"
                         Click="AddAction_Click"/>
             </StackPanel>
@@ -190,34 +216,32 @@
         <ListView x:Name="ActionsList" SelectionMode="Single" MinHeight="150">
             <ListView.View>
                 <GridView>
-                    <GridViewColumn Header="Icon" Width="40">
+                    <GridViewColumn Header="{DynamicResource Str_ColIcon}" Width="40">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding Icon}" 
-                                           FontFamily="Segoe MDL2 Assets" 
-                                           FontSize="13" 
-                                           HorizontalAlignment="Center" 
+                                <TextBlock Text="{Binding Icon}"
+                                           FontFamily="Segoe MDL2 Assets"
+                                           FontSize="13"
+                                           HorizontalAlignment="Center"
                                            Foreground="{DynamicResource AccentBrush}"/>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Header="Name"   Width="95"  DisplayMemberBinding="{Binding Name}"/>
-                    <GridViewColumn Header="Prompt" Width="265" DisplayMemberBinding="{Binding PromptFormat}"/>
-                    <GridViewColumn Header="Output" Width="98"  DisplayMemberBinding="{Binding ResultAction}"/>
+                    <GridViewColumn Header="{DynamicResource Str_ColName}"   Width="95"  DisplayMemberBinding="{Binding Name}"/>
+                    <GridViewColumn Header="{DynamicResource Str_ColPrompt}" Width="265" DisplayMemberBinding="{Binding PromptFormat}"/>
+                    <GridViewColumn Header="{DynamicResource Str_ColOutput}" Width="98"  DisplayMemberBinding="{Binding ResultAction}"/>
                 </GridView>
             </ListView.View>
         </ListView>
 
         <!-- ── Info & GitHub link ── -->
         <StackPanel Orientation="Vertical" Margin="0,10,0,0">
-            <TextBlock FontSize="10" Foreground="{DynamicResource TextLow}" TextWrapping="Wrap"
-                       Margin="0,0,0,4">
-                Popup triggers: drag to select · double-click (word) · Shift+arrow keys / Ctrl+A · hold left button (≥ 300 ms) in a text field · custom hotkey above. Dismiss with Esc, right-click, or clicking outside.
-            </TextBlock>
+            <TextBlock Text="{DynamicResource Str_PopupTriggerHint}" FontSize="10"
+                       Foreground="{DynamicResource TextLow}" TextWrapping="Wrap" Margin="0,0,0,4"/>
             <TextBlock FontSize="10">
                 <Hyperlink NavigateUri="https://github.com/CrowKing63/Orbital"
                            RequestNavigate="Hyperlink_RequestNavigate">
-                    GitHub — CrowKing63/Orbital
+                    <Run Text="{DynamicResource Str_GitHubLink}"/>
                 </Hyperlink>
             </TextBlock>
         </StackPanel>
@@ -227,16 +251,16 @@
 
         <!-- ── Bottom buttons ── -->
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
-            <Button Content="↑" Width="36" Margin="0,0,4,0" ToolTip="Move Up"
+            <Button Content="↑" Width="36" Margin="0,0,4,0" ToolTip="{DynamicResource Str_MoveUp}"
                     Click="MoveActionUp_Click"/>
-            <Button Content="↓" Width="36" Margin="0,0,12,0" ToolTip="Move Down"
+            <Button Content="↓" Width="36" Margin="0,0,12,0" ToolTip="{DynamicResource Str_MoveDown}"
                     Click="MoveActionDown_Click"/>
-            <Button Content="Delete" Width="76" Margin="0,0,8,0"
+            <Button Content="{DynamicResource Str_Delete}" Width="76" Margin="0,0,8,0"
                     Style="{StaticResource DangerButton}"
                     Click="DeleteAction_Click"/>
-            <Button Content="Edit" Width="76" Margin="0,0,8,0"
+            <Button Content="{DynamicResource Str_Edit}" Width="76" Margin="0,0,8,0"
                     Click="EditAction_Click"/>
-            <Button Content="Save &amp; Close" Width="110"
+            <Button Content="{DynamicResource Str_SaveAndClose}" Width="120"
                     Style="{StaticResource PrimaryButton}"
                     Click="SaveAndClose_Click" IsDefault="True"/>
         </StackPanel>
