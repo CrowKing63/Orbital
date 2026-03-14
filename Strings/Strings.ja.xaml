@@ -83,6 +83,7 @@ Orbital はテキスト選択ジェスチャーを検出するためにこのフ
     <s:String x:Key="Str_HookErrorTitle">Orbital 起動エラー</s:String>
     <s:String x:Key="Str_TrayTooltip">Orbital - テキスト AI アシスタント</s:String>
     <s:String x:Key="Str_TraySettings">設定</s:String>
+    <s:String x:Key="Str_TrayRestart">再起動</s:String>
     <s:String x:Key="Str_TrayExit">終了</s:String>
     <s:String x:Key="Str_UpdateBalloonTitle">Orbital が更新されました</s:String>
     <s:String x:Key="Str_UpdateBalloonMsg">バージョン {0} がダウンロードされました。Orbital を再起動して適用してください。</s:String>

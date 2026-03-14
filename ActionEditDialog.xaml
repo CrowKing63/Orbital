@@ -8,16 +8,15 @@
 
     <Grid Margin="20">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
+        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel>
+
         <!-- 이름 및 아이콘 -->
-        <Grid Grid.Row="0" Margin="0,0,0,14">
+        <Grid Margin="0,0,0,14">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="3*"/>
                 <ColumnDefinition Width="*"/>
@@ -37,7 +36,7 @@
         </Grid>
 
         <!-- 프롬프트 -->
-        <StackPanel Grid.Row="1" Margin="0,0,0,14">
+        <StackPanel Margin="0,0,0,14">
             <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
                 <TextBlock Text="{DynamicResource Str_Prompt}" FontSize="11" FontWeight="SemiBold"
                            Foreground="{DynamicResource LabelFgBrush}"/>
@@ -49,7 +48,7 @@
         </StackPanel>
 
         <!-- 출력 방식 -->
-        <StackPanel Grid.Row="2" Margin="0,0,0,14">
+        <StackPanel Margin="0,0,0,14">
             <TextBlock Text="{DynamicResource Str_OutputMode}" FontSize="11" FontWeight="SemiBold"
                        Foreground="{DynamicResource LabelFgBrush}" Margin="0,0,0,6"/>
             <ComboBox x:Name="ResultActionBox" SelectedIndex="0">
@@ -64,7 +63,7 @@
         </StackPanel>
 
         <!-- Display mode -->
-        <StackPanel Grid.Row="3" Margin="0,0,0,14">
+        <StackPanel Margin="0,0,0,14">
             <TextBlock Text="{DynamicResource Str_ButtonDisplay}" FontSize="11" FontWeight="SemiBold"
                        Foreground="{DynamicResource LabelFgBrush}" Margin="0,0,0,6"/>
             <ComboBox x:Name="DisplayModeBox" SelectedIndex="0">
@@ -75,13 +74,14 @@
         </StackPanel>
 
         <!-- 옵션 -->
-        <StackPanel Grid.Row="4" Margin="0,0,0,14">
-            <CheckBox x:Name="RequiresSelectionCheck" Content="{DynamicResource Str_RequiresSelection}"
-                      Foreground="{DynamicResource TextMid}" FontSize="11" IsChecked="True"/>
-        </StackPanel>
+        <CheckBox x:Name="RequiresSelectionCheck" Content="{DynamicResource Str_RequiresSelection}"
+                  Foreground="{DynamicResource TextMid}" FontSize="11" IsChecked="True"/>
 
-        <!-- 버튼 -->
-        <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Right">
+        </StackPanel>
+        </ScrollViewer>
+
+        <!-- 하단 버튼 (고정) -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
             <Button Content="{DynamicResource Str_Save}" Width="82" Margin="0,0,8,0"
                     Style="{StaticResource PrimaryButton}"
                     IsDefault="True" Click="Ok_Click"/>

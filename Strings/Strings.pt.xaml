@@ -83,6 +83,7 @@ Causas comuns:
     <s:String x:Key="Str_HookErrorTitle">Erro de inicialização do Orbital</s:String>
     <s:String x:Key="Str_TrayTooltip">Orbital - Assistente de texto com IA</s:String>
     <s:String x:Key="Str_TraySettings">Configurações</s:String>
+    <s:String x:Key="Str_TrayRestart">Reiniciar</s:String>
     <s:String x:Key="Str_TrayExit">Sair</s:String>
     <s:String x:Key="Str_UpdateBalloonTitle">Orbital atualizado</s:String>
     <s:String x:Key="Str_UpdateBalloonMsg">A versão {0} foi baixada. Reinicie o Orbital para aplicar.</s:String>

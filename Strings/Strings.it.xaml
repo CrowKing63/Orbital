@@ -83,6 +83,7 @@ Cause comuni:
     <s:String x:Key="Str_HookErrorTitle">Errore di avvio di Orbital</s:String>
     <s:String x:Key="Str_TrayTooltip">Orbital - Assistente testo IA</s:String>
     <s:String x:Key="Str_TraySettings">Impostazioni</s:String>
+    <s:String x:Key="Str_TrayRestart">Riavvia</s:String>
     <s:String x:Key="Str_TrayExit">Esci</s:String>
     <s:String x:Key="Str_UpdateBalloonTitle">Orbital aggiornato</s:String>
     <s:String x:Key="Str_UpdateBalloonMsg">La versione {0} è stata scaricata. Riavvia Orbital per applicare l'aggiornamento.</s:String>

@@ -25,6 +25,8 @@ namespace Orbital
         private ActionExecutorService? _actionExecutor;
         private CancellationTokenSource? _selectionCts;
         private readonly object _selectionLock = new object();
+        private UpdateInfo? _pendingUpdate;
+        private UpdateManager? _updateManager;
 
         private static readonly HashSet<string> _supportedLanguages =
             new() { "en", "ko", "ja", "zh", "es", "fr", "de", "pt", "ru", "it" };
@@ -151,8 +153,12 @@ namespace Orbital
                 if (updateInfo != null)
                 {
                     await mgr.DownloadUpdatesAsync(updateInfo);
+                    _updateManager = mgr;
+                    _pendingUpdate = updateInfo;
+                    mgr.WaitExitThenApplyUpdates(updateInfo, silent: true, restart: true);
                     Dispatcher.Invoke(() =>
                     {
+                        RebuildTrayMenu();
                         _notifyIcon.ShowBalloonTip(
                             8000,
                             Loc.Get("Str_UpdateBalloonTitle"),
@@ -263,6 +269,23 @@ namespace Orbital
             menu.Items.Clear();
             menu.Items.Add(Loc.Get("Str_TraySettings"), null,
                 (s, e) => Dispatcher.Invoke(OpenSettingsWindow));
+            menu.Items.Add(new WinForms.ToolStripSeparator());
+
+            string restartLabel = _pendingUpdate != null
+                ? $"{Loc.Get("Str_TrayRestart")} (v{_pendingUpdate.TargetFullRelease.Version})"
+                : Loc.Get("Str_TrayRestart");
+            menu.Items.Add(restartLabel, null, (s, e) =>
+            {
+                if (_pendingUpdate != null)
+                    _updateManager?.ApplyUpdatesAndRestart(_pendingUpdate);
+                else
+                {
+                    var exe = Environment.ProcessPath;
+                    if (exe != null) System.Diagnostics.Process.Start(exe);
+                    Dispatcher.Invoke(Shutdown);
+                }
+            });
+
             menu.Items.Add(new WinForms.ToolStripSeparator());
             menu.Items.Add(Loc.Get("Str_TrayExit"), null, (s, e) =>
             {

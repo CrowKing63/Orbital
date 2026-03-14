@@ -83,6 +83,7 @@ Orbital требует этот перехватчик для обнаружен
     <s:String x:Key="Str_HookErrorTitle">Ошибка запуска Orbital</s:String>
     <s:String x:Key="Str_TrayTooltip">Orbital - текстовый ИИ-ассистент</s:String>
     <s:String x:Key="Str_TraySettings">Настройки</s:String>
+    <s:String x:Key="Str_TrayRestart">Перезапустить</s:String>
     <s:String x:Key="Str_TrayExit">Выход</s:String>
     <s:String x:Key="Str_UpdateBalloonTitle">Orbital обновлён</s:String>
     <s:String x:Key="Str_UpdateBalloonMsg">Версия {0} загружена. Перезапустите Orbital для применения обновления.</s:String>

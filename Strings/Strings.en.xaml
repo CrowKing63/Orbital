@@ -92,6 +92,7 @@ Common causes:
     <s:String x:Key="Str_HookErrorTitle">Orbital Startup Error</s:String>
     <s:String x:Key="Str_TrayTooltip">Orbital - Text AI Assistant</s:String>
     <s:String x:Key="Str_TraySettings">Settings</s:String>
+    <s:String x:Key="Str_TrayRestart">Restart</s:String>
     <s:String x:Key="Str_TrayExit">Exit</s:String>
     <s:String x:Key="Str_UpdateBalloonTitle">Orbital Updated</s:String>
     <s:String x:Key="Str_UpdateBalloonMsg">Version {0} has been downloaded. Restart Orbital to apply.</s:String>

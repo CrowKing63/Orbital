@@ -83,6 +83,7 @@ Causes fréquentes :
     <s:String x:Key="Str_HookErrorTitle">Erreur de démarrage d'Orbital</s:String>
     <s:String x:Key="Str_TrayTooltip">Orbital - Assistant texte IA</s:String>
     <s:String x:Key="Str_TraySettings">Paramètres</s:String>
+    <s:String x:Key="Str_TrayRestart">Redémarrer</s:String>
     <s:String x:Key="Str_TrayExit">Quitter</s:String>
     <s:String x:Key="Str_UpdateBalloonTitle">Orbital mis à jour</s:String>
     <s:String x:Key="Str_UpdateBalloonMsg">La version {0} a été téléchargée. Redémarrez Orbital pour l'appliquer.</s:String>

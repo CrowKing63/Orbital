@@ -83,6 +83,7 @@ Orbital 需要此钩子来检测文本选择手势。
     <s:String x:Key="Str_HookErrorTitle">Orbital 启动错误</s:String>
     <s:String x:Key="Str_TrayTooltip">Orbital - 文本 AI 助手</s:String>
     <s:String x:Key="Str_TraySettings">设置</s:String>
+    <s:String x:Key="Str_TrayRestart">重启</s:String>
     <s:String x:Key="Str_TrayExit">退出</s:String>
     <s:String x:Key="Str_UpdateBalloonTitle">Orbital 已更新</s:String>
     <s:String x:Key="Str_UpdateBalloonMsg">版本 {0} 已下载完成。请重启 Orbital 以应用更新。</s:String>
