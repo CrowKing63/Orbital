@@ -327,9 +327,8 @@ namespace Orbital
 
         private void SystemHookManager_OnDoubleClickRelease(object? sender, SystemHookManager.MousePoint e)
         {
-            // Only show popup for double-click in editable controls (same guard as long-press)
-            if (!IsOverEditableControl(e.X, e.Y)) return;
-            TriggerSelectionMenu(e.X, e.Y, isKeyboard: false);
+            // Editable-control check is deferred to the background thread inside TriggerSelectionMenu
+            TriggerSelectionMenu(e.X, e.Y, isKeyboard: false, requireEditable: true);
         }
 
         private void SystemHookManager_OnKeyboardSelection(object? sender, SystemHookManager.MousePoint e)
@@ -344,11 +343,14 @@ namespace Orbital
 
         private void SystemHookManager_OnLongPress(object? sender, SystemHookManager.MousePoint e)
         {
-            if (!IsOverEditableControl(e.X, e.Y)) return;
-
-            Dispatcher.Invoke(() =>
+            // Run IsOverEditableControl on a background thread to avoid blocking the hook callback
+            System.Threading.Tasks.Task.Run(() =>
             {
-                _radialMenu.ShowAtCursor(e.X, e.Y, string.Empty, isEditable: true);
+                if (!IsOverEditableControl(e.X, e.Y)) return;
+                Dispatcher.Invoke(() =>
+                {
+                    _radialMenu.ShowAtCursor(e.X, e.Y, string.Empty, isEditable: true);
+                });
             });
         }
 
@@ -365,8 +367,10 @@ namespace Orbital
         /// Common path: wait 50 ms, extract selected text via Ctrl+C, show popup.
         /// <paramref name="isKeyboard"/> = true skips the editable-control check for Paste/Cut
         /// (keyboard selection always implies an editable control was focused).
+        /// <paramref name="requireEditable"/> = true aborts early when not over an editable control
+        /// (used for double-click, which should not trigger on read-only areas).
         /// </summary>
-        private void TriggerSelectionMenu(int screenX, int screenY, bool isKeyboard)
+        private void TriggerSelectionMenu(int screenX, int screenY, bool isKeyboard, bool requireEditable = false)
         {
             CancellationToken token;
             lock (_selectionLock)
@@ -384,8 +388,10 @@ namespace Orbital
                 Thread.Sleep(50);
                 if (token.IsCancellationRequested) return;
 
+                bool isEditable = isKeyboard || IsOverEditableControl(screenX, screenY);
+                if (requireEditable && !isEditable) return;
+
                 string selectedText = ClipboardHelper.GetSelectedText();
-                bool   isEditable   = isKeyboard || IsOverEditableControl(screenX, screenY);
 
                 if (!string.IsNullOrWhiteSpace(selectedText) && !token.IsCancellationRequested)
                 {

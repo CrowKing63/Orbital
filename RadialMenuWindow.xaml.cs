@@ -10,6 +10,15 @@ namespace Orbital
     public partial class RadialMenuWindow : Window
     {
         private static readonly System.Windows.Media.FontFamily _iconFont = new System.Windows.Media.FontFamily("Segoe MDL2 Assets");
+        private static readonly System.Windows.Media.FontFamily _emojiFont = new System.Windows.Media.FontFamily("Segoe UI Emoji");
+
+        // Returns MDL2 font for private-use-area characters (U+E000–U+F8FF), emoji font otherwise.
+        private static System.Windows.Media.FontFamily ResolveIconFont(string icon)
+        {
+            foreach (char c in icon)
+                if (c >= '\uE000' && c <= '\uF8FF') return _iconFont;
+            return _emojiFont;
+        }
 
         public string SelectedText { get; private set; } = string.Empty;
         private ActionExecutorService? _actionExecutor;
@@ -73,7 +82,7 @@ namespace Orbital
                     stack.Children.Add(new TextBlock
                     {
                         Text = action.Icon,
-                        FontFamily = _iconFont,
+                        FontFamily = ResolveIconFont(action.Icon),
                         FontSize = 14,
                         VerticalAlignment = VerticalAlignment.Center,
                         Margin = new Thickness(0, 0, 8, 0)
@@ -90,7 +99,7 @@ namespace Orbital
                     content = new TextBlock
                     {
                         Text = action.Icon,
-                        FontFamily = _iconFont,
+                        FontFamily = ResolveIconFont(action.Icon),
                         FontSize = 16,
                         VerticalAlignment = VerticalAlignment.Center
                     };

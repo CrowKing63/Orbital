@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -78,7 +79,7 @@ namespace Orbital
             Result = new ActionProfile
             {
                 Name = NameBox.Text.Trim(),
-                Icon = IconBox.Text.Trim(),
+                Icon = ParseIconInput(IconBox.Text.Trim()),
                 PromptFormat = PromptBox.Text,
                 ActionType = ActionTypeExtensions.FromString(selectedActionString),
                 RequiresSelection = RequiresSelectionCheck.IsChecked,
@@ -91,6 +92,14 @@ namespace Orbital
         private void Cancel_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = false;
+        }
+
+        // Converts "\uE8C8" or "U+E8C8" typed as text into the actual Unicode character.
+        private static string ParseIconInput(string input)
+        {
+            if (string.IsNullOrWhiteSpace(input)) return input;
+            return Regex.Replace(input, @"(?:\\u|U\+)([0-9a-fA-F]{4,5})", m =>
+                char.ConvertFromUtf32(Convert.ToInt32(m.Groups[1].Value, 16)));
         }
     }
 }

@@ -27,6 +27,9 @@
     <SolidColorBrush x:Key="PillBgBrush"        Color="#CC0D0D22"/>
     <SolidColorBrush x:Key="PillBorderBrush"    Color="#507080FF"/>
     <Color           x:Key="PillGlowColor">#7080FF</Color>
+    <Color           x:Key="AccentViColor">#7080FF</Color>
+    <Color           x:Key="AccentCyColor">#00D4FF</Color>
+    <Color           x:Key="BgPanelColor">#11112A</Color>
 
     <!-- ── Bar buttons ── -->
     <SolidColorBrush x:Key="BtnFgBrush"         Color="#C8C8FF"/>

@@ -23,9 +23,7 @@ namespace Orbital
         private const int WM_SYSKEYDOWN = 0x0104;
         private const int WM_SYSKEYUP   = 0x0105;
 
-        // Hit test
-        private const int WM_NCHITTEST = 0x0084;
-        private const int HTCLIENT     = 1;
+        // (WM_NCHITTEST / HTCLIENT removed — client area is now checked geometrically)
 
         // Keyboard injection flag — set when the keystroke was synthesised (e.g. ClipboardHelper Ctrl+C)
         private const uint LLKHF_INJECTED = 0x00000010;
@@ -199,9 +197,7 @@ namespace Orbital
                     _isDoubleClick = false;
 
                     IntPtr hwnd = WindowFromPoint(hookStruct.pt);
-                    IntPtr hitParam = (IntPtr)(((hookStruct.pt.Y & 0xFFFF) << 16) | (hookStruct.pt.X & 0xFFFF));
-                    IntPtr hitResult = SendMessage(hwnd, WM_NCHITTEST, IntPtr.Zero, hitParam);
-                    _mouseDownInClient = hitResult == (IntPtr)HTCLIENT;
+                    _mouseDownInClient = IsPointInClientArea(hwnd, hookStruct.pt);
 
                     bool startLongPressTimer = true;
 
@@ -348,6 +344,24 @@ namespace Orbital
             return CallNextHookEx(_keyboardHookID, nCode, wParam, lParam);
         }
 
+        // ── Client-area helper ───────────────────────────────────────────────────
+        /// <summary>
+        /// Returns true when <paramref name="screenPt"/> lies inside the client area of
+        /// <paramref name="hwnd"/>. Uses purely geometric Win32 calls — never sends a
+        /// message to the target window, so it cannot block the hook thread.
+        /// </summary>
+        private static bool IsPointInClientArea(IntPtr hwnd, MousePoint screenPt)
+        {
+            if (hwnd == IntPtr.Zero) return false;
+            if (!GetClientRect(hwnd, out RECT clientRect)) return false;
+            POINT origin = new POINT { x = 0, y = 0 };
+            if (!ClientToScreen(hwnd, ref origin)) return false;
+            return screenPt.X >= origin.x &&
+                   screenPt.X <  origin.x + clientRect.Right &&
+                   screenPt.Y >= origin.y &&
+                   screenPt.Y <  origin.y + clientRect.Bottom;
+        }
+
         // ── Long-press timer ─────────────────────────────────────────────────────
         private static void LongPressTimerCallback(object? state)
         {
@@ -363,6 +377,18 @@ namespace Orbital
         }
 
         // ── Win32 imports ────────────────────────────────────────────────────────
+        [StructLayout(LayoutKind.Sequential)]
+        private struct RECT { public int Left, Top, Right, Bottom; }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct POINT { public int x, y; }
+
+        [DllImport("user32.dll")]
+        private static extern bool GetClientRect(IntPtr hWnd, out RECT lpRect);
+
+        [DllImport("user32.dll")]
+        private static extern bool ClientToScreen(IntPtr hWnd, ref POINT lpPoint);
+
         [DllImport("user32.dll")]
         private static extern uint GetDoubleClickTime();
 
@@ -371,9 +397,6 @@ namespace Orbital
 
         [DllImport("user32.dll")]
         private static extern IntPtr WindowFromPoint(MousePoint pt);
-
-        [DllImport("user32.dll")]
-        private static extern IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam);
 
         [DllImport("user32.dll")]
         private static extern bool GetCursorPos(out MousePoint lpPoint);
