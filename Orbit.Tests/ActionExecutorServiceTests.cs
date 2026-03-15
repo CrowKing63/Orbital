@@ -63,7 +63,7 @@ public class ActionExecutorServiceTests
 
     private class MockLlmService : ILlmApiService
     {
-        public Task<string> CallApiAsync(string prompt)
+        public Task<string> CallApiAsync(string prompt, string? systemPrompt = null)
         {
             return Task.FromResult("mock response");
         }
