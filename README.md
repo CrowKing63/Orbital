@@ -1,4 +1,4 @@
-# Orbital
+# <img src="Assets/orbit_logo.png" width="28" valign="middle"/> Orbital
 
 **A free, open-source alternative to Snipdo for Windows.**
 
