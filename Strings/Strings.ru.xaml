@@ -66,6 +66,9 @@
     <s:String x:Key="Str_DisplayTextOnly">Только текст</s:String>
     <s:String x:Key="Str_DisplayIconOnly">Только иконка</s:String>
     <s:String x:Key="Str_RequiresSelection">Для запуска необходимо выделить текст</s:String>
+    <s:String x:Key="Str_CleanOutput">Чистый вывод (убрать комментарии ИИ)</s:String>
+    <s:String x:Key="Str_CleanOutputTooltip">Указывает ИИ возвращать только результат, без пояснений и предисловий.</s:String>
+    <s:String x:Key="Str_LoadPreset">Загрузить шаблон...</s:String>
     <s:String x:Key="Str_CopyToClipboard">Копировать в буфер обмена</s:String>
     <s:String x:Key="Str_SettingsRecoveryMsg" xml:space="preserve">Файл настроек повреждён и сброшен до значений по умолчанию.
 

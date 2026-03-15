@@ -66,6 +66,9 @@
     <s:String x:Key="Str_DisplayTextOnly">テキストのみ</s:String>
     <s:String x:Key="Str_DisplayIconOnly">アイコンのみ</s:String>
     <s:String x:Key="Str_RequiresSelection">実行にはテキストの選択が必要です</s:String>
+    <s:String x:Key="Str_CleanOutput">出力を整形（AI注釈を除去）</s:String>
+    <s:String x:Key="Str_CleanOutputTooltip">AIに結果のみを返すよう指示します。説明や前置きなしに処理結果だけが出力されます。</s:String>
+    <s:String x:Key="Str_LoadPreset">プリセットを読み込む...</s:String>
     <s:String x:Key="Str_CopyToClipboard">クリップボードにコピー</s:String>
     <s:String x:Key="Str_SettingsRecoveryMsg" xml:space="preserve">設定ファイルが破損したため、デフォルト値にリセットされました。
 

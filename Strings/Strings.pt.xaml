@@ -66,6 +66,9 @@
     <s:String x:Key="Str_DisplayTextOnly">Somente texto</s:String>
     <s:String x:Key="Str_DisplayIconOnly">Somente ícone</s:String>
     <s:String x:Key="Str_RequiresSelection">Requer texto selecionado para executar</s:String>
+    <s:String x:Key="Str_CleanOutput">Limpar saída (remover comentários da IA)</s:String>
+    <s:String x:Key="Str_CleanOutputTooltip">Instrui a IA a retornar apenas o resultado, sem explicações ou preâmbulo.</s:String>
+    <s:String x:Key="Str_LoadPreset">Carregar predefinição...</s:String>
     <s:String x:Key="Str_CopyToClipboard">Copiar para a área de transferência</s:String>
     <s:String x:Key="Str_SettingsRecoveryMsg" xml:space="preserve">O arquivo de configurações estava corrompido e foi redefinido para os padrões.
 

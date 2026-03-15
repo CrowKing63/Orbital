@@ -66,6 +66,9 @@
     <s:String x:Key="Str_DisplayTextOnly">仅文字</s:String>
     <s:String x:Key="Str_DisplayIconOnly">仅图标</s:String>
     <s:String x:Key="Str_RequiresSelection">运行时需要先选中文本</s:String>
+    <s:String x:Key="Str_CleanOutput">净化输出（去除AI注释）</s:String>
+    <s:String x:Key="Str_CleanOutputTooltip">指示AI仅返回处理结果，不含任何解释或前言。</s:String>
+    <s:String x:Key="Str_LoadPreset">加载预设...</s:String>
     <s:String x:Key="Str_CopyToClipboard">复制到剪贴板</s:String>
     <s:String x:Key="Str_SettingsRecoveryMsg" xml:space="preserve">设置文件已损坏，已重置为默认值。
 

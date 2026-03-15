@@ -66,6 +66,9 @@
     <s:String x:Key="Str_DisplayTextOnly">Solo testo</s:String>
     <s:String x:Key="Str_DisplayIconOnly">Solo icona</s:String>
     <s:String x:Key="Str_RequiresSelection">Richiede testo selezionato per l'esecuzione</s:String>
+    <s:String x:Key="Str_CleanOutput">Output pulito (rimuovi commenti AI)</s:String>
+    <s:String x:Key="Str_CleanOutputTooltip">Istruisce l'AI a restituire solo il risultato, senza spiegazioni o preamboli.</s:String>
+    <s:String x:Key="Str_LoadPreset">Carica modello...</s:String>
     <s:String x:Key="Str_CopyToClipboard">Copia negli appunti</s:String>
     <s:String x:Key="Str_SettingsRecoveryMsg" xml:space="preserve">Il file delle impostazioni era danneggiato ed è stato ripristinato ai valori predefiniti.
 

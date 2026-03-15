@@ -34,6 +34,9 @@ namespace Orbital
         private const int VK_ALT     = 0x12;
         private const int VK_ESCAPE  = 0x1B;
         private const int VK_A       = 0x41;
+        private const int VK_C       = 0x43;
+        private const int VK_V       = 0x56;
+        private const int VK_X       = 0x58;
 
         // Navigation keys that, combined with Shift, select text
         private static readonly HashSet<int> s_navKeys = new()
@@ -105,6 +108,9 @@ namespace Orbital
 
         /// <summary>Escape key pressed — caller should hide the popup.</summary>
         public static event EventHandler? OnEscapePressed;
+
+        /// <summary>User pressed Ctrl+C, Ctrl+X, or Ctrl+V — popup should hide to let the shortcut reach the target app.</summary>
+        public static event EventHandler? OnClipboardShortcut;
 
         /// <summary>User-configured hotkey combination pressed.</summary>
         public static event EventHandler<MousePoint>? OnCustomHotkey;
@@ -296,6 +302,10 @@ namespace Orbital
 
                         if (_ctrlDown && vk == VK_A)
                             _pendingKeyboardSelection = true;
+
+                        // ── Clipboard shortcuts — dismiss popup ──────────────────
+                        if (_ctrlDown && (vk == VK_C || vk == VK_X || vk == VK_V))
+                            OnClipboardShortcut?.Invoke(null, EventArgs.Empty);
 
                         // ── Custom hotkey ────────────────────────────────────────
                         if (HotkeyVirtualKey != 0 && (uint)vk == HotkeyVirtualKey)

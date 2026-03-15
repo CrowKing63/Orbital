@@ -8,7 +8,7 @@ namespace Orbital
 {
     public interface ILlmApiService
     {
-        Task<string> CallApiAsync(string prompt);
+        Task<string> CallApiAsync(string prompt, string? systemPrompt = null);
     }
 
     public class OpenAiApiService : ILlmApiService, IDisposable
@@ -33,20 +33,37 @@ namespace Orbital
             _authHeader = $"Bearer {apiKey.Trim()}";
         }
 
-        public async Task<string> CallApiAsync(string prompt)
+        public async Task<string> CallApiAsync(string prompt, string? systemPrompt = null)
         {
             if (_disposed)
                 throw new ObjectDisposedException(nameof(OpenAiApiService));
 
-            var requestBody = new
+            object requestBody;
+            if (systemPrompt != null)
             {
-                model = _model,
-                messages = new[]
+                requestBody = new
                 {
-                    new { role = "user", content = prompt }
-                },
-                max_tokens = 2048
-            };
+                    model = _model,
+                    messages = new object[]
+                    {
+                        new { role = "system", content = systemPrompt },
+                        new { role = "user", content = prompt }
+                    },
+                    max_tokens = 2048
+                };
+            }
+            else
+            {
+                requestBody = new
+                {
+                    model = _model,
+                    messages = new[]
+                    {
+                        new { role = "user", content = prompt }
+                    },
+                    max_tokens = 2048
+                };
+            }
 
             string json = JsonSerializer.Serialize(requestBody);
             using var content = new StringContent(json, Encoding.UTF8, "application/json");

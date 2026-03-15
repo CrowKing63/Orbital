@@ -66,6 +66,9 @@
     <s:String x:Key="Str_DisplayTextOnly">텍스트만</s:String>
     <s:String x:Key="Str_DisplayIconOnly">아이콘만</s:String>
     <s:String x:Key="Str_RequiresSelection">실행하려면 텍스트를 선택해야 합니다</s:String>
+    <s:String x:Key="Str_CleanOutput">출력 정제 (AI 부가설명 제거)</s:String>
+    <s:String x:Key="Str_CleanOutputTooltip">AI가 결과만 반환하도록 지시합니다. 설명이나 서두 없이 처리 결과만 출력됩니다.</s:String>
+    <s:String x:Key="Str_LoadPreset">프리셋 불러오기...</s:String>
     <s:String x:Key="Str_CopyToClipboard">클립보드에 복사</s:String>
     <s:String x:Key="Str_SettingsRecoveryMsg" xml:space="preserve">설정 파일이 손상되어 기본값으로 초기화되었습니다.
 

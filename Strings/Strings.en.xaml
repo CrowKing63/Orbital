@@ -71,6 +71,9 @@
     <s:String x:Key="Str_DisplayTextOnly">Text Only</s:String>
     <s:String x:Key="Str_DisplayIconOnly">Icon Only</s:String>
     <s:String x:Key="Str_RequiresSelection">Requires selected text to run</s:String>
+    <s:String x:Key="Str_CleanOutput">Clean output (strip AI commentary)</s:String>
+    <s:String x:Key="Str_CleanOutputTooltip">Instructs the AI to return only the result, without any explanation or preamble.</s:String>
+    <s:String x:Key="Str_LoadPreset">Load preset...</s:String>
 
     <!-- ══ ResultTooltipWindow — XAML ══ -->
     <s:String x:Key="Str_CopyToClipboard">Copy to Clipboard</s:String>

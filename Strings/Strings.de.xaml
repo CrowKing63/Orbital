@@ -66,6 +66,9 @@
     <s:String x:Key="Str_DisplayTextOnly">Nur Text</s:String>
     <s:String x:Key="Str_DisplayIconOnly">Nur Symbol</s:String>
     <s:String x:Key="Str_RequiresSelection">Erfordert ausgewählten Text zur Ausführung</s:String>
+    <s:String x:Key="Str_CleanOutput">Ausgabe bereinigen (KI-Kommentare entfernen)</s:String>
+    <s:String x:Key="Str_CleanOutputTooltip">Weist die KI an, nur das Ergebnis zurückzugeben, ohne Erklärungen oder Vorbemerkungen.</s:String>
+    <s:String x:Key="Str_LoadPreset">Vorlage laden...</s:String>
     <s:String x:Key="Str_CopyToClipboard">In Zwischenablage kopieren</s:String>
     <s:String x:Key="Str_SettingsRecoveryMsg" xml:space="preserve">Die Einstellungsdatei war beschädigt und wurde auf die Standardwerte zurückgesetzt.
 

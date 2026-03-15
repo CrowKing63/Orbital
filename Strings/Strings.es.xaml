@@ -66,6 +66,9 @@
     <s:String x:Key="Str_DisplayTextOnly">Solo texto</s:String>
     <s:String x:Key="Str_DisplayIconOnly">Solo ícono</s:String>
     <s:String x:Key="Str_RequiresSelection">Requiere texto seleccionado para ejecutarse</s:String>
+    <s:String x:Key="Str_CleanOutput">Limpiar salida (eliminar comentarios de IA)</s:String>
+    <s:String x:Key="Str_CleanOutputTooltip">Indica a la IA que devuelva solo el resultado, sin explicaciones ni preámbulos.</s:String>
+    <s:String x:Key="Str_LoadPreset">Cargar preset...</s:String>
     <s:String x:Key="Str_CopyToClipboard">Copiar al portapapeles</s:String>
     <s:String x:Key="Str_SettingsRecoveryMsg" xml:space="preserve">El archivo de configuración estaba dañado y se ha restablecido a los valores predeterminados.
 

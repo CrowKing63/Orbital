@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 
 namespace Orbital
 {
@@ -38,31 +39,52 @@ namespace Orbital
 
             if (existing != null)
             {
-                NameBox.Text = existing.Name;
-                IconBox.Text = existing.Icon;
-                PromptBox.Text = existing.PromptFormat;
-                RequiresSelectionCheck.IsChecked = existing.IsSelectionRequired;
+                PopulateFields(existing);
+            }
+        }
 
-                // Match by Tag (serialized value) so localized Content doesn't break selection
-                foreach (ComboBoxItem item in ResultActionBox.Items)
-                {
-                    if (item.Tag?.ToString() == existing.ActionType.ToSerializedString())
-                    {
-                        ResultActionBox.SelectedItem = item;
-                        break;
-                    }
-                }
+        private void PopulateFields(ActionProfile profile)
+        {
+            NameBox.Text = profile.Name;
+            IconBox.Text = profile.Icon;
+            PromptBox.Text = profile.PromptFormat;
+            RequiresSelectionCheck.IsChecked = profile.IsSelectionRequired;
+            CleanOutputCheck.IsChecked = profile.CleanOutput;
 
-                // Set DisplayModeBox selection
-                foreach (ComboBoxItem item in DisplayModeBox.Items)
+            // Match by Tag (serialized value) so localized Content doesn't break selection
+            foreach (ComboBoxItem item in ResultActionBox.Items)
+            {
+                if (item.Tag?.ToString() == profile.ActionType.ToSerializedString())
                 {
-                    if (item.Tag?.ToString() == existing.DisplayMode.ToString())
-                    {
-                        DisplayModeBox.SelectedItem = item;
-                        break;
-                    }
+                    ResultActionBox.SelectedItem = item;
+                    break;
                 }
             }
+
+            // Set DisplayModeBox selection
+            foreach (ComboBoxItem item in DisplayModeBox.Items)
+            {
+                if (item.Tag?.ToString() == profile.DisplayMode.ToString())
+                {
+                    DisplayModeBox.SelectedItem = item;
+                    break;
+                }
+            }
+        }
+
+        private void LoadPreset_Click(object sender, RoutedEventArgs e)
+        {
+            var menu = new ContextMenu { PlacementTarget = LoadPresetButton, Placement = PlacementMode.Bottom };
+            foreach (var preset in ActionPresets.All)
+            {
+                string display = string.IsNullOrEmpty(preset.Icon)
+                    ? preset.Name
+                    : $"{preset.Icon}  {preset.Name}";
+                var item = new MenuItem { Header = display, Tag = preset };
+                item.Click += (_, _) => PopulateFields((ActionProfile)((MenuItem)item).Tag!);
+                menu.Items.Add(item);
+            }
+            menu.IsOpen = true;
         }
 
         private void Ok_Click(object sender, RoutedEventArgs e)
@@ -83,7 +105,8 @@ namespace Orbital
                 PromptFormat = PromptBox.Text,
                 ActionType = ActionTypeExtensions.FromString(selectedActionString),
                 RequiresSelection = RequiresSelectionCheck.IsChecked,
-                DisplayMode = Enum.TryParse<ButtonDisplayMode>(selectedMode, out var mode) ? mode : ButtonDisplayMode.TextAndIcon
+                DisplayMode = Enum.TryParse<ButtonDisplayMode>(selectedMode, out var mode) ? mode : ButtonDisplayMode.TextAndIcon,
+                CleanOutput = CleanOutputCheck.IsChecked == true
             };
 
             DialogResult = true;

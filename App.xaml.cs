@@ -67,6 +67,7 @@ namespace Orbital
             SystemHookManager.OnDoubleClickRelease  += SystemHookManager_OnDoubleClickRelease;
             SystemHookManager.OnKeyboardSelection   += SystemHookManager_OnKeyboardSelection;
             SystemHookManager.OnEscapePressed       += SystemHookManager_OnEscapePressed;
+            SystemHookManager.OnClipboardShortcut   += SystemHookManager_OnClipboardShortcut;
             SystemHookManager.OnCustomHotkey        += SystemHookManager_OnCustomHotkey;
 
             ApplyHotkeySettings();
@@ -355,6 +356,15 @@ namespace Orbital
         }
 
         private void SystemHookManager_OnEscapePressed(object? sender, EventArgs e)
+        {
+            Dispatcher.BeginInvoke(() =>
+            {
+                if (_radialMenu.IsVisible)
+                    _radialMenu.Hide();
+            });
+        }
+
+        private void SystemHookManager_OnClipboardShortcut(object? sender, EventArgs e)
         {
             Dispatcher.BeginInvoke(() =>
             {

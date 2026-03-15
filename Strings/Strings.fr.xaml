@@ -66,6 +66,9 @@
     <s:String x:Key="Str_DisplayTextOnly">Texte uniquement</s:String>
     <s:String x:Key="Str_DisplayIconOnly">Icône uniquement</s:String>
     <s:String x:Key="Str_RequiresSelection">Nécessite du texte sélectionné pour s'exécuter</s:String>
+    <s:String x:Key="Str_CleanOutput">Nettoyer la sortie (supprimer les commentaires IA)</s:String>
+    <s:String x:Key="Str_CleanOutputTooltip">Demande à l'IA de retourner uniquement le résultat, sans explication ni préambule.</s:String>
+    <s:String x:Key="Str_LoadPreset">Charger un modèle...</s:String>
     <s:String x:Key="Str_CopyToClipboard">Copier dans le presse-papiers</s:String>
     <s:String x:Key="Str_SettingsRecoveryMsg" xml:space="preserve">Le fichier de paramètres était corrompu et a été réinitialisé aux valeurs par défaut.
 

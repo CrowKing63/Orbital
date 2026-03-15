@@ -50,6 +50,7 @@ namespace Orbital
                     return;
 
                 case ActionType.Paste:
+                    System.Threading.Thread.Sleep(150); // allow focus to return to target window after popup hides
                     ClipboardHelper.SimulatePaste();
                     return;
             }
@@ -61,7 +62,10 @@ namespace Orbital
             }
 
             string prompt = action.PromptFormat.Replace("{text}", selectedText);
-            string result = await _llmService.CallApiAsync(prompt);
+            string? systemPrompt = action.CleanOutput
+                ? "Return only the processed result. Do not include any explanation, preamble, commentary, or extra text."
+                : null;
+            string result = await _llmService.CallApiAsync(prompt, systemPrompt);
 
             switch (action.ActionType)
             {
