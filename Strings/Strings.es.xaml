@@ -18,6 +18,8 @@
     <s:String x:Key="Str_ApiKey">Clave de API</s:String>
     <s:String x:Key="Str_Startup">Inicio</s:String>
     <s:String x:Key="Str_RunAtStartup">Iniciar Orbital al arrancar Windows</s:String>
+    <s:String x:Key="Str_SelectionBehavior">Comportamiento de selección</s:String>
+    <s:String x:Key="Str_AutoCopyOnSelection">Leer automáticamente el texto seleccionado al arrastrar (necesario para acciones de IA instantáneas)</s:String>
     <s:String x:Key="Str_Appearance">Apariencia</s:String>
     <s:String x:Key="Str_Theme">Tema</s:String>
     <s:String x:Key="Str_ThemeDark">Oscuro</s:String>

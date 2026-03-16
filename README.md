@@ -137,6 +137,26 @@ The project uses WPF for UI and WinForms only for the `NotifyIcon` tray integrat
 
 ---
 
+## Security / Antivirus False Positives
+
+Some antivirus programs (notably Kaspersky) flag `Update.exe` — the auto-updater installed by Velopack to `%LocalAppData%\Orbital\Update.exe` — as a trojan (`Trojan.Win32.Zapchast` or similar). **This is a false positive.**
+
+### Why does this happen?
+
+Orbital releases are currently **unsigned** — no code-signing certificate is applied to the binaries. Antivirus heuristics treat unsigned executables that run silently in the background (as Velopack's updater does) as suspicious, even when the code is entirely benign.
+
+### What you can do
+
+- **Portable users**: Use the `Orbital-*-Portable.zip` release instead of the installer. The portable build does not install `Update.exe`.
+- **Installer users**: Add `%LocalAppData%\Orbital\Update.exe` to your antivirus exclusions, then re-run the installer.
+- **Verify the source**: You can inspect the full source code of Orbital in this repository. Releases are built automatically by [GitHub Actions](.github/workflows/release.yml) from this source — no manual steps.
+
+### Long-term fix
+
+Code signing requires purchasing an OV or EV certificate ($100–700/yr). This is on the roadmap. Once signed, AV false positives should disappear entirely.
+
+---
+
 ## Contributing
 
 Pull requests are welcome. For major changes, please open an issue first.

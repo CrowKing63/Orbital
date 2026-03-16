@@ -401,14 +401,18 @@ namespace Orbital
                 bool isEditable = isKeyboard || IsOverEditableControl(screenX, screenY);
                 if (requireEditable && !isEditable) return;
 
-                string selectedText = ClipboardHelper.GetSelectedText();
+                bool autoCopy = SettingsManager.CurrentSettings.AutoCopyOnSelection;
+                string selectedText = autoCopy ? ClipboardHelper.GetSelectedText() : string.Empty;
 
-                if (!string.IsNullOrWhiteSpace(selectedText) && !token.IsCancellationRequested)
+                // Show menu if we got text, or if auto-copy is off (lazy read will happen on click)
+                bool shouldShow = !string.IsNullOrWhiteSpace(selectedText) || !autoCopy;
+
+                if (shouldShow && !token.IsCancellationRequested)
                 {
                     Dispatcher.Invoke(() =>
                     {
                         if (!token.IsCancellationRequested)
-                            _radialMenu.ShowAtCursor(screenX, screenY, selectedText, isEditable);
+                            _radialMenu.ShowAtCursor(screenX, screenY, selectedText, isEditable, pendingRead: !autoCopy);
                     });
                 }
             }, token);

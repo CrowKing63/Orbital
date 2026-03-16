@@ -22,6 +22,7 @@ namespace Orbital
 
         public string SelectedText { get; private set; } = string.Empty;
         private ActionExecutorService? _actionExecutor;
+        private bool _pendingRead = false;
 
         public RadialMenuWindow(ActionExecutorService? actionExecutor)
         {
@@ -45,9 +46,11 @@ namespace Orbital
 
             foreach (var action in actions)
             {
-                bool enabled = hasText || !action.IsSelectionRequired;
+                // When pendingRead is true (AutoCopyOnSelection=off), show all buttons;
+                // the selection will be read lazily when the user clicks an action.
+                bool enabled = hasText || _pendingRead || !action.IsSelectionRequired;
 
-                // When no text is selected, completely hide buttons that require selection
+                // When no text is available and no pending read, hide buttons that require selection
                 if (!enabled)
                     continue;
 
@@ -124,9 +127,10 @@ namespace Orbital
             }
         }
 
-        public void ShowAtCursor(int mouseX, int mouseY, string text, bool isEditable = true)
+        public void ShowAtCursor(int mouseX, int mouseY, string text, bool isEditable = true, bool pendingRead = false)
         {
             SelectedText = text;
+            _pendingRead = pendingRead;
             PopulateBarButtons(!string.IsNullOrEmpty(text), isEditable);
 
             // 측정을 위해 화면 밖에서 불투명도 0으로 먼저 표시
@@ -181,7 +185,21 @@ namespace Orbital
             {
                 if (_actionExecutor != null)
                 {
-                    await Task.Run(() => _actionExecutor.ExecuteAsync(action, SelectedText));
+                    // Capture state before entering Task.Run
+                    string capturedText = SelectedText;
+                    bool doLazyRead = _pendingRead && string.IsNullOrEmpty(capturedText) && action.IsSelectionRequired;
+
+                    await Task.Run(async () =>
+                    {
+                        string text = capturedText;
+                        if (doLazyRead)
+                        {
+                            // Allow focus to return to the source window before reading
+                            System.Threading.Thread.Sleep(100);
+                            text = ClipboardHelper.GetSelectedText();
+                        }
+                        await _actionExecutor.ExecuteAsync(action, text);
+                    });
                 }
             }
             catch (Exception ex)
