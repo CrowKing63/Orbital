@@ -54,6 +54,10 @@ namespace Orbital
         // Custom hotkey: Ctrl=0x02, Alt=0x01, Shift=0x04. VirtualKey=0 means disabled.
         public uint HotkeyModifiers  { get; set; } = 0;
         public uint HotkeyVirtualKey { get; set; } = 0;
+
+        // When false, Ctrl+C is not simulated on text selection; the popup still shows
+        // but reads the selection only when an action is explicitly clicked.
+        public bool AutoCopyOnSelection { get; set; } = true;
     }
 
     public static class SettingsManager

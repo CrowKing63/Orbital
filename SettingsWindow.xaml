@@ -121,6 +121,20 @@
             </StackPanel>
         </Border>
 
+        <!-- ── Selection Behavior ── -->
+        <Border Background="{DynamicResource PanelBgBrush}" CornerRadius="10"
+                BorderBrush="{DynamicResource PanelBorderBrush}" BorderThickness="1" Margin="0,0,0,16" Padding="16,12">
+            <StackPanel>
+                <TextBlock Text="{DynamicResource Str_SelectionBehavior}" FontSize="11" FontWeight="SemiBold"
+                           Foreground="{DynamicResource LabelFgBrush}" Margin="0,0,0,10"/>
+                <CheckBox x:Name="AutoCopyCheck"
+                          Content="{DynamicResource Str_AutoCopyOnSelection}"
+                          Foreground="{DynamicResource TextMid}" FontSize="12"
+                          Checked="AutoCopyCheck_Changed"
+                          Unchecked="AutoCopyCheck_Changed"/>
+            </StackPanel>
+        </Border>
+
         <!-- ── Appearance (Theme + Language) ── -->
         <Border Background="{DynamicResource PanelBgBrush}" CornerRadius="10"
                 BorderBrush="{DynamicResource PanelBorderBrush}" BorderThickness="1" Margin="0,0,0,16" Padding="16,12">

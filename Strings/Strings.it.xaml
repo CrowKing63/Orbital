@@ -18,6 +18,8 @@
     <s:String x:Key="Str_ApiKey">Chiave API</s:String>
     <s:String x:Key="Str_Startup">Avvio</s:String>
     <s:String x:Key="Str_RunAtStartup">Avvia Orbital all'avvio di Windows</s:String>
+    <s:String x:Key="Str_SelectionBehavior">Comportamento di selezione</s:String>
+    <s:String x:Key="Str_AutoCopyOnSelection">Leggi automaticamente il testo selezionato durante il trascinamento (necessario per le azioni IA immediate)</s:String>
     <s:String x:Key="Str_Appearance">Aspetto</s:String>
     <s:String x:Key="Str_Theme">Tema</s:String>
     <s:String x:Key="Str_ThemeDark">Scuro</s:String>
