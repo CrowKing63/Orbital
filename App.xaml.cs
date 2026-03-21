@@ -350,7 +350,7 @@ namespace Orbital
                 if (!IsOverEditableControl(e.X, e.Y)) return;
                 Dispatcher.Invoke(() =>
                 {
-                    _radialMenu.ShowAtCursor(e.X, e.Y, string.Empty, isEditable: true);
+                    _radialMenu.ShowAtCursor(e.X, e.Y, isEditable: true);
                 });
             });
         }
@@ -374,11 +374,12 @@ namespace Orbital
         }
 
         /// <summary>
-        /// Common path: wait 50 ms, extract selected text via Ctrl+C, show popup.
-        /// <paramref name="isKeyboard"/> = true skips the editable-control check for Paste/Cut
-        /// (keyboard selection always implies an editable control was focused).
-        /// <paramref name="requireEditable"/> = true aborts early when not over an editable control
-        /// (used for double-click, which should not trigger on read-only areas).
+        /// Shows the popup immediately (no clipboard/UI Automation calls before display).
+        /// Selected text is read lazily when the user clicks an action button.
+        /// <paramref name="isKeyboard"/> = true means a keyboard selection triggered this
+        /// (always editable, so Paste/Cut are shown).
+        /// <paramref name="requireEditable"/> = true (double-click) checks editable on a
+        /// background thread and skips the popup if the target is read-only.
         /// </summary>
         private void TriggerSelectionMenu(int screenX, int screenY, bool isKeyboard, bool requireEditable = false)
         {
@@ -391,31 +392,30 @@ namespace Orbital
                 token = _selectionCts.Token;
             }
 
-            System.Threading.Tasks.Task.Run(async () =>
+            if (requireEditable)
             {
-                if (token.IsCancellationRequested) return;
-
-                await System.Threading.Tasks.Task.Delay(30);
-                if (token.IsCancellationRequested) return;
-
-                bool isEditable = isKeyboard || IsOverEditableControl(screenX, screenY);
-                if (requireEditable && !isEditable) return;
-
-                bool autoCopy = SettingsManager.CurrentSettings.AutoCopyOnSelection;
-                string selectedText = autoCopy ? ClipboardHelper.GetSelectedText() : string.Empty;
-
-                // Show menu if we got text, or if auto-copy is off (lazy read will happen on click)
-                bool shouldShow = !string.IsNullOrWhiteSpace(selectedText) || !autoCopy;
-
-                if (shouldShow && !token.IsCancellationRequested)
+                // Double-click path: verify the target is editable before showing,
+                // but skip GetSelectedText — text is read lazily on action click.
+                System.Threading.Tasks.Task.Run(() =>
                 {
-                    _ = Dispatcher.BeginInvoke(() =>
+                    if (token.IsCancellationRequested) return;
+                    if (!isKeyboard && !IsOverEditableControl(screenX, screenY)) return;
+                    Dispatcher.BeginInvoke(() =>
                     {
                         if (!token.IsCancellationRequested)
-                            _radialMenu.ShowAtCursor(screenX, screenY, selectedText, isEditable, pendingRead: !autoCopy);
+                            _radialMenu.ShowAtCursor(screenX, screenY, isEditable: true);
                     });
-                }
-            }, token);
+                }, token);
+            }
+            else
+            {
+                // Normal path: show immediately — no Ctrl+C, no UI Automation IPC.
+                Dispatcher.BeginInvoke(() =>
+                {
+                    if (!token.IsCancellationRequested)
+                        _radialMenu.ShowAtCursor(screenX, screenY, isEditable: true);
+                });
+            }
         }
 
         private static bool IsOverEditableControl(int screenX, int screenY)

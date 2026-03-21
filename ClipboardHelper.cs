@@ -89,7 +89,18 @@ namespace Orbital
                 // Simulate Ctrl + C
                 SimulateKeyStroke(VK_LCONTROL, VK_C);
 
-                Thread.Sleep(80);
+                // Poll for clipboard text instead of a fixed sleep: return as soon as
+                // the target app has copied, up to 200 ms.
+                const int maxWaitMs = 200;
+                const int pollIntervalMs = 10;
+                int elapsed = 0;
+                while (elapsed < maxWaitMs)
+                {
+                    Thread.Sleep(pollIntervalMs);
+                    elapsed += pollIntervalMs;
+                    bool hasText = Application.Current.Dispatcher.Invoke(() => Clipboard.ContainsText());
+                    if (hasText) break;
+                }
 
                 // 2) Read + Restore in one Dispatcher call
                 string selectedText = Application.Current.Dispatcher.Invoke(() =>

@@ -55,9 +55,6 @@ namespace Orbital
         public uint HotkeyModifiers  { get; set; } = 0;
         public uint HotkeyVirtualKey { get; set; } = 0;
 
-        // When false, Ctrl+C is not simulated on text selection; the popup still shows
-        // but reads the selection only when an action is explicitly clicked.
-        public bool AutoCopyOnSelection { get; set; } = true;
     }
 
     public static class SettingsManager

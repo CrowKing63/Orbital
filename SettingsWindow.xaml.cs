@@ -82,7 +82,6 @@ namespace Orbital
                 : string.Format(Loc.Get("Str_ApiKeySaved"), key.Length >= 4 ? key[^4..] : key);
 
             RunAtStartupCheck.IsChecked = SettingsManager.CurrentSettings.RunAtStartup;
-            AutoCopyCheck.IsChecked = SettingsManager.CurrentSettings.AutoCopyOnSelection;
 
             // Theme selector
             string currentTheme = SettingsManager.CurrentSettings.Theme ?? "Dark";
@@ -184,13 +183,6 @@ namespace Orbital
             bool enable = RunAtStartupCheck.IsChecked == true;
             SettingsManager.CurrentSettings.RunAtStartup = enable;
             SettingsManager.ApplyStartupRegistry(enable);
-            SettingsManager.SaveSettings();
-        }
-
-        private void AutoCopyCheck_Changed(object sender, RoutedEventArgs e)
-        {
-            if (_suppressEvents) return;
-            SettingsManager.CurrentSettings.AutoCopyOnSelection = AutoCopyCheck.IsChecked == true;
             SettingsManager.SaveSettings();
         }
 

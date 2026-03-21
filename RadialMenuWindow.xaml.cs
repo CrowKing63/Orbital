@@ -20,9 +20,7 @@ namespace Orbital
             return _emojiFont;
         }
 
-        public string SelectedText { get; private set; } = string.Empty;
         private ActionExecutorService? _actionExecutor;
-        private bool _pendingRead = false;
 
         public RadialMenuWindow(ActionExecutorService? actionExecutor)
         {
@@ -35,7 +33,7 @@ namespace Orbital
             _actionExecutor = executor;
         }
 
-        private void PopulateBarButtons(bool hasText, bool isEditable)
+        private void PopulateBarButtons(bool isEditable)
         {
             ButtonPanel.Children.Clear();
 
@@ -46,14 +44,6 @@ namespace Orbital
 
             foreach (var action in actions)
             {
-                // When pendingRead is true (AutoCopyOnSelection=off), show all buttons;
-                // the selection will be read lazily when the user clicks an action.
-                bool enabled = hasText || _pendingRead || !action.IsSelectionRequired;
-
-                // When no text is available and no pending read, hide buttons that require selection
-                if (!enabled)
-                    continue;
-
                 // Hide write-only actions (Paste / Cut) when the target is read-only
                 bool requiresWrite = action.ActionType == ActionType.Paste ||
                                      action.ActionType == ActionType.Cut;
@@ -127,11 +117,9 @@ namespace Orbital
             }
         }
 
-        public void ShowAtCursor(int mouseX, int mouseY, string text, bool isEditable = true, bool pendingRead = false)
+        public void ShowAtCursor(int mouseX, int mouseY, bool isEditable = true)
         {
-            SelectedText = text;
-            _pendingRead = pendingRead;
-            PopulateBarButtons(!string.IsNullOrEmpty(text), isEditable);
+            PopulateBarButtons(isEditable);
 
             // 측정을 위해 화면 밖에서 불투명도 0으로 먼저 표시
             Opacity = 0;
@@ -185,18 +173,16 @@ namespace Orbital
             {
                 if (_actionExecutor != null)
                 {
-                    // Capture state before entering Task.Run
-                    string capturedText = SelectedText;
-                    bool doLazyRead = _pendingRead && string.IsNullOrEmpty(capturedText) && action.IsSelectionRequired;
-
                     await Task.Run(async () =>
                     {
-                        string text = capturedText;
-                        if (doLazyRead)
+                        string text = string.Empty;
+                        if (action.IsSelectionRequired)
                         {
-                            // Allow focus to return to the source window before reading
-                            System.Threading.Thread.Sleep(100);
+                            // Wait for focus to return to the source window before reading
+                            await System.Threading.Tasks.Task.Delay(120);
                             text = ClipboardHelper.GetSelectedText();
+                            if (string.IsNullOrWhiteSpace(text))
+                                return; // Nothing selected — abort silently
                         }
                         await _actionExecutor.ExecuteAsync(action, text);
                     });
