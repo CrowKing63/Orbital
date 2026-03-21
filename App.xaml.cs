@@ -391,11 +391,11 @@ namespace Orbital
                 token = _selectionCts.Token;
             }
 
-            System.Threading.Tasks.Task.Run(() =>
+            System.Threading.Tasks.Task.Run(async () =>
             {
                 if (token.IsCancellationRequested) return;
 
-                Thread.Sleep(50);
+                await System.Threading.Tasks.Task.Delay(30);
                 if (token.IsCancellationRequested) return;
 
                 bool isEditable = isKeyboard || IsOverEditableControl(screenX, screenY);
@@ -409,7 +409,7 @@ namespace Orbital
 
                 if (shouldShow && !token.IsCancellationRequested)
                 {
-                    Dispatcher.Invoke(() =>
+                    _ = Dispatcher.BeginInvoke(() =>
                     {
                         if (!token.IsCancellationRequested)
                             _radialMenu.ShowAtCursor(screenX, screenY, selectedText, isEditable, pendingRead: !autoCopy);

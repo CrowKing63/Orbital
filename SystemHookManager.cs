@@ -250,18 +250,19 @@ namespace Orbital
                         int dx = Math.Abs(hookStruct.pt.X - _buttonDownPos.X);
                         int dy = Math.Abs(hookStruct.pt.Y - _buttonDownPos.Y);
 
+                        var pt = hookStruct.pt; // capture for closure
                         if (_isDoubleClick)
                         {
                             // Word selection is complete at mouse-up time
-                            OnDoubleClickRelease?.Invoke(null, hookStruct.pt);
+                            ThreadPool.QueueUserWorkItem(_ => OnDoubleClickRelease?.Invoke(null, pt));
                         }
                         else if (_isLongPressed && dx <= DragThreshold && dy <= DragThreshold)
                         {
-                            OnLongPress?.Invoke(null, hookStruct.pt);
+                            ThreadPool.QueueUserWorkItem(_ => OnLongPress?.Invoke(null, pt));
                         }
                         else if (!_isLongPressed && (dx > DragThreshold || dy > DragThreshold))
                         {
-                            OnMouseUp?.Invoke(null, hookStruct.pt);
+                            ThreadPool.QueueUserWorkItem(_ => OnMouseUp?.Invoke(null, pt));
                         }
                     }
 

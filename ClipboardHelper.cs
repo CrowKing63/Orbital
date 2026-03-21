@@ -77,32 +77,27 @@ namespace Orbital
         {
             lock (_clipboardLock)
             {
-                // 기존 클립보드 내용 백업
-                IDataObject? backup = null;
-                Application.Current.Dispatcher.Invoke(() =>
+                // 1) Backup + Clear in one Dispatcher call
+                IDataObject? backup = Application.Current.Dispatcher.Invoke(() =>
                 {
-                    try { backup = Clipboard.GetDataObject(); } catch { }
+                    IDataObject? bk = null;
+                    try { bk = Clipboard.GetDataObject(); } catch { }
                     Clipboard.Clear();
+                    return bk;
                 });
 
                 // Simulate Ctrl + C
                 SimulateKeyStroke(VK_LCONTROL, VK_C);
 
-                Thread.Sleep(100);
+                Thread.Sleep(80);
 
-                string selectedText = string.Empty;
-                Application.Current.Dispatcher.Invoke(() =>
+                // 2) Read + Restore in one Dispatcher call
+                string selectedText = Application.Current.Dispatcher.Invoke(() =>
                 {
-                    if (Clipboard.ContainsText())
-                        selectedText = Clipboard.GetText();
-
-                    // 기존 클립보드 복원
-                    try
-                    {
-                        if (backup != null)
-                            Clipboard.SetDataObject(backup, true);
-                    }
-                    catch { }
+                    string text = string.Empty;
+                    try { if (Clipboard.ContainsText()) text = Clipboard.GetText(); } catch { }
+                    try { if (backup != null) Clipboard.SetDataObject(backup, true); } catch { }
+                    return text;
                 });
 
                 return selectedText;
