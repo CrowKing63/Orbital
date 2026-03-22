@@ -1,5 +1,10 @@
 using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -59,11 +64,61 @@ namespace Orbital
             catch { }
         }
 
+        private static readonly HttpClient _http = new();
+
         public SettingsWindow()
         {
             InitializeComponent();
             LoadSettings();
+            ShowAppVersion();
+            _ = CheckForUpdateAsync();
         }
+
+        private void ShowAppVersion()
+        {
+            // GetEntryAssembly() returns the managed assembly that started the process.
+            // Its Version comes from <AssemblyVersion> in the .csproj and is available
+            // even in single-file portable executables (no file-path lookup needed).
+            var v = Assembly.GetEntryAssembly()?.GetName().Version;
+            TxtVersion.Text = v is null ? string.Empty : $"v{v.Major}.{v.Minor}.{v.Build}";
+        }
+
+        private async System.Threading.Tasks.Task CheckForUpdateAsync()
+        {
+            try
+            {
+                if (!_http.DefaultRequestHeaders.UserAgent.Any())
+                    _http.DefaultRequestHeaders.UserAgent.Add(
+                        new ProductInfoHeaderValue("Orbital-UpdateCheck", "1.0"));
+
+                using var response = await _http.GetAsync(
+                    "https://api.github.com/repos/CrowKing63/Orbital/releases/latest");
+                if (!response.IsSuccessStatusCode) return;
+
+                using var doc = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+                var tag = doc.RootElement.GetProperty("tag_name").GetString(); // e.g. "v0.1.8"
+                var url = doc.RootElement.GetProperty("html_url").GetString();
+                if (tag is null || url is null) return;
+
+                var remote = ParseVersion(tag.TrimStart('v'));
+                var local  = ParseVersion(TxtVersion.Text.TrimStart('v'));
+                if (remote is null || local is null) return;
+
+                if (remote > local)
+                {
+                    Dispatcher.Invoke(() =>
+                    {
+                        UpdateHyperlink.NavigateUri = new Uri(url);
+                        UpdateHyperlinkText.Text = $"↑ New version available: {tag}";
+                        TxtUpdateAvailable.Visibility = Visibility.Visible;
+                    });
+                }
+            }
+            catch { /* network unavailable — silently ignore */ }
+        }
+
+        private static Version? ParseVersion(string s)
+            => Version.TryParse(s, out var v) ? v : null;
 
         private void LoadSettings()
         {

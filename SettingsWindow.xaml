@@ -238,18 +238,14 @@
         <StackPanel Orientation="Vertical" Margin="0,10,0,0">
             <TextBlock Text="{DynamicResource Str_PopupTriggerHint}" FontSize="10"
                        Foreground="{DynamicResource TextLow}" TextWrapping="Wrap" Margin="0,0,0,4"/>
-            <StackPanel Orientation="Horizontal">
-                <TextBlock x:Name="TxtVersion" FontSize="10"
-                           Foreground="{DynamicResource TextLow}" VerticalAlignment="Center"/>
-                <TextBlock FontSize="10" Foreground="{DynamicResource TextLow}"
-                           VerticalAlignment="Center" Margin="6,0,6,0" Text="·"/>
-                <TextBlock FontSize="10" VerticalAlignment="Center">
-                    <Hyperlink NavigateUri="https://github.com/CrowKing63/Orbital"
-                               RequestNavigate="Hyperlink_RequestNavigate">
-                        <Run Text="{DynamicResource Str_GitHubLink}"/>
-                    </Hyperlink>
-                </TextBlock>
-            </StackPanel>
+            <TextBlock FontSize="10" Foreground="{DynamicResource TextLow}">
+                <Run x:Name="TxtVersion"/>
+                <Run Text=" · "/>
+                <Hyperlink NavigateUri="https://github.com/CrowKing63/Orbital"
+                           RequestNavigate="Hyperlink_RequestNavigate">
+                    <Run Text="{DynamicResource Str_GitHubLink}"/>
+                </Hyperlink>
+            </TextBlock>
             <TextBlock x:Name="TxtUpdateAvailable" FontSize="10" Margin="0,3,0,0"
                        Visibility="Collapsed">
                 <Hyperlink x:Name="UpdateHyperlink" RequestNavigate="Hyperlink_RequestNavigate"
