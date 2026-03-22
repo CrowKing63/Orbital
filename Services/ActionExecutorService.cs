@@ -53,6 +53,10 @@ namespace Orbital
                     System.Threading.Thread.Sleep(150); // allow focus to return to target window after popup hides
                     ClipboardHelper.SimulatePaste();
                     return;
+
+                case ActionType.Delete:
+                    ClipboardHelper.DeleteSelectedText();
+                    return;
             }
 
             // LLM 액션

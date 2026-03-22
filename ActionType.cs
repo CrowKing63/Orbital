@@ -24,7 +24,10 @@ namespace Orbital
         Cut,
         
         /// <summary>Paste clipboard content at cursor (no LLM)</summary>
-        Paste
+        Paste,
+
+        /// <summary>Delete selected text without touching clipboard (no LLM)</summary>
+        Delete
     }
 
     /// <summary>
@@ -59,6 +62,9 @@ namespace Orbital
                     return true;
                 case "Paste":
                     actionType = ActionType.Paste;
+                    return true;
+                case "Delete":
+                    actionType = ActionType.Delete;
                     return true;
                 default:
                     actionType = ActionType.Popup;

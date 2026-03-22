@@ -46,8 +46,9 @@ namespace Orbital
             {
                 // Hide actions that write to the target document when the target is read-only.
                 // Replace simulates Ctrl+V (writes), so it is also excluded from read-only contexts.
-                bool requiresWrite = action.ActionType == ActionType.Paste ||
-                                     action.ActionType == ActionType.Cut  ||
+                bool requiresWrite = action.ActionType == ActionType.Paste  ||
+                                     action.ActionType == ActionType.Cut    ||
+                                     action.ActionType == ActionType.Delete ||
                                      action.ActionType == ActionType.Replace;
                 if (requiresWrite && !isEditable)
                     continue;
@@ -104,17 +105,18 @@ namespace Orbital
                     content = action.Name;
                 }
 
-                // Dim actions that need a text selection when nothing is selected.
+                // Hide actions that need a text selection when nothing is selected.
                 // (IsSelectionRequired is false only for Paste.)
-                bool enabled = !action.IsSelectionRequired || hasText;
+                if (action.IsSelectionRequired && !hasText)
+                    continue;
 
                 var btn = new Button
                 {
                     Content = content,
                     Tag = action,
                     Style = (Style)FindResource("BarButtonStyle"),
-                    IsEnabled = enabled,
-                    Opacity = enabled ? 1.0 : 0.4
+                    IsEnabled = true,
+                    Opacity = 1.0
                 };
 
                 btn.Click += ActionButton_Click;
