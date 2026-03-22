@@ -63,6 +63,10 @@
     <s:String x:Key="Str_ActionDirectCopyTooltip">将选中的文本复制到剪贴板（不使用 AI）</s:String>
     <s:String x:Key="Str_ActionCutTooltip">剪切选中的文本（不使用 AI）</s:String>
     <s:String x:Key="Str_ActionPasteTooltip">在光标处粘贴剪贴板内容（不使用 AI）</s:String>
+    <s:String x:Key="Str_ActionDelete">删除</s:String>
+    <s:String x:Key="Str_ActionDeleteTooltip">删除所选文字而不影响剪贴板（不使用 AI）</s:String>
+    <s:String x:Key="Str_ActionSimulateKey">模拟按键</s:String>
+    <s:String x:Key="Str_ActionSimulateKeyTooltip">在光标处按键 — 在 Prompt 字段输入键名: Enter, Space, Delete, Backspace, Escape, Tab（不使用 AI）</s:String>
     <s:String x:Key="Str_ButtonDisplay">按钮显示</s:String>
     <s:String x:Key="Str_DisplayTextAndIcon">文字 + 图标</s:String>
     <s:String x:Key="Str_DisplayTextOnly">仅文字</s:String>

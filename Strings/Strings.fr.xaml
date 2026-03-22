@@ -63,6 +63,10 @@
     <s:String x:Key="Str_ActionDirectCopyTooltip">Copier le texte sélectionné dans le presse-papiers (sans IA)</s:String>
     <s:String x:Key="Str_ActionCutTooltip">Couper le texte sélectionné (sans IA)</s:String>
     <s:String x:Key="Str_ActionPasteTooltip">Coller le contenu du presse-papiers au curseur (sans IA)</s:String>
+    <s:String x:Key="Str_ActionDelete">Supprimer</s:String>
+    <s:String x:Key="Str_ActionDeleteTooltip">Supprimer le texte sélectionné sans modifier le presse-papiers (sans IA)</s:String>
+    <s:String x:Key="Str_ActionSimulateKey">Simuler une touche</s:String>
+    <s:String x:Key="Str_ActionSimulateKeyTooltip">Appuyer sur une touche au curseur — nom dans le champ Prompt : Enter, Space, Delete, Backspace, Escape, Tab (sans IA)</s:String>
     <s:String x:Key="Str_ButtonDisplay">Affichage du bouton</s:String>
     <s:String x:Key="Str_DisplayTextAndIcon">Texte + Icône</s:String>
     <s:String x:Key="Str_DisplayTextOnly">Texte uniquement</s:String>

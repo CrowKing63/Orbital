@@ -63,6 +63,10 @@
     <s:String x:Key="Str_ActionDirectCopyTooltip">Ausgewählten Text in die Zwischenablage kopieren (ohne KI)</s:String>
     <s:String x:Key="Str_ActionCutTooltip">Ausgewählten Text ausschneiden (ohne KI)</s:String>
     <s:String x:Key="Str_ActionPasteTooltip">Zwischenablageinhalt an Cursor-Position einfügen (ohne KI)</s:String>
+    <s:String x:Key="Str_ActionDelete">Löschen</s:String>
+    <s:String x:Key="Str_ActionDeleteTooltip">Ausgewählten Text ohne Änderung der Zwischenablage löschen (ohne KI)</s:String>
+    <s:String x:Key="Str_ActionSimulateKey">Taste simulieren</s:String>
+    <s:String x:Key="Str_ActionSimulateKeyTooltip">Taste am Cursor drücken — Tastenname im Prompt-Feld: Enter, Space, Delete, Backspace, Escape, Tab (ohne KI)</s:String>
     <s:String x:Key="Str_ButtonDisplay">Schaltflächenanzeige</s:String>
     <s:String x:Key="Str_DisplayTextAndIcon">Text + Symbol</s:String>
     <s:String x:Key="Str_DisplayTextOnly">Nur Text</s:String>

@@ -63,6 +63,10 @@
     <s:String x:Key="Str_ActionDirectCopyTooltip">Скопировать выделенный текст в буфер обмена (без ИИ)</s:String>
     <s:String x:Key="Str_ActionCutTooltip">Вырезать выделенный текст (без ИИ)</s:String>
     <s:String x:Key="Str_ActionPasteTooltip">Вставить содержимое буфера обмена в позицию курсора (без ИИ)</s:String>
+    <s:String x:Key="Str_ActionDelete">Удалить</s:String>
+    <s:String x:Key="Str_ActionDeleteTooltip">Удалить выделенный текст без изменения буфера обмена (без ИИ)</s:String>
+    <s:String x:Key="Str_ActionSimulateKey">Нажать клавишу</s:String>
+    <s:String x:Key="Str_ActionSimulateKeyTooltip">Нажать клавишу в позиции курсора — имя клавиши в поле Prompt: Enter, Space, Delete, Backspace, Escape, Tab (без ИИ)</s:String>
     <s:String x:Key="Str_ButtonDisplay">Отображение кнопки</s:String>
     <s:String x:Key="Str_DisplayTextAndIcon">Текст + Иконка</s:String>
     <s:String x:Key="Str_DisplayTextOnly">Только текст</s:String>

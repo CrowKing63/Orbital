@@ -63,6 +63,10 @@
     <s:String x:Key="Str_ActionDirectCopyTooltip">Copia il testo selezionato negli appunti (senza IA)</s:String>
     <s:String x:Key="Str_ActionCutTooltip">Taglia il testo selezionato (senza IA)</s:String>
     <s:String x:Key="Str_ActionPasteTooltip">Incolla il contenuto degli appunti nel cursore (senza IA)</s:String>
+    <s:String x:Key="Str_ActionDelete">Elimina</s:String>
+    <s:String x:Key="Str_ActionDeleteTooltip">Elimina il testo selezionato senza toccare gli appunti (senza IA)</s:String>
+    <s:String x:Key="Str_ActionSimulateKey">Simula tasto</s:String>
+    <s:String x:Key="Str_ActionSimulateKeyTooltip">Premi un tasto al cursore — nome nel campo Prompt: Enter, Space, Delete, Backspace, Escape, Tab (senza IA)</s:String>
     <s:String x:Key="Str_ButtonDisplay">Visualizzazione pulsante</s:String>
     <s:String x:Key="Str_DisplayTextAndIcon">Testo + Icona</s:String>
     <s:String x:Key="Str_DisplayTextOnly">Solo testo</s:String>

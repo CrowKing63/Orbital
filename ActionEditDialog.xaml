@@ -63,7 +63,9 @@
                 <ComboBoxItem Content="{DynamicResource Str_ActionBrowser}"    Tag="Browser"    ToolTip="{DynamicResource Str_ActionBrowserTooltip}"/>
                 <ComboBoxItem Content="{DynamicResource Str_ActionDirectCopy}" Tag="DirectCopy" ToolTip="{DynamicResource Str_ActionDirectCopyTooltip}"/>
                 <ComboBoxItem Content="{DynamicResource Str_ActionCut}"        Tag="Cut"        ToolTip="{DynamicResource Str_ActionCutTooltip}"/>
-                <ComboBoxItem Content="{DynamicResource Str_ActionPaste}"      Tag="Paste"      ToolTip="{DynamicResource Str_ActionPasteTooltip}"/>
+                <ComboBoxItem Content="{DynamicResource Str_ActionPaste}"       Tag="Paste"       ToolTip="{DynamicResource Str_ActionPasteTooltip}"/>
+                <ComboBoxItem Content="{DynamicResource Str_ActionDelete}"      Tag="Delete"      ToolTip="{DynamicResource Str_ActionDeleteTooltip}"/>
+                <ComboBoxItem Content="{DynamicResource Str_ActionSimulateKey}" Tag="SimulateKey" ToolTip="{DynamicResource Str_ActionSimulateKeyTooltip}"/>
             </ComboBox>
         </StackPanel>
 

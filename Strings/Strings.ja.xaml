@@ -63,6 +63,10 @@
     <s:String x:Key="Str_ActionDirectCopyTooltip">選択したテキストをクリップボードにコピー (AI なし)</s:String>
     <s:String x:Key="Str_ActionCutTooltip">選択したテキストを切り取り (AI なし)</s:String>
     <s:String x:Key="Str_ActionPasteTooltip">カーソル位置にクリップボードの内容を貼り付け (AI なし)</s:String>
+    <s:String x:Key="Str_ActionDelete">削除</s:String>
+    <s:String x:Key="Str_ActionDeleteTooltip">クリップボードを変更せずに選択テキストを削除 (AI なし)</s:String>
+    <s:String x:Key="Str_ActionSimulateKey">キー入力</s:String>
+    <s:String x:Key="Str_ActionSimulateKeyTooltip">カーソルでキーを押す — プロンプト欄にキー名を入力: Enter, Space, Delete, Backspace, Escape, Tab (AI なし)</s:String>
     <s:String x:Key="Str_ButtonDisplay">ボタン表示</s:String>
     <s:String x:Key="Str_DisplayTextAndIcon">テキスト + アイコン</s:String>
     <s:String x:Key="Str_DisplayTextOnly">テキストのみ</s:String>
