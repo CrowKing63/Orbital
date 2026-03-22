@@ -203,7 +203,10 @@ namespace Orbital
                     _isDoubleClick = false;
 
                     IntPtr hwnd = WindowFromPoint(hookStruct.pt);
-                    _mouseDownInClient = IsPointInClientArea(hwnd, hookStruct.pt);
+                    // Exclude system shell windows (taskbar, desktop) from drag tracking.
+                    // These windows have a client area but never contain selectable text.
+                    _mouseDownInClient = IsPointInClientArea(hwnd, hookStruct.pt)
+                                        && !IsSystemShellWindow(hwnd);
 
                     bool startLongPressTimer = true;
 
@@ -355,7 +358,23 @@ namespace Orbital
             return CallNextHookEx(_keyboardHookID, nCode, wParam, lParam);
         }
 
-        // ── Client-area helper ───────────────────────────────────────────────────
+        // ── Client-area / shell helpers ──────────────────────────────────────────
+        /// <summary>
+        /// Returns true for known Windows shell windows that should never trigger
+        /// drag-selection detection: taskbar, secondary taskbar, and desktop.
+        /// All Win32 calls; no UIA, no messages sent to the target window.
+        /// </summary>
+        private static bool IsSystemShellWindow(IntPtr hwnd)
+        {
+            if (hwnd == IntPtr.Zero) return false;
+            var buf = new System.Text.StringBuilder(64);
+            GetClassName(hwnd, buf, buf.Capacity);
+            return buf.ToString() is "Shell_TrayWnd"          // main taskbar
+                                  or "Shell_SecondaryTrayWnd" // secondary-monitor taskbar
+                                  or "Progman"                // desktop
+                                  or "WorkerW";               // desktop (with wallpaper/icons)
+        }
+
         /// <summary>
         /// Returns true when <paramref name="screenPt"/> lies inside the client area of
         /// <paramref name="hwnd"/>. Uses purely geometric Win32 calls — never sends a
@@ -408,6 +427,9 @@ namespace Orbital
 
         [DllImport("user32.dll")]
         private static extern IntPtr WindowFromPoint(MousePoint pt);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        private static extern int GetClassName(IntPtr hWnd, System.Text.StringBuilder lpClassName, int nMaxCount);
 
         [DllImport("user32.dll")]
         private static extern bool GetCursorPos(out MousePoint lpPoint);
