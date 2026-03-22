@@ -43,7 +43,7 @@ Click any action button to run it. Dismiss with **Esc**, a **right-click**, or c
 - **Instant action bar** — select any text anywhere on Windows, get a floating pill menu above your cursor
 - **Multiple trigger methods** — mouse drag, double-click, keyboard selection (Shift+arrows / Ctrl+A), long-press, or a custom hotkey
 - **AI actions** — Replace, Copy to clipboard, or Popup with AI-generated results
-- **Utility actions** — Copy, Cut, Paste, and Google Search without any AI calls
+- **Utility actions** — Copy, Cut, Paste, Delete, key simulation, and Google Search without any AI calls
 - **Keyboard-friendly** — works with Shift+arrow key selection and Ctrl+A; Paste/Cut automatically hidden in read-only contexts
 - **Bring your own model** — works with OpenAI, OpenRouter (including free models), Ollama, LM Studio, or any OpenAI-compatible endpoint
 - **Custom prompts** — add, edit, and reorder actions with your own prompt templates using `{text}` as a placeholder
@@ -111,6 +111,28 @@ Select **OpenRouter** as the provider and use `openrouter/free` as the model nam
 | `Cut` | Cuts selected text — no AI |
 | `Paste` | Pastes clipboard at cursor — no AI |
 | `Browser` | Opens Google Search with selected text — no AI |
+| `Delete` | Deletes selected text without touching the clipboard — no AI |
+| `SimulateKey` | Presses a key at the cursor — key name set in the Prompt field (see below) — no AI |
+
+#### SimulateKey — supported key names
+
+Set **Output** to `SimulateKey` and put one of the following key names in the **Prompt** field:
+
+| Prompt value | Key pressed |
+|---|---|
+| `Enter` or `Return` | Enter ↵ |
+| `Space` | Space bar |
+| `Delete` | Delete |
+| `Backspace` | Backspace ⌫ |
+| `Escape` or `Esc` | Escape |
+| `Tab` | Tab ↹ |
+
+**Example — press Enter after selecting text:**
+```
+Name:   Confirm
+Prompt: Enter
+Output: SimulateKey
+```
 
 ### Custom Prompt Example
 
