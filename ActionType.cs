@@ -26,9 +26,6 @@ namespace Orbital
         /// <summary>Paste clipboard content at cursor (no LLM)</summary>
         Paste,
 
-        /// <summary>Delete selected text without touching clipboard (no LLM)</summary>
-        Delete,
-
         /// <summary>Simulate a key press; key name is stored in PromptFormat (no LLM)</summary>
         SimulateKey
     }
@@ -65,9 +62,6 @@ namespace Orbital
                     return true;
                 case "Paste":
                     actionType = ActionType.Paste;
-                    return true;
-                case "Delete":
-                    actionType = ActionType.Delete;
                     return true;
                 case "SimulateKey":
                     actionType = ActionType.SimulateKey;

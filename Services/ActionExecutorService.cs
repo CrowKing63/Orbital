@@ -54,10 +54,6 @@ namespace Orbital
                     ClipboardHelper.SimulatePaste();
                     return;
 
-                case ActionType.Delete:
-                    ClipboardHelper.DeleteSelectedText();
-                    return;
-
                 case ActionType.SimulateKey:
                     ClipboardHelper.SimulateKey(action.PromptFormat ?? string.Empty);
                     return;
