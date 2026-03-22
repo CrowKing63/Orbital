@@ -38,7 +38,8 @@ namespace Orbital
         }
         
         [JsonIgnore]
-        public bool IsSelectionRequired => RequiresSelection ?? (ActionType != Orbital.ActionType.Paste);
+        public bool IsSelectionRequired => RequiresSelection ?? (ActionType != Orbital.ActionType.Paste &&
+                                                                  ActionType != Orbital.ActionType.SimulateKey);
     }
 
     public class AppSettings
