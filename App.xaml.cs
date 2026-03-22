@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Automation;
+using System.Windows.Automation.Text;
 using System.Windows.Media;
 using Velopack;
 using Velopack.Sources;
@@ -350,7 +351,7 @@ namespace Orbital
                 if (!IsOverEditableControl(e.X, e.Y)) return;
                 Dispatcher.Invoke(() =>
                 {
-                    _radialMenu.ShowAtCursor(e.X, e.Y, isEditable: true);
+                    _radialMenu.ShowAtCursor(e.X, e.Y, isEditable: true, hasText: false);
                 });
             });
         }
@@ -392,54 +393,115 @@ namespace Orbital
                 token = _selectionCts.Token;
             }
 
-            if (requireEditable)
+            System.Threading.Tasks.Task.Run(() =>
             {
-                // Double-click path: verify the target is editable before showing,
-                // but skip GetSelectedText — text is read lazily on action click.
-                System.Threading.Tasks.Task.Run(() =>
+                if (token.IsCancellationRequested) return;
+
+                bool isEditable;
+                bool hasText;
+                if (isKeyboard)
                 {
+                    isEditable = true;
+                    hasText = true; // keyboard selection always produces a text selection
+                }
+                else
+                {
+                    // Double-click word selection needs a brief moment to commit before we query it.
+                    if (requireEditable)
+                        Thread.Sleep(80);
+
                     if (token.IsCancellationRequested) return;
-                    if (!isKeyboard && !IsOverEditableControl(screenX, screenY)) return;
-                    Dispatcher.BeginInvoke(() =>
-                    {
-                        if (!token.IsCancellationRequested)
-                            _radialMenu.ShowAtCursor(screenX, screenY, isEditable: true);
-                    });
-                }, token);
-            }
-            else
-            {
-                // Normal path: show immediately — no Ctrl+C, no UI Automation IPC.
+
+                    (bool canSelect, bool canWrite, bool selHasText) = CheckEditability(screenX, screenY);
+                    if (!canSelect) return;
+                    isEditable = canWrite;
+                    hasText = selHasText;
+                }
+
                 Dispatcher.BeginInvoke(() =>
                 {
                     if (!token.IsCancellationRequested)
-                        _radialMenu.ShowAtCursor(screenX, screenY, isEditable: true);
+                        _radialMenu.ShowAtCursor(screenX, screenY, isEditable, hasText);
                 });
-            }
+            }, token);
         }
 
-        private static bool IsOverEditableControl(int screenX, int screenY)
+        /// <summary>
+        /// Returns (canSelect, canWrite) for the UI element at the given screen point.
+        /// canSelect — text is selected and can be acted on.
+        ///             For Edit controls this is always true (Paste is useful even without selection).
+        /// canWrite  — element accepts text input; controls whether Cut/Paste actions are shown.
+        ///
+        /// Only ControlType.Edit, Document, and Text-inside-Document are considered.
+        /// Everything else (game windows, taskbar, desktop, etc.) returns (false, false).
+        /// </summary>
+        /// <summary>
+        /// Returns (canSelect, canWrite, hasText) for the UI element at the given screen point.
+        /// canSelect — popup may be shown at all.
+        /// canWrite  — element accepts text input (Cut / Paste / Replace work).
+        /// hasText   — a non-empty text selection currently exists (LLM / selection-based actions work).
+        /// </summary>
+        private static (bool canSelect, bool canWrite, bool hasText) CheckEditability(int screenX, int screenY)
         {
             try
             {
                 var element = AutomationElement.FromPoint(new System.Windows.Point(screenX, screenY));
-                if (element == null) return false;
+                if (element == null) return (false, false, false);
 
                 var controlType = element.GetCurrentPropertyValue(AutomationElement.ControlTypeProperty) as ControlType;
-                if (controlType == ControlType.Edit || controlType == ControlType.Document)
-                    return true;
 
-                if (element.TryGetCurrentPattern(ValuePattern.Pattern, out var valuePatternObj)
-                    && valuePatternObj is ValuePattern vp && !vp.Current.IsReadOnly)
-                    return true;
+                // Writable text input — always show popup (Paste is useful even without a selection).
+                // hasText reflects whether the user actually selected something right now.
+                if (controlType == ControlType.Edit)
+                {
+                    bool sel = HasRealTextSelection(element);
+                    return (true, true, sel);
+                }
 
-                if (element.TryGetCurrentPattern(TextPattern.Pattern, out _))
-                    return true;
+                // Document (browser page, PDF, Word, etc.) — show only when text is actually selected.
+                if (controlType == ControlType.Document)
+                {
+                    bool sel = HasRealTextSelection(element);
+                    return (sel, false, sel);
+                }
 
-                return false;
+                // Leaf text span (e.g. Chrome renders individual runs as ControlType.Text).
+                // Walk up ONE level; only proceed if the parent is a Document.
+                if (controlType == ControlType.Text)
+                {
+                    var parent = TreeWalker.ContentViewWalker.GetParent(element);
+                    if (parent != null)
+                    {
+                        var parentType = parent.GetCurrentPropertyValue(AutomationElement.ControlTypeProperty) as ControlType;
+                        if (parentType == ControlType.Document)
+                        {
+                            bool sel = HasRealTextSelection(parent);
+                            return (sel, false, sel);
+                        }
+                    }
+                }
+
+                // All other types (game windows, taskbar buttons, desktop, UWP tiles, etc.) — no popup.
+                return (false, false, false);
             }
-            catch { return false; }
+            catch { return (false, false, false); }
         }
+
+        /// <summary>
+        /// Returns true when the element's TextPattern reports a non-collapsed (non-empty) selection.
+        /// </summary>
+        private static bool HasRealTextSelection(AutomationElement element)
+        {
+            if (!element.TryGetCurrentPattern(TextPattern.Pattern, out var tpo) || tpo is not TextPattern tp)
+                return false;
+            var sel = tp.GetSelection();
+            if (sel.Length == 0) return false;
+            // CompareEndpoints == 0 means start == end (collapsed cursor, no visible selection).
+            return sel[0].CompareEndpoints(TextPatternRangeEndpoint.Start, sel[0], TextPatternRangeEndpoint.End) != 0;
+        }
+
+        private static bool IsOverEditableControl(int screenX, int screenY)
+            => CheckEditability(screenX, screenY).canSelect;
 
         protected override void OnExit(ExitEventArgs e)
         {

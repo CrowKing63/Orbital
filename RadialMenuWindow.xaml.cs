@@ -33,7 +33,7 @@ namespace Orbital
             _actionExecutor = executor;
         }
 
-        private void PopulateBarButtons(bool isEditable)
+        private void PopulateBarButtons(bool isEditable, bool hasText)
         {
             ButtonPanel.Children.Clear();
 
@@ -44,9 +44,11 @@ namespace Orbital
 
             foreach (var action in actions)
             {
-                // Hide write-only actions (Paste / Cut) when the target is read-only
+                // Hide actions that write to the target document when the target is read-only.
+                // Replace simulates Ctrl+V (writes), so it is also excluded from read-only contexts.
                 bool requiresWrite = action.ActionType == ActionType.Paste ||
-                                     action.ActionType == ActionType.Cut;
+                                     action.ActionType == ActionType.Cut  ||
+                                     action.ActionType == ActionType.Replace;
                 if (requiresWrite && !isEditable)
                     continue;
 
@@ -102,13 +104,17 @@ namespace Orbital
                     content = action.Name;
                 }
 
+                // Dim actions that need a text selection when nothing is selected.
+                // (IsSelectionRequired is false only for Paste.)
+                bool enabled = !action.IsSelectionRequired || hasText;
+
                 var btn = new Button
                 {
                     Content = content,
                     Tag = action,
                     Style = (Style)FindResource("BarButtonStyle"),
-                    IsEnabled = true,
-                    Opacity = 1.0
+                    IsEnabled = enabled,
+                    Opacity = enabled ? 1.0 : 0.4
                 };
 
                 btn.Click += ActionButton_Click;
@@ -117,9 +123,9 @@ namespace Orbital
             }
         }
 
-        public void ShowAtCursor(int mouseX, int mouseY, bool isEditable = true)
+        public void ShowAtCursor(int mouseX, int mouseY, bool isEditable = true, bool hasText = false)
         {
-            PopulateBarButtons(isEditable);
+            PopulateBarButtons(isEditable, hasText);
 
             // 측정을 위해 화면 밖에서 불투명도 0으로 먼저 표시
             Opacity = 0;
