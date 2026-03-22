@@ -46,9 +46,10 @@ namespace Orbital
             {
                 // Hide actions that write to the target document when the target is read-only.
                 // Replace simulates Ctrl+V (writes), so it is also excluded from read-only contexts.
-                bool requiresWrite = action.ActionType == ActionType.Paste  ||
-                                     action.ActionType == ActionType.Cut    ||
-                                     action.ActionType == ActionType.Delete ||
+                bool requiresWrite = action.ActionType == ActionType.Paste       ||
+                                     action.ActionType == ActionType.Cut         ||
+                                     action.ActionType == ActionType.Delete      ||
+                                     action.ActionType == ActionType.SimulateKey ||
                                      action.ActionType == ActionType.Replace;
                 if (requiresWrite && !isEditable)
                     continue;

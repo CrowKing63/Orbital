@@ -57,6 +57,10 @@ namespace Orbital
                 case ActionType.Delete:
                     ClipboardHelper.DeleteSelectedText();
                     return;
+
+                case ActionType.SimulateKey:
+                    ClipboardHelper.SimulateKey(action.PromptFormat ?? string.Empty);
+                    return;
             }
 
             // LLM 액션

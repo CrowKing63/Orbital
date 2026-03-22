@@ -62,6 +62,11 @@ namespace Orbital
         private const ushort VK_C = 0x43;
         private const ushort VK_V = 0x56;
         private const ushort VK_DELETE = 0x2E;
+        private const ushort VK_RETURN = 0x0D;
+        private const ushort VK_SPACE  = 0x20;
+        private const ushort VK_BACK   = 0x08;
+        private const ushort VK_ESCAPE = 0x1B;
+        private const ushort VK_TAB    = 0x09;
 
         [DllImport("user32.dll")]
         static extern uint SendInput(uint nInputs, INPUT[] pInputs, int cbSize);
@@ -169,6 +174,40 @@ namespace Orbital
 
                 SendInput((uint)inputs.Length, inputs, INPUT.Size);
             }
+        }
+
+        /// <summary>
+        /// Supported key names for SimulateKey: Delete, Backspace, Enter, Space, Escape, Tab.
+        /// Returns false when the key name is unrecognised.
+        /// </summary>
+        public static bool SimulateKey(string keyName)
+        {
+            ushort vk = keyName.Trim().ToLowerInvariant() switch
+            {
+                "delete"    => VK_DELETE,
+                "backspace" => VK_BACK,
+                "enter"     => VK_RETURN,
+                "return"    => VK_RETURN,
+                "space"     => VK_SPACE,
+                "escape"    => VK_ESCAPE,
+                "esc"       => VK_ESCAPE,
+                "tab"       => VK_TAB,
+                _           => 0
+            };
+            if (vk == 0) return false;
+
+            lock (_clipboardLock)
+            {
+                Thread.Sleep(50);
+                INPUT[] inputs = new INPUT[2];
+                inputs[0].type = INPUT_KEYBOARD;
+                inputs[0].U.ki.wVk = vk;
+                inputs[1].type = INPUT_KEYBOARD;
+                inputs[1].U.ki.wVk = vk;
+                inputs[1].U.ki.dwFlags = KEYEVENTF_KEYUP;
+                SendInput((uint)inputs.Length, inputs, INPUT.Size);
+            }
+            return true;
         }
 
         /// <summary>
