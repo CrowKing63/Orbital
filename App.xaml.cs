@@ -500,8 +500,35 @@ namespace Orbital
             return sel[0].CompareEndpoints(TextPatternRangeEndpoint.Start, sel[0], TextPatternRangeEndpoint.End) != 0;
         }
 
+        /// <summary>
+        /// Returns true when the cursor is over an editable text control — used by the long-press path.
+        /// Unlike CheckEditability, this does NOT require an active text selection.
+        /// Handles ControlType.Edit (classic Win32/WPF) and ControlType.Document with a writable
+        /// ValuePattern (Windows 11 Notepad, contenteditable, Word Online, etc.).
+        /// </summary>
         private static bool IsOverEditableControl(int screenX, int screenY)
-            => CheckEditability(screenX, screenY).canSelect;
+        {
+            try
+            {
+                var element = AutomationElement.FromPoint(new System.Windows.Point(screenX, screenY));
+                if (element == null) return false;
+
+                var controlType = element.GetCurrentPropertyValue(AutomationElement.ControlTypeProperty) as ControlType;
+
+                if (controlType == ControlType.Edit)
+                    return true;
+
+                // Document is editable when it exposes a writable ValuePattern
+                // (Win11 Notepad RichEditBox, contenteditable divs, Word Online).
+                // Browser read-only pages either have no ValuePattern or IsReadOnly=true.
+                if (controlType == ControlType.Document)
+                    return element.TryGetCurrentPattern(ValuePattern.Pattern, out var vpo)
+                           && vpo is ValuePattern vp && !vp.Current.IsReadOnly;
+
+                return false;
+            }
+            catch { return false; }
+        }
 
         protected override void OnExit(ExitEventArgs e)
         {
