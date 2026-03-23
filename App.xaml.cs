@@ -470,11 +470,22 @@ namespace Orbital
                     return (true, true, sel);
                 }
 
-                // Document (browser page, PDF, Word, etc.) — show only when text is actually selected.
+                // Document — writable documents (Notepad, Sticky Notes, Word) are treated like Edit:
+                // popup always shows and Paste/Cut are available. Read-only documents (browser pages,
+                // PDFs) only show the popup when text is actually selected.
+                // Writability is detected via ValuePattern.IsReadOnly when available; otherwise
+                // IsKeyboardFocusable is used as a heuristic (editable containers accept keyboard input,
+                // while most read-only document containers do not).
                 if (controlType == ControlType.Document)
                 {
+                    bool isWritable;
+                    if (element.TryGetCurrentPattern(ValuePattern.Pattern, out var vpo) && vpo is ValuePattern vp)
+                        isWritable = !vp.Current.IsReadOnly;
+                    else
+                        isWritable = (bool)element.GetCurrentPropertyValue(AutomationElement.IsKeyboardFocusableProperty);
+
                     bool sel = HasRealTextSelection(element);
-                    return (sel, false, sel);
+                    return isWritable ? (true, true, sel) : (sel, false, sel);
                 }
 
                 // Leaf text span (e.g. Chrome renders individual runs as ControlType.Text).
@@ -530,12 +541,16 @@ namespace Orbital
                 if (controlType == ControlType.Edit)
                     return true;
 
-                // Document is editable when it exposes a writable ValuePattern
-                // (Win11 Notepad RichEditBox, contenteditable divs, Word Online).
-                // Browser read-only pages either have no ValuePattern or IsReadOnly=true.
+                // Document is editable when it exposes a writable ValuePattern, or when it is
+                // keyboard-focusable (UWP RichEditBox / Sticky Notes lack ValuePattern but do
+                // accept keyboard input). Browser read-only pages are not keyboard-focusable
+                // at the document level.
                 if (controlType == ControlType.Document)
-                    return element.TryGetCurrentPattern(ValuePattern.Pattern, out var vpo)
-                           && vpo is ValuePattern vp && !vp.Current.IsReadOnly;
+                {
+                    if (element.TryGetCurrentPattern(ValuePattern.Pattern, out var vpo) && vpo is ValuePattern vp)
+                        return !vp.Current.IsReadOnly;
+                    return (bool)element.GetCurrentPropertyValue(AutomationElement.IsKeyboardFocusableProperty);
+                }
 
                 return false;
             }

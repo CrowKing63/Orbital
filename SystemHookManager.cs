@@ -388,17 +388,28 @@ namespace Orbital
         /// Returns true when <paramref name="screenPt"/> lies inside the client area of
         /// <paramref name="hwnd"/>. Uses purely geometric Win32 calls — never sends a
         /// message to the target window, so it cannot block the hook thread.
+        /// Falls back to the full window rect when ClientToScreen fails or returns an
+        /// empty rect (can happen with UWP / WinUI / WebView2 windows).
         /// </summary>
         private static bool IsPointInClientArea(IntPtr hwnd, MousePoint screenPt)
         {
             if (hwnd == IntPtr.Zero) return false;
-            if (!GetClientRect(hwnd, out RECT clientRect)) return false;
-            POINT origin = new POINT { x = 0, y = 0 };
-            if (!ClientToScreen(hwnd, ref origin)) return false;
-            return screenPt.X >= origin.x &&
-                   screenPt.X <  origin.x + clientRect.Right &&
-                   screenPt.Y >= origin.y &&
-                   screenPt.Y <  origin.y + clientRect.Bottom;
+            if (GetClientRect(hwnd, out RECT clientRect) && clientRect.Right > 0 && clientRect.Bottom > 0)
+            {
+                POINT origin = new POINT { x = 0, y = 0 };
+                if (ClientToScreen(hwnd, ref origin))
+                {
+                    return screenPt.X >= origin.x &&
+                           screenPt.X <  origin.x + clientRect.Right &&
+                           screenPt.Y >= origin.y &&
+                           screenPt.Y <  origin.y + clientRect.Bottom;
+                }
+            }
+            // Fallback: check against the full window rect (includes title bar, but always
+            // returns valid screen coords — precise enough to exclude other app windows).
+            if (!GetWindowRect(hwnd, out RECT winRect)) return false;
+            return screenPt.X >= winRect.Left && screenPt.X < winRect.Right &&
+                   screenPt.Y >= winRect.Top  && screenPt.Y < winRect.Bottom;
         }
 
         // ── Long-press timer ─────────────────────────────────────────────────────
@@ -424,6 +435,9 @@ namespace Orbital
 
         [DllImport("user32.dll")]
         private static extern bool GetClientRect(IntPtr hWnd, out RECT lpRect);
+
+        [DllImport("user32.dll")]
+        private static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
 
         [DllImport("user32.dll")]
         private static extern bool ClientToScreen(IntPtr hWnd, ref POINT lpPoint);
