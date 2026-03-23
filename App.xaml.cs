@@ -488,18 +488,27 @@ namespace Orbital
                     return isWritable ? (true, true, sel) : (sel, false, sel);
                 }
 
-                // Leaf text span (e.g. Chrome renders individual runs as ControlType.Text).
-                // Walk up ONE level; only proceed if the parent is a Document.
-                if (controlType == ControlType.Text)
+                // For unrecognised leaf types (ControlType.Text, ControlType.Custom, etc.)
+                // walk up one level to find an Edit or Document ancestor.
                 {
-                    var parent = TreeWalker.ContentViewWalker.GetParent(element);
+                    var parent = TreeWalker.ControlViewWalker.GetParent(element);
                     if (parent != null)
                     {
                         var parentType = parent.GetCurrentPropertyValue(AutomationElement.ControlTypeProperty) as ControlType;
-                        if (parentType == ControlType.Document)
+                        if (parentType == ControlType.Edit)
                         {
                             bool sel = HasRealTextSelection(parent);
-                            return (sel, false, sel);
+                            return (true, true, sel);
+                        }
+                        if (parentType == ControlType.Document)
+                        {
+                            bool isWritable;
+                            if (parent.TryGetCurrentPattern(ValuePattern.Pattern, out var vpo2) && vpo2 is ValuePattern vp2)
+                                isWritable = !vp2.Current.IsReadOnly;
+                            else
+                                isWritable = (bool)parent.GetCurrentPropertyValue(AutomationElement.IsKeyboardFocusableProperty);
+                            bool sel = HasRealTextSelection(parent);
+                            return isWritable ? (true, true, sel) : (sel, false, sel);
                         }
                     }
                 }
