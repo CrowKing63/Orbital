@@ -416,9 +416,9 @@ namespace Orbital
                 }
                 else
                 {
-                    // Double-click word selection needs a brief moment to commit before we query it.
-                    if (requireEditable)
-                        Thread.Sleep(80);
+                    // Allow the UIA selection state to commit before querying.
+                    // Double-click needs longer (word selection takes more time in some apps).
+                    Thread.Sleep(requireEditable ? 150 : 50);
 
                     if (token.IsCancellationRequested) return;
 
@@ -464,7 +464,8 @@ namespace Orbital
 
                 // Writable text input — always show popup (Paste is useful even without a selection).
                 // hasText reflects whether the user actually selected something right now.
-                if (controlType == ControlType.Edit)
+                // ComboBox (e.g. Google search bar, address bars) has an embedded editable field.
+                if (controlType == ControlType.Edit || controlType == ControlType.ComboBox)
                 {
                     bool sel = HasRealTextSelection(element);
                     return (true, true, sel);
@@ -547,7 +548,7 @@ namespace Orbital
 
                 var controlType = element.GetCurrentPropertyValue(AutomationElement.ControlTypeProperty) as ControlType;
 
-                if (controlType == ControlType.Edit)
+                if (controlType == ControlType.Edit || controlType == ControlType.ComboBox)
                     return true;
 
                 // Document is editable when it exposes a writable ValuePattern, or when it is
