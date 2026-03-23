@@ -58,6 +58,7 @@ namespace Orbital
 
         // ── Mouse state ──────────────────────────────────────────────────────────
         private static MousePoint _buttonDownPos;
+        private static string _buttonDownHwndClass = string.Empty;
         private static bool  _mouseDownInClient;
         private static Timer? _longPressTimer;
         private static bool  _isLongPressed;
@@ -89,6 +90,9 @@ namespace Orbital
         /// <summary>Screen position where the most recent left button down occurred.
         /// Captured before any mouse-up processing; safe to read in OnMouseUp handlers.</summary>
         public static MousePoint LastButtonDownPos => _buttonDownPos;
+
+        /// <summary>Win32 class name of the HWND under the cursor at the last left button down.</summary>
+        public static string LastButtonDownHwndClass => _buttonDownHwndClass;
 
         // ── Public events ────────────────────────────────────────────────────────
 
@@ -207,6 +211,9 @@ namespace Orbital
                     _isDoubleClick = false;
 
                     IntPtr hwnd = WindowFromPoint(hookStruct.pt);
+                    var hwndClsBuf = new System.Text.StringBuilder(128);
+                    GetClassName(hwnd, hwndClsBuf, hwndClsBuf.Capacity);
+                    _buttonDownHwndClass = hwndClsBuf.ToString();
                     // Walk up to the root window so that UWP/WinUI/WebView2 leaf HWNDs
                     // (whose ClientToScreen can fail or return wrong coordinates) are handled
                     // correctly. The root window always has reliable Win32 geometry.
@@ -477,5 +484,6 @@ namespace Orbital
 
         [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         private static extern IntPtr GetModuleHandle(string lpModuleName);
+
     }
 }

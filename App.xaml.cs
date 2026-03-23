@@ -326,7 +326,8 @@ namespace Orbital
         {
             // Capture drag-start position now; _buttonDownPos may be overwritten by the next click.
             var down = SystemHookManager.LastButtonDownPos;
-            TriggerSelectionMenu(e.X, e.Y, isKeyboard: false, editCheckX: down.X, editCheckY: down.Y);
+            var downClass = SystemHookManager.LastButtonDownHwndClass;
+            TriggerSelectionMenu(e.X, e.Y, isKeyboard: false, editCheckX: down.X, editCheckY: down.Y, dragStartHwndClass: downClass);
         }
 
         private void SystemHookManager_OnDoubleClickRelease(object? sender, SystemHookManager.MousePoint e)
@@ -388,7 +389,8 @@ namespace Orbital
         /// For drag selection, pass the drag-start position so the check succeeds even when
         /// the cursor drifts outside the text field before mouse-up.</param>
         private void TriggerSelectionMenu(int screenX, int screenY, bool isKeyboard,
-            bool requireEditable = false, int editCheckX = -1, int editCheckY = -1)
+            bool requireEditable = false, int editCheckX = -1, int editCheckY = -1,
+            string dragStartHwndClass = "")
         {
             // Fall back to the menu-display position when no explicit check position is given.
             if (editCheckX < 0) editCheckX = screenX;
@@ -424,7 +426,7 @@ namespace Orbital
 
                     // Use editCheckX/Y (drag-start position) so the check succeeds even when
                     // the cursor has moved outside the source text field by mouse-up time.
-                    (bool canSelect, bool canWrite, bool selHasText) = CheckEditability(editCheckX, editCheckY);
+                    (bool canSelect, bool canWrite, bool selHasText) = CheckEditability(editCheckX, editCheckY, dragStartHwndClass);
                     if (!canSelect) return;
                     isEditable = canWrite;
                     hasText = selHasText;
@@ -453,7 +455,8 @@ namespace Orbital
         /// canWrite  — element accepts text input (Cut / Paste / Replace work).
         /// hasText   — a non-empty text selection currently exists (LLM / selection-based actions work).
         /// </summary>
-        private static (bool canSelect, bool canWrite, bool hasText) CheckEditability(int screenX, int screenY)
+        private static (bool canSelect, bool canWrite, bool hasText) CheckEditability(
+            int screenX, int screenY, string hwndClass = "")
         {
             try
             {
@@ -492,6 +495,18 @@ namespace Orbital
                     return isWritable ? (true, true, sel) : (true, false, true);
                 }
 
+                // WinUI 3 / UWP text areas (e.g. new Sticky Notes) report as ControlType.Pane
+                // but expose TextPattern, making them detectable as text input areas.
+                if (controlType == ControlType.Pane)
+                {
+                    bool hasText = element.TryGetCurrentPattern(TextPattern.Pattern, out _);
+                    if (hasText)
+                    {
+                        bool sel = HasRealTextSelection(element);
+                        return (true, true, sel);
+                    }
+                }
+
                 // For unrecognised leaf types (ControlType.Text, ControlType.Custom, etc.)
                 // walk up one level to find an Edit or Document ancestor.
                 {
@@ -514,6 +529,10 @@ namespace Orbital
                             bool sel = HasRealTextSelection(parent);
                             return isWritable ? (true, true, sel) : (true, false, true);
                         }
+                        // Browser body text: leaf=ControlType.Text inside a ControlType.Group.
+                        // Chrome renders page text this way; video/image elements do not use Text leaves.
+                        if (controlType == ControlType.Text && parentType == ControlType.Group)
+                            return (true, false, true);
                     }
                 }
 
