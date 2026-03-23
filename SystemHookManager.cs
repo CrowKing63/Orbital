@@ -86,6 +86,10 @@ namespace Orbital
         private static readonly HookProc _mouseProc    = MouseHookCallback;
         private static readonly HookProc _keyboardProc = KeyboardHookCallback;
 
+        /// <summary>Screen position where the most recent left button down occurred.
+        /// Captured before any mouse-up processing; safe to read in OnMouseUp handlers.</summary>
+        public static MousePoint LastButtonDownPos => _buttonDownPos;
+
         // ── Public events ────────────────────────────────────────────────────────
 
         /// <summary>Any mouse button down — used to dismiss the popup when clicking outside.</summary>
@@ -203,10 +207,15 @@ namespace Orbital
                     _isDoubleClick = false;
 
                     IntPtr hwnd = WindowFromPoint(hookStruct.pt);
+                    // Walk up to the root window so that UWP/WinUI/WebView2 leaf HWNDs
+                    // (whose ClientToScreen can fail or return wrong coordinates) are handled
+                    // correctly. The root window always has reliable Win32 geometry.
+                    IntPtr rootHwnd = GetAncestor(hwnd, GA_ROOT);
+                    if (rootHwnd == IntPtr.Zero) rootHwnd = hwnd;
                     // Exclude system shell windows (taskbar, desktop) from drag tracking.
                     // These windows have a client area but never contain selectable text.
-                    _mouseDownInClient = IsPointInClientArea(hwnd, hookStruct.pt)
-                                        && !IsSystemShellWindow(hwnd);
+                    _mouseDownInClient = IsPointInClientArea(rootHwnd, hookStruct.pt)
+                                        && !IsSystemShellWindow(rootHwnd);
 
                     bool startLongPressTimer = true;
 
@@ -427,6 +436,11 @@ namespace Orbital
 
         [DllImport("user32.dll")]
         private static extern IntPtr WindowFromPoint(MousePoint pt);
+
+        private const uint GA_ROOT = 2;
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr GetAncestor(IntPtr hwnd, uint gaFlags);
 
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         private static extern int GetClassName(IntPtr hWnd, System.Text.StringBuilder lpClassName, int nMaxCount);

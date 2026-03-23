@@ -324,7 +324,9 @@ namespace Orbital
 
         private void SystemHookManager_OnMouseUp(object? sender, SystemHookManager.MousePoint e)
         {
-            TriggerSelectionMenu(e.X, e.Y, isKeyboard: false);
+            // Capture drag-start position now; _buttonDownPos may be overwritten by the next click.
+            var down = SystemHookManager.LastButtonDownPos;
+            TriggerSelectionMenu(e.X, e.Y, isKeyboard: false, editCheckX: down.X, editCheckY: down.Y);
         }
 
         private void SystemHookManager_OnDoubleClickRelease(object? sender, SystemHookManager.MousePoint e)
@@ -382,8 +384,16 @@ namespace Orbital
         /// <paramref name="requireEditable"/> = true (double-click) checks editable on a
         /// background thread and skips the popup if the target is read-only.
         /// </summary>
-        private void TriggerSelectionMenu(int screenX, int screenY, bool isKeyboard, bool requireEditable = false)
+        /// <param name="editCheckX">X coordinate to use for the editability check.
+        /// For drag selection, pass the drag-start position so the check succeeds even when
+        /// the cursor drifts outside the text field before mouse-up.</param>
+        private void TriggerSelectionMenu(int screenX, int screenY, bool isKeyboard,
+            bool requireEditable = false, int editCheckX = -1, int editCheckY = -1)
         {
+            // Fall back to the menu-display position when no explicit check position is given.
+            if (editCheckX < 0) editCheckX = screenX;
+            if (editCheckY < 0) editCheckY = screenY;
+
             CancellationToken token;
             lock (_selectionLock)
             {
@@ -412,7 +422,9 @@ namespace Orbital
 
                     if (token.IsCancellationRequested) return;
 
-                    (bool canSelect, bool canWrite, bool selHasText) = CheckEditability(screenX, screenY);
+                    // Use editCheckX/Y (drag-start position) so the check succeeds even when
+                    // the cursor has moved outside the source text field by mouse-up time.
+                    (bool canSelect, bool canWrite, bool selHasText) = CheckEditability(editCheckX, editCheckY);
                     if (!canSelect) return;
                     isEditable = canWrite;
                     hasText = selHasText;
