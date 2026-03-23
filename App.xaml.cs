@@ -486,7 +486,10 @@ namespace Orbital
                         isWritable = (bool)element.GetCurrentPropertyValue(AutomationElement.IsKeyboardFocusableProperty);
 
                     bool sel = HasRealTextSelection(element);
-                    return isWritable ? (true, true, sel) : (sel, false, sel);
+                    // Writable documents: sel determines hasText (e.g. Notepad with no selection → Paste only).
+                    // Read-only documents: always set hasText=true — the user dragged to select, so text
+                    // is almost certainly present; the actual content is fetched via clipboard at action time.
+                    return isWritable ? (true, true, sel) : (true, false, true);
                 }
 
                 // For unrecognised leaf types (ControlType.Text, ControlType.Custom, etc.)
@@ -509,7 +512,7 @@ namespace Orbital
                             else
                                 isWritable = (bool)parent.GetCurrentPropertyValue(AutomationElement.IsKeyboardFocusableProperty);
                             bool sel = HasRealTextSelection(parent);
-                            return isWritable ? (true, true, sel) : (sel, false, sel);
+                            return isWritable ? (true, true, sel) : (true, false, true);
                         }
                     }
                 }
