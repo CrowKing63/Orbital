@@ -72,6 +72,8 @@
     <s:String x:Key="Str_ActionDeleteTooltip">Delete selected text without touching clipboard (no AI)</s:String>
     <s:String x:Key="Str_ActionSimulateKey">Simulate Key</s:String>
     <s:String x:Key="Str_ActionSimulateKeyTooltip">Press a key at cursor — set key name in Prompt: Enter, Space, Delete, Backspace, Escape, Tab (no AI)</s:String>
+    <s:String x:Key="Str_ActionSelectAll">Select All</s:String>
+    <s:String x:Key="Str_ActionSelectAllTooltip">Select all text in the focused field, then re-show the action bar (no AI)</s:String>
     <s:String x:Key="Str_ButtonDisplay">Button Display</s:String>
     <s:String x:Key="Str_DisplayTextAndIcon">Text + Icon</s:String>
     <s:String x:Key="Str_DisplayTextOnly">Text Only</s:String>

@@ -67,6 +67,8 @@
     <s:String x:Key="Str_ActionDeleteTooltip">Eliminar el texto seleccionado sin tocar el portapapeles (sin IA)</s:String>
     <s:String x:Key="Str_ActionSimulateKey">Simular tecla</s:String>
     <s:String x:Key="Str_ActionSimulateKeyTooltip">Presionar una tecla en el cursor — nombre en el campo Prompt: Enter, Space, Delete, Backspace, Escape, Tab (sin IA)</s:String>
+    <s:String x:Key="Str_ActionSelectAll">Seleccionar todo</s:String>
+    <s:String x:Key="Str_ActionSelectAllTooltip">Seleccionar todo el texto del campo activo y mostrar de nuevo la barra de acciones (sin IA)</s:String>
     <s:String x:Key="Str_ButtonDisplay">Visualización del botón</s:String>
     <s:String x:Key="Str_DisplayTextAndIcon">Texto + Ícono</s:String>
     <s:String x:Key="Str_DisplayTextOnly">Solo texto</s:String>

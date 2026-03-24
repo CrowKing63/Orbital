@@ -65,6 +65,7 @@
                 <ComboBoxItem Content="{DynamicResource Str_ActionCut}"        Tag="Cut"        ToolTip="{DynamicResource Str_ActionCutTooltip}"/>
                 <ComboBoxItem Content="{DynamicResource Str_ActionPaste}"       Tag="Paste"       ToolTip="{DynamicResource Str_ActionPasteTooltip}"/>
                 <ComboBoxItem Content="{DynamicResource Str_ActionSimulateKey}" Tag="SimulateKey" ToolTip="{DynamicResource Str_ActionSimulateKeyTooltip}"/>
+                <ComboBoxItem Content="{DynamicResource Str_ActionSelectAll}"  Tag="SelectAll"  ToolTip="{DynamicResource Str_ActionSelectAllTooltip}"/>
             </ComboBox>
         </StackPanel>
 

@@ -67,6 +67,8 @@
     <s:String x:Key="Str_ActionDeleteTooltip">クリップボードを変更せずに選択テキストを削除 (AI なし)</s:String>
     <s:String x:Key="Str_ActionSimulateKey">キー入力</s:String>
     <s:String x:Key="Str_ActionSimulateKeyTooltip">カーソルでキーを押す — プロンプト欄にキー名を入力: Enter, Space, Delete, Backspace, Escape, Tab (AI なし)</s:String>
+    <s:String x:Key="Str_ActionSelectAll">すべて選択</s:String>
+    <s:String x:Key="Str_ActionSelectAllTooltip">フォーカス中のフィールドのテキストをすべて選択し、アクションバーを再表示します (AI なし)</s:String>
     <s:String x:Key="Str_ButtonDisplay">ボタン表示</s:String>
     <s:String x:Key="Str_DisplayTextAndIcon">テキスト + アイコン</s:String>
     <s:String x:Key="Str_DisplayTextOnly">テキストのみ</s:String>

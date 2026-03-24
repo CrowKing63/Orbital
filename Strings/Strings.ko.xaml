@@ -67,6 +67,8 @@
     <s:String x:Key="Str_ActionDeleteTooltip">클립보드를 건드리지 않고 선택한 텍스트 삭제 (AI 미사용)</s:String>
     <s:String x:Key="Str_ActionSimulateKey">키 시뮬레이션</s:String>
     <s:String x:Key="Str_ActionSimulateKeyTooltip">커서에서 키 입력 시뮬레이션 — 프롬프트 필드에 키 이름 입력: Enter, Space, Delete, Backspace, Escape, Tab (AI 미사용)</s:String>
+    <s:String x:Key="Str_ActionSelectAll">전체 선택</s:String>
+    <s:String x:Key="Str_ActionSelectAllTooltip">포커스된 필드의 텍스트 전체 선택 후 액션 바 재표시 (AI 미사용)</s:String>
     <s:String x:Key="Str_ButtonDisplay">버튼 표시 방식</s:String>
     <s:String x:Key="Str_DisplayTextAndIcon">텍스트 + 아이콘</s:String>
     <s:String x:Key="Str_DisplayTextOnly">텍스트만</s:String>
