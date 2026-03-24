@@ -14,6 +14,7 @@ namespace Orbital
             new ActionProfile { Name = "Copy",        Icon = "\uE8C8", PromptFormat = "", ResultAction = "DirectCopy", RequiresSelection = true  },
             new ActionProfile { Name = "Cut",         Icon = "\uE8C6", PromptFormat = "", ResultAction = "Cut",        RequiresSelection = true  },
             new ActionProfile { Name = "Paste",       Icon = "\uE77F", PromptFormat = "", ResultAction = "Paste",      RequiresSelection = false },
+            new ActionProfile { Name = "Select All",  Icon = "\uE8B3", PromptFormat = "", ResultAction = "SelectAll",  RequiresSelection = false },
             new ActionProfile { Name = "Search",      Icon = "\uE721", PromptFormat = "", ResultAction = "Browser",    RequiresSelection = true  },
 
             // ── Translation ───────────────────────────────────────────────────────
