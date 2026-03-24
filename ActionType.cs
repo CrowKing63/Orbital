@@ -27,7 +27,10 @@ namespace Orbital
         Paste,
 
         /// <summary>Simulate a key press; key name is stored in PromptFormat (no LLM)</summary>
-        SimulateKey
+        SimulateKey,
+
+        /// <summary>Select all text in the focused control (Ctrl+A), then re-show the action bar (no LLM)</summary>
+        SelectAll
     }
 
     /// <summary>
@@ -65,6 +68,9 @@ namespace Orbital
                     return true;
                 case "SimulateKey":
                     actionType = ActionType.SimulateKey;
+                    return true;
+                case "SelectAll":
+                    actionType = ActionType.SelectAll;
                     return true;
                 default:
                     actionType = ActionType.Popup;

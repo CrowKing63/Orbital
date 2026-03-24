@@ -59,6 +59,7 @@ namespace Orbital
         private const int INPUT_KEYBOARD = 1;
         private const uint KEYEVENTF_KEYUP = 0x0002;
         private const ushort VK_LCONTROL = 0xA2;
+        private const ushort VK_A = 0x41;
         private const ushort VK_C = 0x43;
         private const ushort VK_V = 0x56;
         private const ushort VK_DELETE = 0x2E;
@@ -219,6 +220,18 @@ namespace Orbital
             {
                 Thread.Sleep(50);
                 SimulateKeyStroke(VK_LCONTROL, VK_V);
+            }
+        }
+
+        /// <summary>
+        /// Simulates Ctrl+A to select all text in the currently focused control.
+        /// </summary>
+        public static void SimulateSelectAll()
+        {
+            lock (_clipboardLock)
+            {
+                Thread.Sleep(50);
+                SimulateKeyStroke(VK_LCONTROL, VK_A);
             }
         }
 

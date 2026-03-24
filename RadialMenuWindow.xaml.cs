@@ -168,6 +168,20 @@ namespace Orbital
 
             Hide();
 
+            // Select All: simulate Ctrl+A, then re-show the action bar with full selection
+            if (action.ActionType == ActionType.SelectAll)
+            {
+                await Task.Run(async () =>
+                {
+                    await System.Threading.Tasks.Task.Delay(100); // let focus return to target window
+                    ClipboardHelper.SimulateSelectAll();
+                    await System.Threading.Tasks.Task.Delay(150); // let selection settle
+                    var pos = System.Windows.Forms.Cursor.Position;
+                    Dispatcher.Invoke(() => ShowAtCursor(pos.X, pos.Y, isEditable: true, hasText: true));
+                });
+                return;
+            }
+
             bool isLlmAction = action.ActionType.RequiresLlm();
             if (isLlmAction && (_actionExecutor == null || !_actionExecutor.HasLlmService))
             {

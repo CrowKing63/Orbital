@@ -145,7 +145,8 @@ namespace Orbital
                 {
                     new ActionProfile { Name = "Copy",      Icon = "\uE8C8", PromptFormat = "",                                                               ResultAction = "DirectCopy", RequiresSelection = true },
                     new ActionProfile { Name = "Cut",       Icon = "\uE8C6", PromptFormat = "",                                                               ResultAction = "Cut",        RequiresSelection = true },
-                    new ActionProfile { Name = "Paste",     Icon = "\uE77F", PromptFormat = "",                                                               ResultAction = "Paste",      RequiresSelection = false },
+                    new ActionProfile { Name = "Paste",      Icon = "\uE77F", PromptFormat = "",                                                               ResultAction = "Paste",      RequiresSelection = false },
+                    new ActionProfile { Name = "Select All", Icon = "\uE8B3", PromptFormat = "",                                                               ResultAction = "SelectAll",  RequiresSelection = false },
                     new ActionProfile { Name = "Translate", Icon = "\uE8C1", PromptFormat = "Translate the following to Korean organically: {text}",          ResultAction = "Replace",    RequiresSelection = true, CleanOutput = true },
                     new ActionProfile { Name = "Summarize", Icon = "\uE7C3", PromptFormat = "Summarize the following in 3 lines: {text}",                   ResultAction = "Popup",      RequiresSelection = true },
                     new ActionProfile { Name = "Polish",    Icon = "\uE70F", PromptFormat = "Correct grammar and make this sound professional: {text}",       ResultAction = "Replace",    RequiresSelection = true, CleanOutput = true },

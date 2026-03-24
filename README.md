@@ -113,6 +113,7 @@ Select **OpenRouter** as the provider and use `openrouter/free` as the model nam
 | `Browser` | Opens Google Search with selected text — no AI |
 | `Delete` | Deletes selected text without touching the clipboard — no AI |
 | `SimulateKey` | Presses a key at the cursor — key name set in the Prompt field (see below) — no AI |
+| `SelectAll` | Selects all text in the focused control (Ctrl+A), then re-shows the action bar so you can act on the full selection — no AI |
 
 #### SimulateKey — supported key names
 
