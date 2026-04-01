@@ -56,6 +56,8 @@ namespace Orbital
         public uint HotkeyModifiers  { get; set; } = 0;
         public uint HotkeyVirtualKey { get; set; } = 0;
 
+        public bool SoundEnabled { get; set; } = true;
+
     }
 
     public static class SettingsManager

@@ -160,6 +160,7 @@ namespace Orbital
             Left = left;
             Top = top;
             Opacity = 1;
+            SoundHelper.PlayPopupSound();
         }
 
         private async void ActionButton_Click(object sender, RoutedEventArgs e)

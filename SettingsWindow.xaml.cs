@@ -136,7 +136,8 @@ namespace Orbital
                 ? Loc.Get("Str_ApiKeyNotConfigured")
                 : string.Format(Loc.Get("Str_ApiKeySaved"), key.Length >= 4 ? key[^4..] : key);
 
-            RunAtStartupCheck.IsChecked = SettingsManager.CurrentSettings.RunAtStartup;
+            RunAtStartupCheck.IsChecked  = SettingsManager.CurrentSettings.RunAtStartup;
+            SoundEnabledCheck.IsChecked  = SettingsManager.CurrentSettings.SoundEnabled;
 
             // Theme selector
             string currentTheme = SettingsManager.CurrentSettings.Theme ?? "Dark";
@@ -238,6 +239,13 @@ namespace Orbital
             bool enable = RunAtStartupCheck.IsChecked == true;
             SettingsManager.CurrentSettings.RunAtStartup = enable;
             SettingsManager.ApplyStartupRegistry(enable);
+            SettingsManager.SaveSettings();
+        }
+
+        private void SoundEnabledCheck_Changed(object sender, RoutedEventArgs e)
+        {
+            if (_suppressEvents) return;
+            SettingsManager.CurrentSettings.SoundEnabled = SoundEnabledCheck.IsChecked == true;
             SettingsManager.SaveSettings();
         }
 

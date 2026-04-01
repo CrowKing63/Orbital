@@ -38,24 +38,29 @@ namespace Orbital
                     {
                         Process.Start(new ProcessStartInfo { FileName = url, UseShellExecute = true });
                     });
+                    SoundHelper.PlayActionSound();
                     return;
 
                 case ActionType.DirectCopy:
                     ClipboardHelper.CopyToClipboard(selectedText);
+                    SoundHelper.PlayActionSound();
                     return;
 
                 case ActionType.Cut:
                     ClipboardHelper.CopyToClipboard(selectedText);
                     ClipboardHelper.DeleteSelectedText();
+                    SoundHelper.PlayActionSound();
                     return;
 
                 case ActionType.Paste:
                     System.Threading.Thread.Sleep(150); // allow focus to return to target window after popup hides
                     ClipboardHelper.SimulatePaste();
+                    SoundHelper.PlayActionSound();
                     return;
 
                 case ActionType.SimulateKey:
                     ClipboardHelper.SimulateKey(action.PromptFormat ?? string.Empty);
+                    SoundHelper.PlayActionSound();
                     return;
             }
 
@@ -90,6 +95,7 @@ namespace Orbital
                     });
                     break;
             }
+            SoundHelper.PlayActionSound();
         }
     }
 }
