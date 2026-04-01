@@ -18,6 +18,7 @@
     <s:String x:Key="Str_ApiKey">API 密钥</s:String>
     <s:String x:Key="Str_Startup">开机启动</s:String>
     <s:String x:Key="Str_RunAtStartup">Windows 启动时自动运行 Orbital</s:String>
+    <s:String x:Key="Str_EnableSoundEffects">弹出和操作时播放细微音效</s:String>
     <s:String x:Key="Str_SelectionBehavior">选择行为</s:String>
     <s:String x:Key="Str_AutoCopyOnSelection">拖选时自动读取选中文本（即时 AI 操作所需）</s:String>
     <s:String x:Key="Str_Appearance">外观</s:String>

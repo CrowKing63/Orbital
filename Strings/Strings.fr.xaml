@@ -18,6 +18,7 @@
     <s:String x:Key="Str_ApiKey">Clé API</s:String>
     <s:String x:Key="Str_Startup">Démarrage</s:String>
     <s:String x:Key="Str_RunAtStartup">Lancer Orbital au démarrage de Windows</s:String>
+    <s:String x:Key="Str_EnableSoundEffects">Jouer des sons discrets à l'ouverture et lors des actions</s:String>
     <s:String x:Key="Str_SelectionBehavior">Comportement de sélection</s:String>
     <s:String x:Key="Str_AutoCopyOnSelection">Lire automatiquement le texte sélectionné lors du glisser (requis pour les actions IA instantanées)</s:String>
     <s:String x:Key="Str_Appearance">Apparence</s:String>

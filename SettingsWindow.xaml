@@ -118,6 +118,12 @@
                           Foreground="{DynamicResource TextMid}" FontSize="12"
                           Checked="RunAtStartupCheck_Changed"
                           Unchecked="RunAtStartupCheck_Changed"/>
+                <CheckBox x:Name="SoundEnabledCheck"
+                          Content="{DynamicResource Str_EnableSoundEffects}"
+                          Foreground="{DynamicResource TextMid}" FontSize="12"
+                          Margin="0,6,0,0"
+                          Checked="SoundEnabledCheck_Changed"
+                          Unchecked="SoundEnabledCheck_Changed"/>
             </StackPanel>
         </Border>
 
