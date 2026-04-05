@@ -9,15 +9,10 @@ publish/
 *.suo
 *.userosscache
 *.sln.docstates
-.claude/
-CLAUDE.md
-settings.local.json
 
 # Rider
 .idea/
 .vscode/
-
-docs/
 
 # User-specific files
 *.rsuser
@@ -36,9 +31,6 @@ desktop.ini
 
 # Logs
 *.log
-
-# Docs
-docs/
 
 # Test results
 TestResults/
