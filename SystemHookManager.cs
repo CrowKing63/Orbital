@@ -24,11 +24,6 @@ namespace Orbital
         private const int WM_SYSKEYDOWN = 0x0104;
         private const int WM_SYSKEYUP   = 0x0105;
 
-        // (WM_NCHITTEST / HTCLIENT removed — client area is now checked geometrically)
-
-        // Keyboard injection flag — set when the keystroke was synthesised (e.g. ClipboardHelper Ctrl+C)
-        private const uint LLKHF_INJECTED = 0x00000010;
-
         // Virtual key codes
         private const int VK_SHIFT   = 0x10;
         private const int VK_CONTROL = 0x11;
@@ -147,7 +142,7 @@ namespace Orbital
         {
             public uint vkCode;
             public uint scanCode;
-            public uint flags;   // LLKHF_INJECTED = 0x10
+            public uint flags;
             public uint time;
             public IntPtr dwExtraInfo;
         }
@@ -215,13 +210,10 @@ namespace Orbital
                     var hwndClsBuf = new System.Text.StringBuilder(128);
                     GetClassName(hwnd, hwndClsBuf, hwndClsBuf.Capacity);
                     _buttonDownHwndClass = hwndClsBuf.ToString();
-                    // Walk up to the root window so that UWP/WinUI/WebView2 leaf HWNDs
-                    // (whose ClientToScreen can fail or return wrong coordinates) are handled
-                    // correctly. The root window always has reliable Win32 geometry.
+                    
                     IntPtr rootHwnd = GetAncestor(hwnd, GA_ROOT);
                     if (rootHwnd == IntPtr.Zero) rootHwnd = hwnd;
-                    // Exclude system shell windows (taskbar, desktop) from drag tracking.
-                    // These windows have a client area but never contain selectable text.
+                    
                     _mouseDownInClient = IsPointInClientArea(rootHwnd, hookStruct.pt)
                                         && !IsSystemShellWindow(rootHwnd);
 
@@ -305,8 +297,9 @@ namespace Orbital
             {
                 KBDLLHOOKSTRUCT ks = Marshal.PtrToStructure<KBDLLHOOKSTRUCT>(lParam);
 
-                // Ignore synthetic keystrokes (e.g. Ctrl+C/V injected by ClipboardHelper)
-                if ((ks.flags & LLKHF_INJECTED) == 0)
+                // Allow virtual keyboards (OSK, etc.) but ignore Orbital's own simulated keys.
+                // Orbital tags its SendInput calls with ClipboardHelper.ORBITAL_EXTRA_INFO (0x4F524254).
+                if (ks.dwExtraInfo != ClipboardHelper.ORBITAL_EXTRA_INFO)
                 {
                     int  vk        = (int)ks.vkCode;
                     bool isKeyDown = wParam == (IntPtr)WM_KEYDOWN || wParam == (IntPtr)WM_SYSKEYDOWN;
@@ -376,29 +369,17 @@ namespace Orbital
         }
 
         // ── Client-area / shell helpers ──────────────────────────────────────────
-        /// <summary>
-        /// Returns true for known Windows shell windows that should never trigger
-        /// drag-selection detection: taskbar, secondary taskbar, and desktop.
-        /// All Win32 calls; no UIA, no messages sent to the target window.
-        /// </summary>
         private static bool IsSystemShellWindow(IntPtr hwnd)
         {
             if (hwnd == IntPtr.Zero) return false;
             var buf = new System.Text.StringBuilder(64);
             GetClassName(hwnd, buf, buf.Capacity);
-            return buf.ToString() is "Shell_TrayWnd"          // main taskbar
-                                  or "Shell_SecondaryTrayWnd" // secondary-monitor taskbar
-                                  or "Progman"                // desktop
-                                  or "WorkerW";               // desktop (with wallpaper/icons)
+            return buf.ToString() is "Shell_TrayWnd"
+                                  or "Shell_SecondaryTrayWnd"
+                                  or "Progman"
+                                  or "WorkerW";
         }
 
-        /// <summary>
-        /// Returns true when <paramref name="screenPt"/> lies inside the client area of
-        /// <paramref name="hwnd"/>. Uses purely geometric Win32 calls — never sends a
-        /// message to the target window, so it cannot block the hook thread.
-        /// Falls back to the full window rect when ClientToScreen fails or returns an
-        /// empty rect (can happen with UWP / WinUI / WebView2 windows).
-        /// </summary>
         private static bool IsPointInClientArea(IntPtr hwnd, MousePoint screenPt)
         {
             if (hwnd == IntPtr.Zero) return false;
@@ -413,14 +394,11 @@ namespace Orbital
                            screenPt.Y <  origin.y + clientRect.Bottom;
                 }
             }
-            // Fallback: check against the full window rect (includes title bar, but always
-            // returns valid screen coords — precise enough to exclude other app windows).
             if (!GetWindowRect(hwnd, out RECT winRect)) return false;
             return screenPt.X >= winRect.Left && screenPt.X < winRect.Right &&
                    screenPt.Y >= winRect.Top  && screenPt.Y < winRect.Bottom;
         }
 
-        // ── Long-press timer ─────────────────────────────────────────────────────
         private static void LongPressTimerCallback(object? state)
         {
             _longPressTimer?.Dispose();
@@ -477,7 +455,6 @@ namespace Orbital
         private static extern IntPtr SetWindowsHookEx(int idHook, HookProc lpfn, IntPtr hMod, uint dwThreadId);
 
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool UnhookWindowsHookEx(IntPtr hhk);
 
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
@@ -485,155 +462,5 @@ namespace Orbital
 
         [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         private static extern IntPtr GetModuleHandle(string lpModuleName);
-
-        // ── Raw Input API (for virtual keyboard / on-screen keyboard support) ───────
-        private const int WM_INPUT = 0x00FF;
-        private const int RIM_INPUTKEYBOARD = 1;
-
-        [StructLayout(LayoutKind.Sequential)]
-        private struct RAWINPUTHEADER
-        {
-            public uint dwType;   // RIM_TYPE keyboard = 1
-            public uint dwSize;
-            public IntPtr hDevice;
-            public IntPtr wParam;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        private struct RAWKEYBOARD
-        {
-            public ushort MakeCode;
-            public ushort Flags;      // RI_KEY_BREAK = 0x80, RI_KEY_E0 = 0x01
-            public ushort Reserved;
-            public ushort VKey;
-            public uint   Message;
-            public ulong  ExtraInformation;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        private struct RAWINPUT
-        {
-            public RAWINPUTHEADER header;
-            public RAWKEYBOARD   keyboard;
-        }
-
-        private const int RI_KEY_BREAK = 0x0080;
-        private const int RI_KEY_E0    = 0x0001;
-
-        [DllImport("user32.dll", SetLastError = true)]
-        private static extern uint GetRawInputData(IntPtr hRawInput, uint uiCommand,
-            [Out] byte[]? pData, ref uint pcbSize, uint cbSizeHeader);
-
-        [DllImport("user32.dll", SetLastError = true)]
-        private static extern uint GetRawInputData(IntPtr hRawInput, uint uiCommand,
-            IntPtr pData, ref uint pcbSize, uint cbSizeHeader);
-
-        private static IntPtr _rawInputWnd;
-
-        public static void StartRawInputHandling(Window wpfWindow)
-        {
-            var helper = new System.Windows.Interop.WindowInteropHelper(wpfWindow);
-            _rawInputWnd = helper.Handle;
-
-            RAWINPUTDEVICE[] devices = new RAWINPUTDEVICE[1];
-            devices[0].usUsagePage = 0x01;      // Generic Desktop
-            devices[0].usUsage     = 0x06;      // Keyboard
-            devices[0].dwFlags     = 0x00000001; // RIDEV_INPUTSINK - receive input even when window not focused
-            devices[0].hwndTarget  = _rawInputWnd;
-
-            if (!RegisterRawInputDevices(devices, (uint)Marshal.SizeOf<RAWINPUTDEVICE>(), 0))
-            {
-                Debug.WriteLine($"[SystemHookManager] RegisterRawInputDevices failed: {Marshal.GetLastWin32Error()}");
-            }
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        private struct RAWINPUTDEVICE
-        {
-            public ushort usUsagePage;
-            public ushort usUsage;
-            public uint   dwFlags;
-            public IntPtr hwndTarget;
-        }
-
-        [DllImport("user32.dll", SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool RegisterRawInputDevices(RAWINPUTDEVICE[] pDevices, uint cbSize, uint dwFlags);
-
-        public static void ProcessRawInput(IntPtr lParam)
-        {
-            uint size = 0;
-            GetRawInputData(lParam, 0x10000003, null, ref size, (uint)Marshal.SizeOf<RAWINPUTHEADER>()); // RID_INPUT = 0x10000003
-
-            if (size == 0) return;
-
-            IntPtr buffer = Marshal.AllocHGlobal((int)size);
-            try
-            {
-                GetRawInputData(lParam, 0x10000003, buffer, ref size, (uint)Marshal.SizeOf<RAWINPUTHEADER>());
-
-                RAWINPUT raw = Marshal.PtrToStructure<RAWINPUT>(buffer);
-                if (raw.header.dwType != RIM_INPUTKEYBOARD) return;
-
-                bool isKeyUp   = (raw.keyboard.Flags & RI_KEY_BREAK) != 0;
-                int  vk        = raw.keyboard.VKey;
-
-                if (isKeyUp)
-                {
-                    if (vk == VK_ESCAPE)
-                        OnEscapePressed?.Invoke(null, EventArgs.Empty);
-
-                    // Ctrl+A released -> trigger selection
-                    if (vk == VK_A && _ctrlDown && _pendingKeyboardSelection)
-                    {
-                        _pendingKeyboardSelection = false;
-                        GetCursorPos(out MousePoint pt);
-                        OnKeyboardSelection?.Invoke(null, pt);
-                    }
-
-                    if (vk == VK_SHIFT)   _shiftDown = false;
-                    if (vk == VK_CONTROL) _ctrlDown  = false;
-                }
-                else
-                {
-                    // Key down
-                    if (vk == VK_SHIFT)   _shiftDown = true;
-                    if (vk == VK_CONTROL) _ctrlDown  = true;
-
-                    // Track intent to select text with keyboard
-                    if (_shiftDown && s_navKeys.Contains(vk))
-                        _pendingKeyboardSelection = true;
-
-                    if (_ctrlDown && vk == VK_A)
-                        _pendingKeyboardSelection = true;
-
-                    // Clipboard shortcuts — dismiss popup
-                    if (_ctrlDown && (vk == VK_C || vk == VK_X || vk == VK_V))
-                        OnClipboardShortcut?.Invoke(null, EventArgs.Empty);
-
-                    // Custom hotkey
-                    if (HotkeyVirtualKey != 0 && (uint)vk == HotkeyVirtualKey)
-                    {
-                        bool wantCtrl  = (HotkeyModifiers & 0x02) != 0;
-                        bool wantAlt   = (HotkeyModifiers & 0x01) != 0;
-                        bool wantShift = (HotkeyModifiers & 0x04) != 0;
-
-                        bool altDown = (GetAsyncKeyState(VK_ALT) & 0x8000) != 0;
-
-                        if (_ctrlDown  == wantCtrl &&
-                            altDown    == wantAlt  &&
-                            _shiftDown == wantShift)
-                        {
-                            GetCursorPos(out MousePoint pt);
-                            OnCustomHotkey?.Invoke(null, pt);
-                        }
-                    }
-                }
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(buffer);
-            }
-        }
     }
 }

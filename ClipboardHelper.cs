@@ -67,7 +67,14 @@ namespace Orbital
         private const ushort VK_SPACE  = 0x20;
         private const ushort VK_BACK   = 0x08;
         private const ushort VK_ESCAPE = 0x1B;
-        private const ushort VK_TAB    = 0x09;
+        private const uint WM_INPUT = 0x00FF; // Just for reference
+        
+        /// <summary>
+        /// Magic number set in dwExtraInfo for all keystrokes injected by Orbital.
+        /// This allows the low-level hook to ignore our own injections while still
+        /// processing those from virtual keyboards like OSK.
+        /// </summary>
+        public static readonly IntPtr ORBITAL_EXTRA_INFO = (IntPtr)0x4F524254; // 'ORBT'
 
         [DllImport("user32.dll")]
         static extern uint SendInput(uint nInputs, INPUT[] pInputs, int cbSize);
@@ -168,10 +175,12 @@ namespace Orbital
 
                 inputs[0].type = INPUT_KEYBOARD;
                 inputs[0].U.ki.wVk = VK_DELETE;
+                inputs[0].U.ki.dwExtraInfo = ORBITAL_EXTRA_INFO;
 
                 inputs[1].type = INPUT_KEYBOARD;
                 inputs[1].U.ki.wVk = VK_DELETE;
                 inputs[1].U.ki.dwFlags = KEYEVENTF_KEYUP;
+                inputs[1].U.ki.dwExtraInfo = ORBITAL_EXTRA_INFO;
 
                 SendInput((uint)inputs.Length, inputs, INPUT.Size);
             }
@@ -203,9 +212,13 @@ namespace Orbital
                 INPUT[] inputs = new INPUT[2];
                 inputs[0].type = INPUT_KEYBOARD;
                 inputs[0].U.ki.wVk = vk;
+                inputs[0].U.ki.dwExtraInfo = ORBITAL_EXTRA_INFO;
+
                 inputs[1].type = INPUT_KEYBOARD;
                 inputs[1].U.ki.wVk = vk;
                 inputs[1].U.ki.dwFlags = KEYEVENTF_KEYUP;
+                inputs[1].U.ki.dwExtraInfo = ORBITAL_EXTRA_INFO;
+
                 SendInput((uint)inputs.Length, inputs, INPUT.Size);
             }
             return true;
@@ -253,20 +266,24 @@ namespace Orbital
             // Press Modifier (Ctrl)
             inputs[0].type = INPUT_KEYBOARD;
             inputs[0].U.ki.wVk = modifier;
+            inputs[0].U.ki.dwExtraInfo = ORBITAL_EXTRA_INFO;
 
             // Press Key (C or V)
             inputs[1].type = INPUT_KEYBOARD;
             inputs[1].U.ki.wVk = key;
+            inputs[1].U.ki.dwExtraInfo = ORBITAL_EXTRA_INFO;
 
             // Release Key (C or V)
             inputs[2].type = INPUT_KEYBOARD;
             inputs[2].U.ki.wVk = key;
             inputs[2].U.ki.dwFlags = KEYEVENTF_KEYUP;
+            inputs[2].U.ki.dwExtraInfo = ORBITAL_EXTRA_INFO;
 
             // Release Modifier (Ctrl)
             inputs[3].type = INPUT_KEYBOARD;
             inputs[3].U.ki.wVk = modifier;
             inputs[3].U.ki.dwFlags = KEYEVENTF_KEYUP;
+            inputs[3].U.ki.dwExtraInfo = ORBITAL_EXTRA_INFO;
 
             SendInput((uint)inputs.Length, inputs, INPUT.Size);
         }
