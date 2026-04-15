@@ -28,6 +28,12 @@ namespace Orbital
         private const int VK_SHIFT   = 0x10;
         private const int VK_CONTROL = 0x11;
         private const int VK_ALT     = 0x12;
+        private const int VK_LSHIFT   = 0xA0;
+        private const int VK_RSHIFT   = 0xA1;
+        private const int VK_LCONTROL = 0xA2;
+        private const int VK_RCONTROL = 0xA3;
+        private const int VK_LMENU    = 0xA4;
+        private const int VK_RMENU    = 0xA5;
         private const int VK_ESCAPE  = 0x1B;
         private const int VK_A       = 0x41;
         private const int VK_C       = 0x43;
@@ -307,8 +313,8 @@ namespace Orbital
 
                     if (isKeyDown)
                     {
-                        if (vk == VK_SHIFT)   _shiftDown = true;
-                        if (vk == VK_CONTROL) _ctrlDown  = true;
+                        if (vk == VK_SHIFT || vk == VK_LSHIFT || vk == VK_RSHIFT) _shiftDown = true;
+                        if (vk == VK_CONTROL || vk == VK_LCONTROL || vk == VK_RCONTROL) _ctrlDown = true;
 
                         // Track intent to select text with keyboard
                         if (_shiftDown && s_navKeys.Contains(vk))
@@ -344,24 +350,25 @@ namespace Orbital
                         if (vk == VK_ESCAPE)
                             OnEscapePressed?.Invoke(null, EventArgs.Empty);
 
-                        // Shift released after a nav-key selection
-                        if (vk == VK_SHIFT && _pendingKeyboardSelection)
+                        // Shift-release trigger: handle generic and L/R variants
+                        if ((vk == VK_SHIFT || vk == VK_LSHIFT || vk == VK_RSHIFT) && _pendingKeyboardSelection)
                         {
                             _pendingKeyboardSelection = false;
                             GetCursorPos(out MousePoint pt);
                             OnKeyboardSelection?.Invoke(null, pt);
                         }
 
-                        // Ctrl+A released
-                        if (vk == VK_A && _ctrlDown && _pendingKeyboardSelection)
+                        // Ctrl+A release trigger: no longer requires _ctrlDown to be true *now*
+                        // as long as _pendingKeyboardSelection was successfully set during KeyDown.
+                        if (vk == VK_A && _pendingKeyboardSelection)
                         {
                             _pendingKeyboardSelection = false;
                             GetCursorPos(out MousePoint pt);
                             OnKeyboardSelection?.Invoke(null, pt);
                         }
 
-                        if (vk == VK_SHIFT)   _shiftDown = false;
-                        if (vk == VK_CONTROL) _ctrlDown  = false;
+                        if (vk == VK_SHIFT || vk == VK_LSHIFT || vk == VK_RSHIFT) _shiftDown = false;
+                        if (vk == VK_CONTROL || vk == VK_LCONTROL || vk == VK_RCONTROL) _ctrlDown = false;
                     }
                 }
             }
