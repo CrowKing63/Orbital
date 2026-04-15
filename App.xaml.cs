@@ -10,6 +10,7 @@ using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Automation.Text;
 using System.Windows.Media;
+using System.Windows.Interop;
 using Velopack;
 using Velopack.Sources;
 using WinForms = System.Windows.Forms;
@@ -83,6 +84,11 @@ namespace Orbital
 
             // Keyboard hook is best-effort; failures are non-fatal (mouse-only mode still works)
             SystemHookManager.StartKeyboardHook(out _);
+
+            // Start Raw Input handling for virtual keyboard support
+            var mainWindow = new MainWindow();
+            mainWindow.Show();
+            SystemHookManager.StartRawInputHandling(mainWindow);
         }
 
         public static void ApplyTheme(string themeName)

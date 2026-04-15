@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Windows;
 
 namespace Orbital
 {
@@ -485,5 +486,154 @@ namespace Orbital
         [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         private static extern IntPtr GetModuleHandle(string lpModuleName);
 
+        // ── Raw Input API (for virtual keyboard / on-screen keyboard support) ───────
+        private const int WM_INPUT = 0x00FF;
+        private const int RIM_INPUTKEYBOARD = 1;
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct RAWINPUTHEADER
+        {
+            public uint dwType;   // RIM_TYPE keyboard = 1
+            public uint dwSize;
+            public IntPtr hDevice;
+            public IntPtr wParam;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct RAWKEYBOARD
+        {
+            public ushort MakeCode;
+            public ushort Flags;      // RI_KEY_BREAK = 0x80, RI_KEY_E0 = 0x01
+            public ushort Reserved;
+            public ushort VKey;
+            public uint   Message;
+            public ulong  ExtraInformation;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct RAWINPUT
+        {
+            public RAWINPUTHEADER header;
+            public RAWKEYBOARD   keyboard;
+        }
+
+        private const int RI_KEY_BREAK = 0x0080;
+        private const int RI_KEY_E0    = 0x0001;
+
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern uint GetRawInputData(IntPtr hRawInput, uint uiCommand,
+            [Out] byte[]? pData, ref uint pcbSize, uint cbSizeHeader);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern uint GetRawInputData(IntPtr hRawInput, uint uiCommand,
+            IntPtr pData, ref uint pcbSize, uint cbSizeHeader);
+
+        private static IntPtr _rawInputWnd;
+
+        public static void StartRawInputHandling(Window wpfWindow)
+        {
+            var helper = new System.Windows.Interop.WindowInteropHelper(wpfWindow);
+            _rawInputWnd = helper.Handle;
+
+            RAWINPUTDEVICE[] devices = new RAWINPUTDEVICE[1];
+            devices[0].usUsagePage = 0x01;      // Generic Desktop
+            devices[0].usUsage     = 0x06;      // Keyboard
+            devices[0].dwFlags     = 0x00000001; // RIDEV_INPUTSINK - receive input even when window not focused
+            devices[0].hwndTarget  = _rawInputWnd;
+
+            if (!RegisterRawInputDevices(devices, (uint)Marshal.SizeOf<RAWINPUTDEVICE>(), 0))
+            {
+                Debug.WriteLine($"[SystemHookManager] RegisterRawInputDevices failed: {Marshal.GetLastWin32Error()}");
+            }
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct RAWINPUTDEVICE
+        {
+            public ushort usUsagePage;
+            public ushort usUsage;
+            public uint   dwFlags;
+            public IntPtr hwndTarget;
+        }
+
+        [DllImport("user32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool RegisterRawInputDevices(RAWINPUTDEVICE[] pDevices, uint cbSize, uint dwFlags);
+
+        public static void ProcessRawInput(IntPtr lParam)
+        {
+            uint size = 0;
+            GetRawInputData(lParam, 0x10000003, null, ref size, (uint)Marshal.SizeOf<RAWINPUTHEADER>()); // RID_INPUT = 0x10000003
+
+            if (size == 0) return;
+
+            IntPtr buffer = Marshal.AllocHGlobal((int)size);
+            try
+            {
+                GetRawInputData(lParam, 0x10000003, buffer, ref size, (uint)Marshal.SizeOf<RAWINPUTHEADER>());
+
+                RAWINPUT raw = Marshal.PtrToStructure<RAWINPUT>(buffer);
+                if (raw.header.dwType != RIM_INPUTKEYBOARD) return;
+
+                bool isKeyUp   = (raw.keyboard.Flags & RI_KEY_BREAK) != 0;
+                int  vk        = raw.keyboard.VKey;
+
+                if (isKeyUp)
+                {
+                    if (vk == VK_ESCAPE)
+                        OnEscapePressed?.Invoke(null, EventArgs.Empty);
+
+                    // Ctrl+A released -> trigger selection
+                    if (vk == VK_A && _ctrlDown && _pendingKeyboardSelection)
+                    {
+                        _pendingKeyboardSelection = false;
+                        GetCursorPos(out MousePoint pt);
+                        OnKeyboardSelection?.Invoke(null, pt);
+                    }
+
+                    if (vk == VK_SHIFT)   _shiftDown = false;
+                    if (vk == VK_CONTROL) _ctrlDown  = false;
+                }
+                else
+                {
+                    // Key down
+                    if (vk == VK_SHIFT)   _shiftDown = true;
+                    if (vk == VK_CONTROL) _ctrlDown  = true;
+
+                    // Track intent to select text with keyboard
+                    if (_shiftDown && s_navKeys.Contains(vk))
+                        _pendingKeyboardSelection = true;
+
+                    if (_ctrlDown && vk == VK_A)
+                        _pendingKeyboardSelection = true;
+
+                    // Clipboard shortcuts — dismiss popup
+                    if (_ctrlDown && (vk == VK_C || vk == VK_X || vk == VK_V))
+                        OnClipboardShortcut?.Invoke(null, EventArgs.Empty);
+
+                    // Custom hotkey
+                    if (HotkeyVirtualKey != 0 && (uint)vk == HotkeyVirtualKey)
+                    {
+                        bool wantCtrl  = (HotkeyModifiers & 0x02) != 0;
+                        bool wantAlt   = (HotkeyModifiers & 0x01) != 0;
+                        bool wantShift = (HotkeyModifiers & 0x04) != 0;
+
+                        bool altDown = (GetAsyncKeyState(VK_ALT) & 0x8000) != 0;
+
+                        if (_ctrlDown  == wantCtrl &&
+                            altDown    == wantAlt  &&
+                            _shiftDown == wantShift)
+                        {
+                            GetCursorPos(out MousePoint pt);
+                            OnCustomHotkey?.Invoke(null, pt);
+                        }
+                    }
+                }
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(buffer);
+            }
+        }
     }
 }
