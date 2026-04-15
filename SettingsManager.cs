@@ -169,8 +169,10 @@ namespace Orbital
 
                 if (enable)
                 {
-                    string exePath = System.Diagnostics.Process.GetCurrentProcess().MainModule?.FileName
-                                     ?? System.Reflection.Assembly.GetExecutingAssembly().Location;
+                    string exePath = Environment.ProcessPath
+                                     ?? System.Diagnostics.Process.GetCurrentProcess().MainModule?.FileName
+                                     ?? string.Empty;
+                    if (string.IsNullOrEmpty(exePath)) return;
                     key.SetValue(RunRegistryValueName, $"\"{exePath}\"");
                 }
                 else

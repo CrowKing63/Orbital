@@ -67,6 +67,7 @@ namespace Orbital
         private const ushort VK_SPACE  = 0x20;
         private const ushort VK_BACK   = 0x08;
         private const ushort VK_ESCAPE = 0x1B;
+        private const ushort VK_TAB    = 0x09;
         private const uint WM_INPUT = 0x00FF; // Just for reference
         
         /// <summary>
