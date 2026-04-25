@@ -94,9 +94,8 @@ namespace Orbital
                 // 1) Backup + Clear in one Dispatcher call
                 IDataObject? backup = Application.Current.Dispatcher.Invoke(() =>
                 {
-                    IDataObject? bk = null;
-                    try { bk = Clipboard.GetDataObject(); } catch { }
-                    Clipboard.Clear();
+                    IDataObject? bk = RetryFunc(() => Clipboard.GetDataObject(), null);
+                    RetryAction(() => Clipboard.Clear());
                     return bk;
                 });
 
@@ -112,7 +111,7 @@ namespace Orbital
                 {
                     Thread.Sleep(pollIntervalMs);
                     elapsed += pollIntervalMs;
-                    bool hasText = Application.Current.Dispatcher.Invoke(() => Clipboard.ContainsText());
+                    bool hasText = Application.Current.Dispatcher.Invoke(() => RetryFunc(() => Clipboard.ContainsText(), false));
                     if (hasText) break;
                 }
 
@@ -120,8 +119,10 @@ namespace Orbital
                 string selectedText = Application.Current.Dispatcher.Invoke(() =>
                 {
                     string text = string.Empty;
-                    try { if (Clipboard.ContainsText()) text = Clipboard.GetText(); } catch { }
-                    try { if (backup != null) Clipboard.SetDataObject(backup, true); } catch { }
+                    if (RetryFunc(() => Clipboard.ContainsText(), false))
+                        text = RetryFunc(() => Clipboard.GetText(), string.Empty);
+                    if (backup != null)
+                        RetryAction(() => Clipboard.SetDataObject(backup, true));
                     return text;
                 });
 
@@ -139,8 +140,8 @@ namespace Orbital
                 IDataObject? backup = null;
                 Application.Current.Dispatcher.Invoke(() => 
                 {
-                    try { backup = Clipboard.GetDataObject(); } catch { }
-                    Clipboard.SetText(newText);
+                    backup = RetryFunc(() => Clipboard.GetDataObject(), null);
+                    RetryAction(() => Clipboard.SetText(newText));
                 });
 
                 Thread.Sleep(50);
@@ -153,12 +154,8 @@ namespace Orbital
 
                 Application.Current.Dispatcher.Invoke(() =>
                 {
-                    try
-                    {
-                        if (backup != null)
-                            Clipboard.SetDataObject(backup, true);
-                    }
-                    catch { }
+                    if (backup != null)
+                        RetryAction(() => Clipboard.SetDataObject(backup, true));
                 });
             }
         }
@@ -256,8 +253,33 @@ namespace Orbital
         {
             lock (_clipboardLock)
             {
-                Application.Current.Dispatcher.Invoke(() => Clipboard.SetText(text));
+                Application.Current.Dispatcher.Invoke(() => RetryAction(() => Clipboard.SetText(text)));
             }
+        }
+
+        private static void RetryAction(Action action, int maxRetries = 3)
+        {
+            for (int i = 0; i <= maxRetries; i++)
+            {
+                try { action(); return; }
+                catch (System.Runtime.InteropServices.ExternalException) when (i < maxRetries)
+                {
+                    Thread.Sleep(10 * (1 << i));
+                }
+            }
+        }
+
+        private static T RetryFunc<T>(Func<T> func, T fallback, int maxRetries = 3)
+        {
+            for (int i = 0; i <= maxRetries; i++)
+            {
+                try { return func(); }
+                catch (System.Runtime.InteropServices.ExternalException) when (i < maxRetries)
+                {
+                    Thread.Sleep(10 * (1 << i));
+                }
+            }
+            return fallback;
         }
 
         private static void SimulateKeyStroke(ushort modifier, ushort key)
