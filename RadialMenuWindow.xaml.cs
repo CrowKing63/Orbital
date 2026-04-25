@@ -233,9 +233,14 @@ namespace Orbital
             Hide();
         }
 
-        private void Window_Deactivated(object sender, EventArgs e)
+        private async void Window_Deactivated(object sender, EventArgs e)
         {
-            Hide();
+            // Delay briefly so that transient focus steals (notification toasts, UAC prompts)
+            // don't immediately dismiss the popup. If the window re-activates within the
+            // delay, the dismiss is cancelled.
+            await System.Threading.Tasks.Task.Delay(100);
+            if (!IsActive)
+                Hide();
         }
     }
 }

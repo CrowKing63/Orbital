@@ -29,6 +29,7 @@ namespace Orbital
         private readonly object _selectionLock = new object();
         private UpdateInfo? _pendingUpdate;
         private UpdateManager? _updateManager;
+        private DateTime _lastDismissTime = DateTime.MinValue;
 
         private static readonly HashSet<string> _supportedLanguages =
             new() { "en", "ko", "ja", "zh", "es", "fr", "de", "pt", "ru", "it" };
@@ -319,7 +320,10 @@ namespace Orbital
                                     mouseYDip <= _radialMenu.Top  + _radialMenu.Height;
 
                 if (!insideWindow)
+                {
+                    _lastDismissTime = DateTime.UtcNow;
                     _radialMenu.Hide();
+                }
             });
         }
 
@@ -349,14 +353,13 @@ namespace Orbital
 
         private void SystemHookManager_OnLongPress(object? sender, SystemHookManager.MousePoint e)
         {
-            // Run IsOverEditableControl on a background thread to avoid blocking the hook callback
+            // Run IsOverEditableControl on a background thread to avoid blocking the hook callback.
+            // Then go through TriggerSelectionMenu so CTS cancellation prevents conflicts with
+            // subsequent drag / double-click / keyboard triggers.
             System.Threading.Tasks.Task.Run(() =>
             {
                 if (!IsOverEditableControl(e.X, e.Y)) return;
-                Dispatcher.Invoke(() =>
-                {
-                    _radialMenu.ShowAtCursor(e.X, e.Y, isEditable: true, hasText: false);
-                });
+                TriggerSelectionMenu(e.X, e.Y, isKeyboard: true, forceHasText: false);
             });
         }
 
@@ -365,7 +368,10 @@ namespace Orbital
             Dispatcher.BeginInvoke(() =>
             {
                 if (_radialMenu.IsVisible)
+                {
+                    _lastDismissTime = DateTime.UtcNow;
                     _radialMenu.Hide();
+                }
             });
         }
 
@@ -374,7 +380,10 @@ namespace Orbital
             Dispatcher.BeginInvoke(() =>
             {
                 if (_radialMenu.IsVisible)
+                {
+                    _lastDismissTime = DateTime.UtcNow;
                     _radialMenu.Hide();
+                }
             });
         }
 
@@ -385,14 +394,19 @@ namespace Orbital
         /// (always editable, so Paste/Cut are shown).
         /// <paramref name="requireEditable"/> = true (double-click) checks editable on a
         /// background thread and skips the popup if the target is read-only.
+        /// <paramref name="forceHasText"/> overrides hasText when non-null (used by long-press).
         /// </summary>
         /// <param name="editCheckX">X coordinate to use for the editability check.
         /// For drag selection, pass the drag-start position so the check succeeds even when
         /// the cursor drifts outside the text field before mouse-up.</param>
         private void TriggerSelectionMenu(int screenX, int screenY, bool isKeyboard,
             bool requireEditable = false, int editCheckX = -1, int editCheckY = -1,
-            string dragStartHwndClass = "")
+            string dragStartHwndClass = "", bool? forceHasText = null)
         {
+            // Suppress rapid re-triggers after dismiss (e.g. accidental double-trigger).
+            if ((DateTime.UtcNow - _lastDismissTime).TotalMilliseconds < 150)
+                return;
+
             // Fall back to the menu-display position when no explicit check position is given.
             if (editCheckX < 0) editCheckX = screenX;
             if (editCheckY < 0) editCheckY = screenY;
@@ -410,27 +424,42 @@ namespace Orbital
             {
                 if (token.IsCancellationRequested) return;
 
-                bool isEditable;
-                bool hasText;
-                if (isKeyboard)
+                bool isEditable = false;
+                bool hasText = false;
+
+                if (isKeyboard && forceHasText.HasValue)
+                {
+                    // Long-press path: already verified editable, no text selection.
+                    isEditable = true;
+                    hasText = forceHasText.Value;
+                }
+                else if (isKeyboard)
                 {
                     isEditable = true;
                     hasText = true; // keyboard selection always produces a text selection
                 }
                 else
                 {
-                    // Allow the UIA selection state to commit before querying.
-                    // Double-click needs longer (word selection takes more time in some apps).
-                    Thread.Sleep(requireEditable ? 150 : 50);
+                    // Adaptive UIA polling: retry up to 3 times with progressive delays.
+                    // Fast apps (Notepad) succeed on first try; slow apps (browsers, Electron)
+                    // succeed on 2nd or 3rd try. Total worst-case delay = 150ms (same as before).
+                    int[] delays = requireEditable ? new[] { 0, 80, 70 } : new[] { 0, 50, 50 };
+                    bool found = false;
+                    foreach (int delay in delays)
+                    {
+                        if (delay > 0) Thread.Sleep(delay);
+                        if (token.IsCancellationRequested) return;
 
-                    if (token.IsCancellationRequested) return;
-
-                    // Use editCheckX/Y (drag-start position) so the check succeeds even when
-                    // the cursor has moved outside the source text field by mouse-up time.
-                    (bool canSelect, bool canWrite, bool selHasText) = CheckEditability(editCheckX, editCheckY, dragStartHwndClass);
-                    if (!canSelect) return;
-                    isEditable = canWrite;
-                    hasText = selHasText;
+                        (bool canSelect, bool canWrite, bool selHasText) = CheckEditability(editCheckX, editCheckY, dragStartHwndClass);
+                        if (canSelect)
+                        {
+                            isEditable = canWrite;
+                            hasText = selHasText;
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) return;
                 }
 
                 Dispatcher.BeginInvoke(() =>
