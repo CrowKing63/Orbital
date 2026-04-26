@@ -30,9 +30,21 @@ namespace Orbital
         private UpdateInfo? _pendingUpdate;
         private UpdateManager? _updateManager;
         private DateTime _lastDismissTime = DateTime.MinValue;
+        private DateTime _lastTriggerAttemptTime = DateTime.MinValue;
 
         private static readonly HashSet<string> _supportedLanguages =
             new() { "en", "ko", "ja", "zh", "es", "fr", "de", "pt", "ru", "it" };
+
+        /// <summary>Win32 class names of browser windows that support text selection.
+        /// Used as a fast-path to skip expensive UIA IPC calls.</summary>
+        private static readonly HashSet<string> s_browserClasses =
+            new(StringComparer.OrdinalIgnoreCase)
+            {
+                "Chrome_WidgetWin_1",
+                "Chrome_WidgetWin_2",
+                "Chrome_RenderWidgetHostHWND",
+                "MozillaWindowClass",
+            };
 
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -403,6 +415,15 @@ namespace Orbital
             bool requireEditable = false, int editCheckX = -1, int editCheckY = -1,
             string dragStartHwndClass = "", bool? forceHasText = null)
         {
+            // Throttle: if another trigger arrived within 80 ms, just cancel the in-flight
+            // task instead of starting a new UIA round-trip that would pile up and lag the mouse.
+            if ((DateTime.UtcNow - _lastTriggerAttemptTime).TotalMilliseconds < 80)
+            {
+                lock (_selectionLock) { _selectionCts?.Cancel(); }
+                return;
+            }
+            _lastTriggerAttemptTime = DateTime.UtcNow;
+
             // Suppress rapid re-triggers after dismiss (e.g. accidental double-trigger).
             if ((DateTime.UtcNow - _lastDismissTime).TotalMilliseconds < 150)
                 return;
@@ -440,26 +461,19 @@ namespace Orbital
                 }
                 else
                 {
-                    // Adaptive UIA polling: retry up to 3 times with progressive delays.
-                    // Fast apps (Notepad) succeed on first try; slow apps (browsers, Electron)
-                    // succeed on 2nd or 3rd try. Total worst-case delay = 150ms (same as before).
-                    int[] delays = requireEditable ? new[] { 0, 80, 70 } : new[] { 0, 50, 50 };
-                    bool found = false;
-                    foreach (int delay in delays)
-                    {
-                        if (delay > 0) Thread.Sleep(delay);
-                        if (token.IsCancellationRequested) return;
+                    // Single attempt with a short adaptive delay.
+                    // Browsers hit the fast-path in CheckEditability (zero UIA IPC).
+                    // Native apps (Notepad, Word) are fast with CacheRequest.
+                    // Double-click needs a slightly longer wait for word selection to settle.
+                    int delay = requireEditable ? 80 : 25;
+                    if (delay > 0) Thread.Sleep(delay);
+                    if (token.IsCancellationRequested) return;
 
-                        (bool canSelect, bool canWrite, bool selHasText) = CheckEditability(editCheckX, editCheckY, dragStartHwndClass);
-                        if (canSelect)
-                        {
-                            isEditable = canWrite;
-                            hasText = selHasText;
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (!found) return;
+                    (bool canSelect, bool canWrite, bool selHasText) =
+                        CheckEditability(editCheckX, editCheckY, dragStartHwndClass);
+                    if (!canSelect) return;
+                    isEditable = canWrite;
+                    hasText = selHasText;
                 }
 
                 Dispatcher.BeginInvoke(() =>
@@ -488,97 +502,125 @@ namespace Orbital
         private static (bool canSelect, bool canWrite, bool hasText) CheckEditability(
             int screenX, int screenY, string hwndClass = "")
         {
+            // Fast path: skip expensive UIA IPC for known browser windows.
+            // Browsers are always treated as read-only Document with optimistic hasText.
+            if (!string.IsNullOrEmpty(hwndClass) && s_browserClasses.Contains(hwndClass))
+                return (true, false, true);
+
             try
             {
-                var element = AutomationElement.FromPoint(new System.Windows.Point(screenX, screenY));
-                if (element == null) return (false, false, false);
+                var point = new System.Windows.Point(screenX, screenY);
 
-                var controlType = element.GetCurrentPropertyValue(AutomationElement.ControlTypeProperty) as ControlType;
+                // Use CacheRequest to batch property/pattern retrieval in a single cross-process
+                // round-trip. This cuts IPC from ~4 separate calls down to 1, which is the main
+                // cause of mouse stutter when dragging over Chromium-based apps.
+                var cacheRequest = new CacheRequest();
+                cacheRequest.Add(AutomationElement.ControlTypeProperty);
+                cacheRequest.Add(AutomationElement.IsKeyboardFocusableProperty);
+                cacheRequest.Add(TextPattern.Pattern);
+                cacheRequest.Add(ValuePattern.Pattern);
 
-                // Writable text input — always show popup (Paste is useful even without a selection).
-                // hasText reflects whether the user actually selected something right now.
-                // ComboBox (e.g. Google search bar, address bars) has an embedded editable field.
-                if (controlType == ControlType.Edit || controlType == ControlType.ComboBox)
+                using (cacheRequest.Activate())
                 {
-                    bool sel = HasRealTextSelection(element);
-                    return (true, true, sel);
-                }
+                    var element = AutomationElement.FromPoint(point);
+                    if (element == null) return (false, false, false);
 
-                // Document — writable documents (Notepad, Sticky Notes, Word) are treated like Edit:
-                // popup always shows and Paste/Cut are available. Read-only documents (browser pages,
-                // PDFs) only show the popup when text is actually selected.
-                // Writability is detected via ValuePattern.IsReadOnly when available; otherwise
-                // IsKeyboardFocusable is used as a heuristic (editable containers accept keyboard input,
-                // while most read-only document containers do not).
-                if (controlType == ControlType.Document)
-                {
-                    bool isWritable;
-                    if (element.TryGetCurrentPattern(ValuePattern.Pattern, out var vpo) && vpo is ValuePattern vp)
-                        isWritable = !vp.Current.IsReadOnly;
-                    else
-                        isWritable = (bool)element.GetCurrentPropertyValue(AutomationElement.IsKeyboardFocusableProperty);
+                    var controlType = element.GetCachedPropertyValue(AutomationElement.ControlTypeProperty) as ControlType;
 
-                    bool sel = HasRealTextSelection(element);
-                    // Writable documents: sel determines hasText (e.g. Notepad with no selection → Paste only).
-                    // Read-only documents: always set hasText=true — the user dragged to select, so text
-                    // is almost certainly present; the actual content is fetched via clipboard at action time.
-                    return isWritable ? (true, true, sel) : (true, false, true);
-                }
-
-                // WinUI 3 / UWP text areas (e.g. new Sticky Notes) report as ControlType.Pane
-                // but expose TextPattern, making them detectable as text input areas.
-                if (controlType == ControlType.Pane)
-                {
-                    bool hasText = element.TryGetCurrentPattern(TextPattern.Pattern, out _);
-                    if (hasText)
+                    // Writable text input — always show popup (Paste is useful even without selection).
+                    if (controlType == ControlType.Edit || controlType == ControlType.ComboBox)
                     {
                         bool sel = HasRealTextSelection(element);
                         return (true, true, sel);
                     }
-                }
 
-                // For unrecognised leaf types (ControlType.Text, ControlType.Custom, etc.)
-                // walk up one level to find an Edit or Document ancestor.
-                {
-                    var parent = TreeWalker.ControlViewWalker.GetParent(element);
-                    if (parent != null)
+                    if (controlType == ControlType.Document)
                     {
-                        var parentType = parent.GetCurrentPropertyValue(AutomationElement.ControlTypeProperty) as ControlType;
-                        if (parentType == ControlType.Edit)
+                        bool isWritable;
+                        var vp = TryGetCachedPattern<ValuePattern>(element, ValuePattern.Pattern);
+                        if (vp != null)
+                            isWritable = !vp.Current.IsReadOnly;
+                        else
+                            isWritable = (bool)element.GetCachedPropertyValue(AutomationElement.IsKeyboardFocusableProperty);
+
+                        bool sel = HasRealTextSelection(element);
+                        return isWritable ? (true, true, sel) : (true, false, true);
+                    }
+
+                    // WinUI 3 / UWP text areas (e.g. new Sticky Notes) report as Pane
+                    // but expose TextPattern.
+                    if (controlType == ControlType.Pane)
+                    {
+                        if (TryGetCachedPattern<TextPattern>(element, TextPattern.Pattern) != null)
                         {
-                            bool sel = HasRealTextSelection(parent);
+                            bool sel = HasRealTextSelection(element);
                             return (true, true, sel);
                         }
-                        if (parentType == ControlType.Document)
+                    }
+
+                    // Parent fallback — parent wasn't in the cache, so live calls are required.
+                    {
+                        var parent = TreeWalker.ControlViewWalker.GetParent(element);
+                        if (parent != null)
                         {
-                            bool isWritable;
-                            if (parent.TryGetCurrentPattern(ValuePattern.Pattern, out var vpo2) && vpo2 is ValuePattern vp2)
-                                isWritable = !vp2.Current.IsReadOnly;
-                            else
-                                isWritable = (bool)parent.GetCurrentPropertyValue(AutomationElement.IsKeyboardFocusableProperty);
-                            bool sel = HasRealTextSelection(parent);
-                            return isWritable ? (true, true, sel) : (true, false, true);
+                            var parentType = parent.GetCurrentPropertyValue(AutomationElement.ControlTypeProperty) as ControlType;
+                            if (parentType == ControlType.Edit)
+                            {
+                                bool sel = HasRealTextSelection(parent);
+                                return (true, true, sel);
+                            }
+                            if (parentType == ControlType.Document)
+                            {
+                                bool isWritable;
+                                if (parent.TryGetCurrentPattern(ValuePattern.Pattern, out var vpo2) && vpo2 is ValuePattern vp2)
+                                    isWritable = !vp2.Current.IsReadOnly;
+                                else
+                                    isWritable = (bool)parent.GetCurrentPropertyValue(AutomationElement.IsKeyboardFocusableProperty);
+                                bool sel = HasRealTextSelection(parent);
+                                return isWritable ? (true, true, sel) : (true, false, true);
+                            }
+                            if (controlType == ControlType.Text && parentType == ControlType.Group)
+                                return (true, false, true);
                         }
-                        // Browser body text: leaf=ControlType.Text inside a ControlType.Group.
-                        // Chrome renders page text this way; video/image elements do not use Text leaves.
-                        if (controlType == ControlType.Text && parentType == ControlType.Group)
-                            return (true, false, true);
                     }
                 }
 
-                // All other types (game windows, taskbar buttons, desktop, UWP tiles, etc.) — no popup.
                 return (false, false, false);
             }
             catch { return (false, false, false); }
         }
 
         /// <summary>
+        /// Safely retrieves a cached pattern from an element. Returns null if the pattern
+        /// was not cached (i.e. the element does not support it).
+        /// </summary>
+        private static T? TryGetCachedPattern<T>(AutomationElement element, AutomationPattern pattern) where T : class
+        {
+            try
+            {
+                return element.GetCachedPattern(pattern) as T;
+            }
+            catch (InvalidOperationException)
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
         /// Returns true when the element's TextPattern reports a non-collapsed (non-empty) selection.
+        /// Prefers a cached pattern when available (inside an active CacheRequest scope).
         /// </summary>
         private static bool HasRealTextSelection(AutomationElement element)
         {
-            if (!element.TryGetCurrentPattern(TextPattern.Pattern, out var tpo) || tpo is not TextPattern tp)
-                return false;
+            TextPattern? tp = TryGetCachedPattern<TextPattern>(element, TextPattern.Pattern);
+
+            if (tp == null)
+            {
+                if (!element.TryGetCurrentPattern(TextPattern.Pattern, out var tpo) || tpo is not TextPattern tpLive)
+                    return false;
+                tp = tpLive;
+            }
+
             var sel = tp.GetSelection();
             if (sel.Length == 0) return false;
             // CompareEndpoints == 0 means start == end (collapsed cursor, no visible selection).
@@ -595,23 +637,34 @@ namespace Orbital
         {
             try
             {
-                var element = AutomationElement.FromPoint(new System.Windows.Point(screenX, screenY));
-                if (element == null) return false;
+                var point = new System.Windows.Point(screenX, screenY);
 
-                var controlType = element.GetCurrentPropertyValue(AutomationElement.ControlTypeProperty) as ControlType;
+                var cacheRequest = new CacheRequest();
+                cacheRequest.Add(AutomationElement.ControlTypeProperty);
+                cacheRequest.Add(AutomationElement.IsKeyboardFocusableProperty);
+                cacheRequest.Add(ValuePattern.Pattern);
 
-                if (controlType == ControlType.Edit || controlType == ControlType.ComboBox)
-                    return true;
-
-                // Document is editable when it exposes a writable ValuePattern, or when it is
-                // keyboard-focusable (UWP RichEditBox / Sticky Notes lack ValuePattern but do
-                // accept keyboard input). Browser read-only pages are not keyboard-focusable
-                // at the document level.
-                if (controlType == ControlType.Document)
+                using (cacheRequest.Activate())
                 {
-                    if (element.TryGetCurrentPattern(ValuePattern.Pattern, out var vpo) && vpo is ValuePattern vp)
-                        return !vp.Current.IsReadOnly;
-                    return (bool)element.GetCurrentPropertyValue(AutomationElement.IsKeyboardFocusableProperty);
+                    var element = AutomationElement.FromPoint(point);
+                    if (element == null) return false;
+
+                    var controlType = element.GetCachedPropertyValue(AutomationElement.ControlTypeProperty) as ControlType;
+
+                    if (controlType == ControlType.Edit || controlType == ControlType.ComboBox)
+                        return true;
+
+                    // Document is editable when it exposes a writable ValuePattern, or when it is
+                    // keyboard-focusable (UWP RichEditBox / Sticky Notes lack ValuePattern but do
+                    // accept keyboard input). Browser read-only pages are not keyboard-focusable
+                    // at the document level.
+                    if (controlType == ControlType.Document)
+                    {
+                        var vp = TryGetCachedPattern<ValuePattern>(element, ValuePattern.Pattern);
+                        if (vp != null)
+                            return !vp.Current.IsReadOnly;
+                        return (bool)element.GetCachedPropertyValue(AutomationElement.IsKeyboardFocusableProperty);
+                    }
                 }
 
                 return false;
