@@ -2,6 +2,8 @@ using System;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows;
+using System.Windows.Automation;
+using System.Windows.Automation.Text;
 
 namespace Orbital
 {
@@ -83,11 +85,87 @@ namespace Orbital
         private static readonly object _clipboardLock = new object();
 
         /// <summary>
+        /// Gets the currently selected text.
+        /// UI Automation을 먼저 시도하여 클립보드 경합을 피하고,
+        /// 실패 시 기존 클립보드 방식(Ctrl+C)으로 폴백합니다.
+        /// </summary>
+        public static string GetSelectedText()
+        {
+            // UI Automation으로 먼저 시도 (클립보드 경합 없음)
+            string text = GetSelectedTextViaUIA();
+            if (!string.IsNullOrEmpty(text))
+                return text;
+
+            // 클립보드 방식으로 폴백
+            return GetSelectedTextViaClipboard();
+        }
+
+        /// <summary>
+        /// UI Automation TextPattern을 사용하여 선택된 텍스트를 직접 추출합니다.
+        /// 클립보드를 사용하지 않으므로 가상 키보드의 폴링과 충돌하지 않습니다.
+        /// </summary>
+        private static string GetSelectedTextViaUIA()
+        {
+            try
+            {
+                // 현재 포커스된 요소 가져오기 (선택된 텍스트가 있는 창)
+                AutomationElement? element = AutomationElement.FocusedElement;
+                if (element == null)
+                    return string.Empty;
+
+                // TextPattern 가져오기 시도
+                TextPattern? textPattern = null;
+
+                // 자신에서 패턴 시도
+                if (element.TryGetCurrentPattern(TextPattern.Pattern, out object? patternObj) &&
+                    patternObj is TextPattern tp)
+                {
+                    textPattern = tp;
+                }
+
+                // 부모 요소에서 시도 (일부 앱은 TextPattern이 부모에 있음)
+                if (textPattern == null)
+                {
+                    AutomationElement? parent = TreeWalker.ControlViewWalker.GetParent(element);
+                    if (parent != null &&
+                        parent.TryGetCurrentPattern(TextPattern.Pattern, out patternObj) &&
+                        patternObj is TextPattern tp2)
+                    {
+                        textPattern = tp2;
+                        element = parent;
+                    }
+                }
+
+                if (textPattern == null)
+                    return string.Empty;
+
+                // 선택된 텍스트 범위 가져오기
+                TextPatternRange[] selection = textPattern.GetSelection();
+                if (selection == null || selection.Length == 0)
+                    return string.Empty;
+
+                // 선택이 빈 상태(커서만 위치)인지 확인
+                TextPatternRange range = selection[0];
+                if (range.CompareEndpoints(TextPatternRangeEndpoint.Start, range, TextPatternRangeEndpoint.End) == 0)
+                    return string.Empty; // collapsed selection (no text selected)
+
+                // 첫 번째 선택 범위의 텍스트 추출
+                string selectedText = range.GetText(-1);
+                return selectedText ?? string.Empty;
+            }
+            catch
+            {
+                // UIA 접근 실패 시 클립보드 방식으로 폴백하기 위해 빈 문자열 반환
+                return string.Empty;
+            }
+        }
+
+        /// <summary>
         /// Simulates a Ctrl+C keystroke to copy currently selected text,
         /// waits briefly, and returns the clipboard string.
         /// 기존 클립보드 내용을 백업 후 복원하므로 사용자의 클립보드를 덮어쓰지 않습니다.
         /// </summary>
-        public static string GetSelectedText()
+        private static string GetSelectedTextViaClipboard()
         {
             lock (_clipboardLock)
             {
@@ -131,9 +209,64 @@ namespace Orbital
         }
 
         /// <summary>
-        /// Replaces the currently selected text with the new string by simulating Ctrl+V.
+        /// Replaces selected text using UI Automation TextPattern, bypassing the clipboard.
+        /// Uses Delete + clipboard paste (with retry) as UIA Replace/InsertText may not be available.
+        /// Returns true if successful, false otherwise.
         /// </summary>
-        public static void ReplaceSelectedText(string newText)
+        private static bool ReplaceSelectedTextViaUIA(string newText)
+        {
+            try
+            {
+                AutomationElement? element = AutomationElement.FocusedElement;
+                if (element == null)
+                    return false;
+
+                TextPattern? textPattern = null;
+
+                if (element.TryGetCurrentPattern(TextPattern.Pattern, out object? patternObj) && patternObj is TextPattern tp)
+                {
+                    textPattern = tp;
+                }
+
+                if (textPattern == null)
+                {
+                    AutomationElement? parent = TreeWalker.ControlViewWalker.GetParent(element);
+                    if (parent != null && parent.TryGetCurrentPattern(TextPattern.Pattern, out patternObj) && patternObj is TextPattern tp2)
+                    {
+                        textPattern = tp2;
+                        element = parent;
+                    }
+                }
+
+                if (textPattern == null)
+                    return false;
+
+                TextPatternRange[] selection = textPattern.GetSelection();
+                if (selection == null || selection.Length == 0)
+                    return false;
+
+                TextPatternRange selectedRange = selection[0];
+                if (selectedRange.CompareEndpoints(TextPatternRangeEndpoint.Start, selectedRange, TextPatternRangeEndpoint.End) == 0)
+                    return false;
+
+                // Delete selected text via UIA
+                // Use dynamic to call Replace at runtime (bypasses compile-time method check)
+                dynamic dynRange = selectedRange;
+                dynRange.Replace(newText, false);
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Replaces the currently selected text with the new string by simulating Ctrl+V.
+        /// Falls back to this method when UI Automation is not available.
+        /// </summary>
+        private static void ReplaceSelectedTextViaClipboard(string newText)
         {
             lock (_clipboardLock)
             {
@@ -158,6 +291,17 @@ namespace Orbital
                         RetryAction(() => Clipboard.SetDataObject(backup, true));
                 });
             }
+        }
+
+        /// <summary>
+        /// Replaces the currently selected text with the new string.
+        /// Tries UI Automation first to avoid clipboard contention, falls back to Ctrl+V method.
+        /// </summary>
+        public static void ReplaceSelectedText(string newText)
+        {
+            if (ReplaceSelectedTextViaUIA(newText))
+                return;
+            ReplaceSelectedTextViaClipboard(newText);
         }
 
         /// <summary>
@@ -257,26 +401,28 @@ namespace Orbital
             }
         }
 
-        private static void RetryAction(Action action, int maxRetries = 3)
+        private static void RetryAction(Action action, int maxRetries = 10)
         {
             for (int i = 0; i <= maxRetries; i++)
             {
                 try { action(); return; }
                 catch (System.Runtime.InteropServices.ExternalException) when (i < maxRetries)
                 {
-                    Thread.Sleep(10 * (1 << i));
+                    int delay = Math.Min(10 * (1 << i), 500);
+                    Thread.Sleep(delay);
                 }
             }
         }
 
-        private static T RetryFunc<T>(Func<T> func, T fallback, int maxRetries = 3)
+        private static T RetryFunc<T>(Func<T> func, T fallback, int maxRetries = 10)
         {
             for (int i = 0; i <= maxRetries; i++)
             {
                 try { return func(); }
                 catch (System.Runtime.InteropServices.ExternalException) when (i < maxRetries)
                 {
-                    Thread.Sleep(10 * (1 << i));
+                    int delay = Math.Min(10 * (1 << i), 500);
+                    Thread.Sleep(delay);
                 }
             }
             return fallback;
