@@ -170,6 +170,12 @@ namespace Orbital
             HotkeyKeyBox.Text = VkToLabel(_capturedVk);
             UpdateHotkeyHint();
 
+            // Popup Triggers
+            DragTriggerCheck.IsChecked = SettingsManager.CurrentSettings.EnableDragTrigger;
+            DoubleClickTriggerCheck.IsChecked = SettingsManager.CurrentSettings.EnableDoubleClickTrigger;
+            LongPressTriggerCheck.IsChecked = SettingsManager.CurrentSettings.EnableLongPressTrigger;
+            KeyboardTriggerCheck.IsChecked = SettingsManager.CurrentSettings.EnableKeyboardSelectionTrigger;
+
             _suppressEvents = false;
 
             RefreshActionList();
@@ -246,6 +252,16 @@ namespace Orbital
         {
             if (_suppressEvents) return;
             SettingsManager.CurrentSettings.SoundEnabled = SoundEnabledCheck.IsChecked == true;
+            SettingsManager.SaveSettings();
+        }
+
+        private void PopupTrigger_Changed(object sender, RoutedEventArgs e)
+        {
+            if (_suppressEvents) return;
+            SettingsManager.CurrentSettings.EnableDragTrigger = DragTriggerCheck.IsChecked == true;
+            SettingsManager.CurrentSettings.EnableDoubleClickTrigger = DoubleClickTriggerCheck.IsChecked == true;
+            SettingsManager.CurrentSettings.EnableLongPressTrigger = LongPressTriggerCheck.IsChecked == true;
+            SettingsManager.CurrentSettings.EnableKeyboardSelectionTrigger = KeyboardTriggerCheck.IsChecked == true;
             SettingsManager.SaveSettings();
         }
 

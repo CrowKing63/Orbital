@@ -203,6 +203,43 @@
             </StackPanel>
         </Border>
 
+        <!-- ── Popup Triggers ── -->
+        <Border Background="{DynamicResource PanelBgBrush}" CornerRadius="10"
+                BorderBrush="{DynamicResource PanelBorderBrush}" BorderThickness="1" Margin="0,0,0,16" Padding="16,12">
+            <StackPanel>
+                <TextBlock Text="{DynamicResource Str_PopupTriggers}" FontSize="11" FontWeight="SemiBold"
+                           Foreground="{DynamicResource LabelFgBrush}" Margin="0,0,0,10"/>
+                
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <CheckBox x:Name="DragTriggerCheck" Grid.Row="0" Grid.Column="0"
+                              Content="{DynamicResource Str_TriggerDrag}" Margin="0,0,0,6"
+                              Foreground="{DynamicResource TextMid}" FontSize="12"
+                              Checked="PopupTrigger_Changed" Unchecked="PopupTrigger_Changed"/>
+                    <CheckBox x:Name="DoubleClickTriggerCheck" Grid.Row="0" Grid.Column="1"
+                              Content="{DynamicResource Str_TriggerDoubleClick}" Margin="0,0,0,6"
+                              Foreground="{DynamicResource TextMid}" FontSize="12"
+                              Checked="PopupTrigger_Changed" Unchecked="PopupTrigger_Changed"/>
+                    <CheckBox x:Name="LongPressTriggerCheck" Grid.Row="1" Grid.Column="0"
+                              Content="{DynamicResource Str_TriggerLongPress}"
+                              Foreground="{DynamicResource TextMid}" FontSize="12"
+                              Checked="PopupTrigger_Changed" Unchecked="PopupTrigger_Changed"/>
+                    <CheckBox x:Name="KeyboardTriggerCheck" Grid.Row="1" Grid.Column="1"
+                              Content="{DynamicResource Str_TriggerKeyboard}"
+                              Foreground="{DynamicResource TextMid}" FontSize="12"
+                              Checked="PopupTrigger_Changed" Unchecked="PopupTrigger_Changed"/>
+                </Grid>
+            </StackPanel>
+        </Border>
+
         <!-- ── Actions header ── -->
         <DockPanel Margin="0,0,0,8">
             <TextBlock Text="{DynamicResource Str_Actions}" FontSize="11" FontWeight="SemiBold"

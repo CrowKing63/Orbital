@@ -341,6 +341,8 @@ namespace Orbital
 
         private void SystemHookManager_OnMouseUp(object? sender, SystemHookManager.MousePoint e)
         {
+            if (!SettingsManager.CurrentSettings.EnableDragTrigger) return;
+
             // Capture drag-start position now; _buttonDownPos may be overwritten by the next click.
             var down = SystemHookManager.LastButtonDownPos;
             var downClass = SystemHookManager.LastButtonDownHwndClass;
@@ -349,12 +351,16 @@ namespace Orbital
 
         private void SystemHookManager_OnDoubleClickRelease(object? sender, SystemHookManager.MousePoint e)
         {
+            if (!SettingsManager.CurrentSettings.EnableDoubleClickTrigger) return;
+
             // Editable-control check is deferred to the background thread inside TriggerSelectionMenu
             TriggerSelectionMenu(e.X, e.Y, isKeyboard: false, requireEditable: true);
         }
 
         private void SystemHookManager_OnKeyboardSelection(object? sender, SystemHookManager.MousePoint e)
         {
+            if (!SettingsManager.CurrentSettings.EnableKeyboardSelectionTrigger) return;
+
             TriggerSelectionMenu(e.X, e.Y, isKeyboard: true);
         }
 
@@ -365,6 +371,8 @@ namespace Orbital
 
         private void SystemHookManager_OnLongPress(object? sender, SystemHookManager.MousePoint e)
         {
+            if (!SettingsManager.CurrentSettings.EnableLongPressTrigger) return;
+
             // Run IsOverEditableControl on a background thread to avoid blocking the hook callback.
             // Then go through TriggerSelectionMenu so CTS cancellation prevents conflicts with
             // subsequent drag / double-click / keyboard triggers.

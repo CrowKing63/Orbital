@@ -56,6 +56,11 @@ namespace Orbital
         public uint HotkeyModifiers  { get; set; } = 0;
         public uint HotkeyVirtualKey { get; set; } = 0;
 
+        public bool EnableDragTrigger { get; set; } = true;
+        public bool EnableDoubleClickTrigger { get; set; } = true;
+        public bool EnableLongPressTrigger { get; set; } = true;
+        public bool EnableKeyboardSelectionTrigger { get; set; } = true;
+
         public bool SoundEnabled { get; set; } = true;
 
     }
