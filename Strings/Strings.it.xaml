@@ -126,4 +126,9 @@ Fai doppio clic sull'icona nella barra delle applicazioni per aprire le Impostaz
     <s:String x:Key="Str_ErrorOccurred" xml:space="preserve">Si è verificato un errore:
 {0}</s:String>
 
+    <s:String x:Key="Str_PopupTriggers">Enable Popup Triggers</s:String>
+    <s:String x:Key="Str_TriggerDrag">Mouse Drag</s:String>
+    <s:String x:Key="Str_TriggerDoubleClick">Double Click</s:String>
+    <s:String x:Key="Str_TriggerLongPress">Long Press</s:String>
+    <s:String x:Key="Str_TriggerKeyboard">Keyboard Selection</s:String>
 </ResourceDictionary>

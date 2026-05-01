@@ -126,4 +126,9 @@ Orbital 需要此钩子来检测文本选择手势。
     <s:String x:Key="Str_ErrorOccurred" xml:space="preserve">发生错误：
 {0}</s:String>
 
+    <s:String x:Key="Str_PopupTriggers">Enable Popup Triggers</s:String>
+    <s:String x:Key="Str_TriggerDrag">Mouse Drag</s:String>
+    <s:String x:Key="Str_TriggerDoubleClick">Double Click</s:String>
+    <s:String x:Key="Str_TriggerLongPress">Long Press</s:String>
+    <s:String x:Key="Str_TriggerKeyboard">Keyboard Selection</s:String>
 </ResourceDictionary>

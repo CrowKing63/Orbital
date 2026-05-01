@@ -126,4 +126,9 @@ Orbital はテキスト選択ジェスチャーを検出するためにこのフ
     <s:String x:Key="Str_ErrorOccurred" xml:space="preserve">エラーが発生しました:
 {0}</s:String>
 
+    <s:String x:Key="Str_PopupTriggers">Enable Popup Triggers</s:String>
+    <s:String x:Key="Str_TriggerDrag">Mouse Drag</s:String>
+    <s:String x:Key="Str_TriggerDoubleClick">Double Click</s:String>
+    <s:String x:Key="Str_TriggerLongPress">Long Press</s:String>
+    <s:String x:Key="Str_TriggerKeyboard">Keyboard Selection</s:String>
 </ResourceDictionary>
