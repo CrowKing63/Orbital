@@ -170,12 +170,12 @@ namespace Orbital
             lock (_clipboardLock)
             {
                 // 1) Backup + Clear in one Dispatcher call
-                IDataObject? backup = Application.Current.Dispatcher.Invoke(() =>
+                IDataObject? backup = null;
+                RetryAction(() => Application.Current.Dispatcher.Invoke(() =>
                 {
-                    IDataObject? bk = RetryFunc(() => Clipboard.GetDataObject(), null);
-                    RetryAction(() => Clipboard.Clear());
-                    return bk;
-                });
+                    backup = Clipboard.GetDataObject();
+                    Clipboard.Clear();
+                }));
 
                 // Simulate Ctrl + C
                 SimulateKeyStroke(VK_LCONTROL, VK_C);
@@ -189,20 +189,20 @@ namespace Orbital
                 {
                     Thread.Sleep(pollIntervalMs);
                     elapsed += pollIntervalMs;
-                    bool hasText = Application.Current.Dispatcher.Invoke(() => RetryFunc(() => Clipboard.ContainsText(), false));
+                    bool hasText = RetryFunc(() => Application.Current.Dispatcher.Invoke(() => Clipboard.ContainsText()), false);
                     if (hasText) break;
                 }
 
                 // 2) Read + Restore in one Dispatcher call
-                string selectedText = Application.Current.Dispatcher.Invoke(() =>
+                string selectedText = RetryFunc(() => Application.Current.Dispatcher.Invoke(() =>
                 {
                     string text = string.Empty;
-                    if (RetryFunc(() => Clipboard.ContainsText(), false))
-                        text = RetryFunc(() => Clipboard.GetText(), string.Empty);
+                    if (Clipboard.ContainsText())
+                        text = Clipboard.GetText();
                     if (backup != null)
-                        RetryAction(() => Clipboard.SetDataObject(backup, true));
+                        Clipboard.SetDataObject(backup, true);
                     return text;
-                });
+                }), string.Empty);
 
                 return selectedText;
             }
@@ -271,11 +271,11 @@ namespace Orbital
             lock (_clipboardLock)
             {
                 IDataObject? backup = null;
-                Application.Current.Dispatcher.Invoke(() => 
+                RetryAction(() => Application.Current.Dispatcher.Invoke(() => 
                 {
-                    backup = RetryFunc(() => Clipboard.GetDataObject(), null);
-                    RetryAction(() => Clipboard.SetText(newText));
-                });
+                    backup = Clipboard.GetDataObject();
+                    Clipboard.SetText(newText);
+                }));
 
                 Thread.Sleep(50);
 
@@ -285,11 +285,13 @@ namespace Orbital
                 // Wait for the application to process Paste
                 Thread.Sleep(150);
 
-                Application.Current.Dispatcher.Invoke(() =>
+                if (backup != null)
                 {
-                    if (backup != null)
-                        RetryAction(() => Clipboard.SetDataObject(backup, true));
-                });
+                    RetryAction(() => Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        Clipboard.SetDataObject(backup, true);
+                    }));
+                }
             }
         }
 
@@ -397,7 +399,7 @@ namespace Orbital
         {
             lock (_clipboardLock)
             {
-                Application.Current.Dispatcher.Invoke(() => RetryAction(() => Clipboard.SetText(text)));
+                RetryAction(() => Application.Current.Dispatcher.Invoke(() => Clipboard.SetText(text)));
             }
         }
 
@@ -406,7 +408,7 @@ namespace Orbital
             for (int i = 0; i <= maxRetries; i++)
             {
                 try { action(); return; }
-                catch (System.Runtime.InteropServices.ExternalException) when (i < maxRetries)
+                catch (Exception ex) when (i < maxRetries && IsClipboardException(ex))
                 {
                     int delay = Math.Min(10 * (1 << i), 500);
                     Thread.Sleep(delay);
@@ -419,13 +421,20 @@ namespace Orbital
             for (int i = 0; i <= maxRetries; i++)
             {
                 try { return func(); }
-                catch (System.Runtime.InteropServices.ExternalException) when (i < maxRetries)
+                catch (Exception ex) when (i < maxRetries && IsClipboardException(ex))
                 {
                     int delay = Math.Min(10 * (1 << i), 500);
                     Thread.Sleep(delay);
                 }
             }
             return fallback;
+        }
+
+        private static bool IsClipboardException(Exception ex)
+        {
+            if (ex is ExternalException) return true;
+            if (ex.InnerException is ExternalException) return true;
+            return false;
         }
 
         private static void SimulateKeyStroke(ushort modifier, ushort key)
