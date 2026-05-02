@@ -32,5 +32,5 @@ desktop.ini
 # Logs
 *.log
 
-# Test results
-TestResults/
+# AI
+AGENTS.md

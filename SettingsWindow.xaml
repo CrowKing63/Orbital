@@ -107,11 +107,11 @@
             </StackPanel>
         </Border>
 
-        <!-- ── Startup ── -->
+        <!-- ── General Settings ── -->
         <Border Background="{DynamicResource PanelBgBrush}" CornerRadius="10"
                 BorderBrush="{DynamicResource PanelBorderBrush}" BorderThickness="1" Margin="0,0,0,16" Padding="16,12">
             <StackPanel>
-                <TextBlock Text="{DynamicResource Str_Startup}" FontSize="11" FontWeight="SemiBold"
+                <TextBlock Text="{DynamicResource Str_General}" FontSize="11" FontWeight="SemiBold"
                            Foreground="{DynamicResource LabelFgBrush}" Margin="0,0,0,10"/>
                 <CheckBox x:Name="RunAtStartupCheck"
                           Content="{DynamicResource Str_RunAtStartup}"

@@ -18,6 +18,7 @@
     <s:String x:Key="Str_ApiKey">API 키</s:String>
     <s:String x:Key="Str_Startup">시작 프로그램</s:String>
     <s:String x:Key="Str_RunAtStartup">Windows 시작 시 Orbital 자동 실행</s:String>
+    <s:String x:Key="Str_General">일반</s:String>
     <s:String x:Key="Str_EnableSoundEffects">팝업 및 액션 완료 시 효과음 재생</s:String>
     <s:String x:Key="Str_SelectionBehavior">선택 동작</s:String>
     <s:String x:Key="Str_AutoCopyOnSelection">드래그 시 선택 텍스트 자동 읽기 (AI 즉시 실행에 필요)</s:String>

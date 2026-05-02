@@ -21,6 +21,7 @@
     <s:String x:Key="Str_ApiKey">API Key</s:String>
     <s:String x:Key="Str_Startup">Startup</s:String>
     <s:String x:Key="Str_RunAtStartup">Launch Orbital when Windows starts</s:String>
+    <s:String x:Key="Str_General">General</s:String>
     <s:String x:Key="Str_EnableSoundEffects">Play subtle sounds on popup and action</s:String>
     <s:String x:Key="Str_SelectionBehavior">Selection Behavior</s:String>
     <s:String x:Key="Str_AutoCopyOnSelection">Automatically read selected text on drag (required for instant LLM actions)</s:String>

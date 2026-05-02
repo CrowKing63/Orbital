@@ -158,7 +158,8 @@ namespace Orbital
                     new ActionProfile { Name = "Summarize", Icon = "\uE7C3", PromptFormat = "Summarize the following in 3 lines: {text}",                   ResultAction = "Popup",      RequiresSelection = true },
                     new ActionProfile { Name = "Polish",    Icon = "\uE70F", PromptFormat = "Correct grammar and make this sound professional: {text}",       ResultAction = "Replace",    RequiresSelection = true, CleanOutput = true },
                     new ActionProfile { Name = "Search",    Icon = "\uE721", PromptFormat = "",                                                               ResultAction = "Browser",    RequiresSelection = true }
-                }
+                },
+                SoundEnabled = true
             };
         }
 
