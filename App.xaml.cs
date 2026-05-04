@@ -22,6 +22,27 @@ namespace Orbital
         [DllImport("user32.dll", SetLastError = true)]
         private static extern bool DestroyIcon(IntPtr hIcon);
 
+        [StructLayout(LayoutKind.Sequential)]
+        private struct POINT
+        {
+            public int X;
+            public int Y;
+        }
+
+        private const uint GA_ROOT = 2;
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr WindowFromPoint(POINT point);
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr GetAncestor(IntPtr hwnd, uint gaFlags);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        private static extern int GetClassName(IntPtr hWnd, System.Text.StringBuilder lpClassName, int nMaxCount);
+
+        [DllImport("user32.dll")]
+        private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
+
         private RadialMenuWindow _radialMenu = null!;
         private WinForms.NotifyIcon _notifyIcon = null!;
         private ActionExecutorService? _actionExecutor;
@@ -44,6 +65,39 @@ namespace Orbital
                 "Chrome_WidgetWin_2",
                 "Chrome_RenderWidgetHostHWND",
                 "MozillaWindowClass",
+            };
+
+        private static readonly HashSet<string> s_excludedRootWindowClasses =
+            new(StringComparer.OrdinalIgnoreCase)
+            {
+                "Shell_TrayWnd",
+                "Shell_SecondaryTrayWnd",
+                "Progman",
+                "WorkerW",
+            };
+
+        private static readonly HashSet<string> s_excludedControlClasses =
+            new(StringComparer.OrdinalIgnoreCase)
+            {
+                "SHELLDLL_DefView",
+                "SysListView32",
+                "DirectUIHWND",
+                "NamespaceTreeControl",
+            };
+
+        private static readonly HashSet<string> s_clipboardFallbackEditorProcesses =
+            new(StringComparer.OrdinalIgnoreCase)
+            {
+                "notepad++",
+                "emeditor",
+            };
+
+        private static readonly HashSet<string> s_clipboardFallbackEditorClasses =
+            new(StringComparer.OrdinalIgnoreCase)
+            {
+                "Notepad++",
+                "EmEditorMainFrame3",
+                "EmEditorMainFrame4",
             };
 
         protected override void OnStartup(StartupEventArgs e)
@@ -517,6 +571,14 @@ namespace Orbital
 
             try
             {
+                IntPtr hwnd = WindowFromPoint(new POINT { X = screenX, Y = screenY });
+                string rootClass = GetRootWindowClass(hwnd);
+                string controlClass = GetWindowClass(hwnd);
+                string processName = GetProcessNameFromHwnd(hwnd);
+
+                if (s_excludedRootWindowClasses.Contains(rootClass) || s_excludedControlClasses.Contains(controlClass))
+                    return (false, false, false);
+
                 var point = new System.Windows.Point(screenX, screenY);
 
                 // Use CacheRequest to batch property/pattern retrieval in a single cross-process
@@ -593,9 +655,51 @@ namespace Orbital
                     }
                 }
 
+                bool allowClipboardFallback =
+                    s_clipboardFallbackEditorClasses.Contains(controlClass) ||
+                    s_clipboardFallbackEditorClasses.Contains(rootClass) ||
+                    (!string.IsNullOrEmpty(processName) && s_clipboardFallbackEditorProcesses.Contains(processName));
+                if (allowClipboardFallback)
+                {
+                    string selectedText = ClipboardHelper.GetSelectedText();
+                    if (!string.IsNullOrWhiteSpace(selectedText))
+                        return (true, true, true);
+                }
+
                 return (false, false, false);
             }
             catch { return (false, false, false); }
+        }
+
+        private static string GetWindowClass(IntPtr hwnd)
+        {
+            if (hwnd == IntPtr.Zero) return string.Empty;
+            var sb = new System.Text.StringBuilder(128);
+            int len = GetClassName(hwnd, sb, sb.Capacity);
+            return len > 0 ? sb.ToString() : string.Empty;
+        }
+
+        private static string GetRootWindowClass(IntPtr hwnd)
+        {
+            if (hwnd == IntPtr.Zero) return string.Empty;
+            IntPtr root = GetAncestor(hwnd, GA_ROOT);
+            if (root == IntPtr.Zero) root = hwnd;
+            return GetWindowClass(root);
+        }
+
+        private static string GetProcessNameFromHwnd(IntPtr hwnd)
+        {
+            if (hwnd == IntPtr.Zero) return string.Empty;
+            _ = GetWindowThreadProcessId(hwnd, out uint pid);
+            if (pid == 0) return string.Empty;
+            try
+            {
+                return System.Diagnostics.Process.GetProcessById((int)pid).ProcessName;
+            }
+            catch
+            {
+                return string.Empty;
+            }
         }
 
         /// <summary>
