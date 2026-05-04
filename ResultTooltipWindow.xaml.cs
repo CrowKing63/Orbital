@@ -1,17 +1,22 @@
 using System;
 using System.Windows;
 using System.Windows.Threading;
+using Point = System.Windows.Point;
+using Rect = System.Windows.Rect;
+using Size = System.Windows.Size;
 
 namespace Orbital
 {
     public partial class ResultTooltipWindow : Window
     {
         private readonly DispatcherTimer _autoCloseTimer;
+        private readonly PopupAnchorContext _anchors;
 
-        public ResultTooltipWindow(string result)
+        public ResultTooltipWindow(string result, PopupAnchorContext anchors)
         {
             InitializeComponent();
             ResultText.Text = result;
+            _anchors = anchors;
 
             // 로드된 후 화면 우측 하단에 위치
             Loaded += OnLoaded;
@@ -30,12 +35,27 @@ namespace Orbital
 
             var cursorPosition = System.Windows.Forms.Cursor.Position;
             var screen = System.Windows.Forms.Screen.FromPoint(cursorPosition);
+            Rect workArea = new(
+                screen.WorkingArea.Left * dpiX,
+                screen.WorkingArea.Top * dpiY,
+                screen.WorkingArea.Width * dpiX,
+                screen.WorkingArea.Height * dpiY);
+            var normalizedAnchors = new PopupAnchorContext(
+                new Point(_anchors.CursorDip.X * dpiX, _anchors.CursorDip.Y * dpiY),
+                _anchors.SelectionDip is Rect selectionPx
+                    ? new Rect(selectionPx.X * dpiX, selectionPx.Y * dpiY, selectionPx.Width * dpiX, selectionPx.Height * dpiY)
+                    : null,
+                _anchors.ActionBarDip is Rect actionBarPx
+                    ? new Rect(actionBarPx.X * dpiX, actionBarPx.Y * dpiY, actionBarPx.Width * dpiX, actionBarPx.Height * dpiY)
+                    : null);
 
-            double workAreaRight = screen.WorkingArea.Right * dpiX;
-            double workAreaBottom = screen.WorkingArea.Bottom * dpiY;
-
-            Left = workAreaRight - ActualWidth - 20;
-            Top = workAreaBottom - ActualHeight - 20;
+            Point clamped = PopupPlacementCalculator.CalculatePosition(
+                SettingsManager.CurrentSettings.PopupPlacement,
+                normalizedAnchors,
+                workArea,
+                new Size(ActualWidth, ActualHeight));
+            Left = clamped.X;
+            Top = clamped.Y;
         }
 
         private void CloseButton_Click(object sender, RoutedEventArgs e)

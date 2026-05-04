@@ -62,6 +62,7 @@ namespace Orbital
         public bool EnableKeyboardSelectionTrigger { get; set; } = true;
 
         public bool SoundEnabled { get; set; } = true;
+        public PopupPlacementMode PopupPlacement { get; set; } = PopupPlacementMode.BottomRight;
 
     }
 

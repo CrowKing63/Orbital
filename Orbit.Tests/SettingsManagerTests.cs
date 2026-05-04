@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Xunit;
 
 namespace Orbital.Tests;
@@ -52,6 +53,7 @@ public class SettingsManagerTests
         Assert.NotEmpty(settings.Actions);
         Assert.Equal("https://api.openai.com/v1", settings.ApiBaseUrl);
         Assert.Equal("gpt-4o-mini", settings.ModelName);
+        Assert.Equal(PopupPlacementMode.BottomRight, settings.PopupPlacement);
     }
 
     [Fact]
@@ -183,5 +185,21 @@ public class SettingsManagerTests
         Assert.NotNull(error);
         Assert.Contains("Duplicate action name", error);
         Assert.Empty(SettingsManager.CurrentSettings.Actions.FindAll(a => a.Name == "Quick Search"));
+    }
+
+    [Fact]
+    public void LoadSettings_WhenPopupPlacementMissing_DefaultsToBottomRight()
+    {
+        using var scope = new IsolatedSettingsScope();
+
+        var settings = CreateDefaultSettings();
+        settings.PopupPlacement = PopupPlacementMode.NearCursor;
+        var obj = JObject.Parse(JsonConvert.SerializeObject(settings, Formatting.Indented));
+        obj.Remove(nameof(AppSettings.PopupPlacement));
+        File.WriteAllText(scope.ConfigPath, obj.ToString());
+
+        SettingsManager.LoadSettings();
+
+        Assert.Equal(PopupPlacementMode.BottomRight, SettingsManager.CurrentSettings.PopupPlacement);
     }
 }

@@ -131,4 +131,8 @@ Orbital 需要此钩子来检测文本选择手势。
     <s:String x:Key="Str_TriggerDoubleClick">Double Click</s:String>
     <s:String x:Key="Str_TriggerLongPress">Long Press</s:String>
     <s:String x:Key="Str_TriggerKeyboard">Keyboard Selection</s:String>
-</ResourceDictionary>
+    <s:String x:Key="Str_PopupPosition">Popup Position</s:String>
+    <s:String x:Key="Str_PopupPositionBottomRight">Bottom-right (current)</s:String>
+    <s:String x:Key="Str_PopupPositionNearCursor">Near cursor</s:String>
+    <s:String x:Key="Str_PopupPositionNearSelection">Near selected text</s:String>
+    <s:String x:Key="Str_PopupPositionNearActionBar">Near action bar</s:String></ResourceDictionary>

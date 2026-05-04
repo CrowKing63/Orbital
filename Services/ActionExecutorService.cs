@@ -2,6 +2,11 @@ using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Automation;
+using System.Windows.Automation.Text;
+using System.Windows.Forms;
+using Point = System.Windows.Point;
+using Rect = System.Windows.Rect;
 
 namespace Orbital
 {
@@ -21,7 +26,7 @@ namespace Orbital
         /// 액션을 실행합니다. 반드시 백그라운드 스레드(Task.Run)에서 호출하세요.
         /// 내부적으로 UI 업데이트는 Dispatcher를 통해 처리됩니다.
         /// </summary>
-        public async Task ExecuteAsync(ActionProfile action, string selectedText)
+        public async Task ExecuteAsync(ActionProfile action, string selectedText, Rect? actionBarBoundsDip = null)
         {
             if (action.IsSelectionRequired && string.IsNullOrEmpty(selectedText))
             {
@@ -88,14 +93,81 @@ namespace Orbital
 
                 case ActionType.Popup:
                 default:
+                    var cursor = Cursor.Position;
+                    Point cursorDip = new(cursor.X, cursor.Y);
+                    Rect? selectionDip = TryGetSelectionBoundsAtCursorDip(cursorDip);
+                    var anchors = new PopupAnchorContext(cursorDip, selectionDip, actionBarBoundsDip);
+
                     Application.Current.Dispatcher.Invoke(() =>
                     {
-                        var tooltip = new ResultTooltipWindow(result);
+                        var tooltip = new ResultTooltipWindow(result, anchors);
                         tooltip.Show();
                     });
                     break;
             }
             SoundHelper.PlayActionSound();
+        }
+
+        private static Rect? TryGetSelectionBoundsAtCursorDip(Point cursorDip)
+        {
+            try
+            {
+                var element = AutomationElement.FromPoint(cursorDip);
+                if (element == null)
+                {
+                    return null;
+                }
+
+                if (!element.TryGetCurrentPattern(TextPattern.Pattern, out object patternObj) || patternObj is not TextPattern textPattern)
+                {
+                    return null;
+                }
+
+                TextPatternRange[] ranges = textPattern.GetSelection();
+                if (ranges.Length == 0)
+                {
+                    return null;
+                }
+
+                Rect[] rects = ranges[0].GetBoundingRectangles();
+                if (rects.Length == 0)
+                {
+                    return null;
+                }
+
+                double minX = double.MaxValue;
+                double minY = double.MaxValue;
+                double maxX = double.MinValue;
+                double maxY = double.MinValue;
+
+                foreach (Rect rect in rects)
+                {
+                    double x = rect.X;
+                    double y = rect.Y;
+                    double w = rect.Width;
+                    double h = rect.Height;
+                    if (w <= 0 || h <= 0)
+                    {
+                        continue;
+                    }
+
+                    minX = Math.Min(minX, x);
+                    minY = Math.Min(minY, y);
+                    maxX = Math.Max(maxX, x + w);
+                    maxY = Math.Max(maxY, y + h);
+                }
+
+                if (minX == double.MaxValue)
+                {
+                    return null;
+                }
+
+                return new Rect(new Point(minX, minY), new Point(maxX, maxY));
+            }
+            catch
+            {
+                return null;
+            }
         }
     }
 }

@@ -124,6 +124,16 @@
                           Margin="0,6,0,0"
                           Checked="SoundEnabledCheck_Changed"
                           Unchecked="SoundEnabledCheck_Changed"/>
+                <StackPanel Margin="0,10,0,0">
+                    <TextBlock Text="{DynamicResource Str_PopupPosition}" FontSize="11"
+                               Foreground="{DynamicResource LabelFgBrush}" Margin="0,0,0,5"/>
+                    <ComboBox x:Name="PopupPositionBox" SelectionChanged="PopupPositionBox_SelectionChanged">
+                        <ComboBoxItem Content="{DynamicResource Str_PopupPositionBottomRight}" Tag="BottomRight"/>
+                        <ComboBoxItem Content="{DynamicResource Str_PopupPositionNearCursor}" Tag="NearCursor"/>
+                        <ComboBoxItem Content="{DynamicResource Str_PopupPositionNearSelection}" Tag="NearSelection"/>
+                        <ComboBoxItem Content="{DynamicResource Str_PopupPositionNearActionBar}" Tag="NearActionBar"/>
+                    </ComboBox>
+                </StackPanel>
             </StackPanel>
         </Border>
 

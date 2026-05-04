@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -138,6 +139,14 @@ namespace Orbital
 
             RunAtStartupCheck.IsChecked  = SettingsManager.CurrentSettings.RunAtStartup;
             SoundEnabledCheck.IsChecked  = SettingsManager.CurrentSettings.SoundEnabled;
+            foreach (ComboBoxItem item in PopupPositionBox.Items)
+            {
+                if (item.Tag?.ToString() == SettingsManager.CurrentSettings.PopupPlacement.ToString())
+                {
+                    PopupPositionBox.SelectedItem = item;
+                    break;
+                }
+            }
 
             // Theme selector
             string currentTheme = SettingsManager.CurrentSettings.Theme ?? "Dark";
@@ -263,6 +272,17 @@ namespace Orbital
             SettingsManager.CurrentSettings.EnableLongPressTrigger = LongPressTriggerCheck.IsChecked == true;
             SettingsManager.CurrentSettings.EnableKeyboardSelectionTrigger = KeyboardTriggerCheck.IsChecked == true;
             SettingsManager.SaveSettings();
+        }
+
+        private void PopupPositionBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_suppressEvents) return;
+            string mode = (PopupPositionBox.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? nameof(PopupPlacementMode.BottomRight);
+            if (Enum.TryParse(mode, out PopupPlacementMode parsed))
+            {
+                SettingsManager.CurrentSettings.PopupPlacement = parsed;
+                SettingsManager.SaveSettings();
+            }
         }
 
         private void ThemeBox_SelectionChanged(object sender, SelectionChangedEventArgs e)

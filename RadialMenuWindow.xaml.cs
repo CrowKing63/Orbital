@@ -4,6 +4,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using Point = System.Windows.Point;
+using Rect = System.Windows.Rect;
 
 namespace Orbital
 {
@@ -207,7 +209,15 @@ namespace Orbital
                             if (string.IsNullOrWhiteSpace(text))
                                 return; // Nothing selected — abort silently
                         }
-                        await _actionExecutor.ExecuteAsync(action, text);
+                        PresentationSource? source = PresentationSource.FromVisual(this);
+                        double toDeviceX = source?.CompositionTarget?.TransformToDevice.M11 ?? 1.0;
+                        double toDeviceY = source?.CompositionTarget?.TransformToDevice.M22 ?? 1.0;
+                        Rect actionBarBounds = new(
+                            Left * toDeviceX,
+                            Top * toDeviceY,
+                            ActualWidth * toDeviceX,
+                            ActualHeight * toDeviceY);
+                        await _actionExecutor.ExecuteAsync(action, text, actionBarBounds);
                     });
                 }
             }
@@ -215,7 +225,9 @@ namespace Orbital
             {
                 Dispatcher.Invoke(() =>
                 {
-                    var tooltip = new ResultTooltipWindow(string.Format(Loc.Get("Str_ErrorOccurred"), ex.Message));
+                    var cursor = System.Windows.Forms.Cursor.Position;
+                    var anchors = new PopupAnchorContext(new Point(cursor.X, cursor.Y), null, null);
+                    var tooltip = new ResultTooltipWindow(string.Format(Loc.Get("Str_ErrorOccurred"), ex.Message), anchors);
                     tooltip.Show();
                 });
             }
