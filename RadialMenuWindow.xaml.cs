@@ -198,6 +198,16 @@ namespace Orbital
             {
                 if (_actionExecutor != null)
                 {
+                    // Capture WPF window metrics on the UI thread before Task.Run.
+                    PresentationSource? source = PresentationSource.FromVisual(this);
+                    double toDeviceX = source?.CompositionTarget?.TransformToDevice.M11 ?? 1.0;
+                    double toDeviceY = source?.CompositionTarget?.TransformToDevice.M22 ?? 1.0;
+                    Rect actionBarBounds = new(
+                        Left * toDeviceX,
+                        Top * toDeviceY,
+                        ActualWidth * toDeviceX,
+                        ActualHeight * toDeviceY);
+
                     await Task.Run(async () =>
                     {
                         string text = string.Empty;
@@ -209,14 +219,6 @@ namespace Orbital
                             if (string.IsNullOrWhiteSpace(text))
                                 return; // Nothing selected — abort silently
                         }
-                        PresentationSource? source = PresentationSource.FromVisual(this);
-                        double toDeviceX = source?.CompositionTarget?.TransformToDevice.M11 ?? 1.0;
-                        double toDeviceY = source?.CompositionTarget?.TransformToDevice.M22 ?? 1.0;
-                        Rect actionBarBounds = new(
-                            Left * toDeviceX,
-                            Top * toDeviceY,
-                            ActualWidth * toDeviceX,
-                            ActualHeight * toDeviceY);
                         await _actionExecutor.ExecuteAsync(action, text, actionBarBounds);
                     });
                 }
