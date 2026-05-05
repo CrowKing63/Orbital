@@ -1,151 +1,393 @@
-# Windows 11 Fluent Design Migration Analysis
+# Windows 11 Fluent Design Migration Plan
 
-**Issue Reference**: GitHub Issue - "Design is out of place"
-
-**Date**: 2026-05-04
-
-**Status**: Accepted (Pending Implementation)
+**Date**: 2026-05-05  
+**Status**: Proposed  
+**Priority**: Medium
 
 ---
 
-## Issue Summary
+## Goal
 
-User requested modernizing the Orbital app UI to match Windows 11 Fluent Design language, similar to Clipboard Manager, Start Menu, and Settings app.
+Reduce the visual gap between Orbital and modern Windows 11 apps without turning the work into a long-running UI rewrite.
 
----
+This document scopes the migration into short, independent phases that can be:
 
-## Current State Analysis
-
-### Project Overview
-- **Type**: WPF (Windows Presentation Foundation) desktop application
-- **Target**: .NET 8.0 Windows
-- **Purpose**: Floating action bar/pill menu for AI-powered text actions
-
-### Technology Stack
-| Component | Technology |
-|-----------|------------|
-| Primary UI | WPF with XAML |
-| System Tray | Windows Forms (NotifyIcon) |
-| Theme System | XAML ResourceDictionary (Dark.xaml, Light.xaml) |
-| Localization | XAML ResourceDictionary (10 languages) |
-
-### Current Design System
-
-#### Color Palette (Dark Theme)
-| Token | Color | Purpose |
-|-------|-------|---------|
-| `BgDeep` | `#0A0A18` | Deep background |
-| `BgPanel` | `#11112A` | Panel backgrounds |
-| `BgElement` | `#191932` | Input elements |
-| `AccentVi` | `#7080FF` | Primary accent (violet) |
-| `AccentCy` | `#00D4FF` | Secondary accent (cyan) |
-
-#### Design Characteristics
-- Corner Radius: 6-14px (consistent)
-- Shadows: DropShadowEffect for depth
-- Typography: Segoe UI Variable
-- Icons: Segoe MDL2 Assets + Emoji
+- built and tested separately,
+- committed separately,
+- released separately if needed,
+- interrupted by unrelated work without causing merge or rollout confusion.
 
 ---
 
-## Windows 11 Fluent Design Key Elements
+## Current Constraints
 
-1. **Mica Material**: Semi-transparent window background showing desktop
-2. **Acrylic**: Glass-like effect for popups/surfaces
-3. **System Accent Colors**: Follow user's Windows theme
-4. **Modern Controls**: Win11-style buttons, combo boxes, etc.
-5. **Proper Elevation**: Visual hierarchy through layering
-6. **Subtle Animations**: Smooth transitions
+### Architecture
 
----
+- Orbital is a WPF desktop app targeting `.NET 8`.
+- The tray menu uses WinForms `NotifyIcon`.
+- Theme switching is already centralized through XAML resource dictionaries.
+- Many core controls already use custom global templates.
 
-## Implementation Feasibility Analysis
+### Important UI Constraints
 
-### High Feasibility (Easy)
-- ✅ Update color palette to Windows 11 neutral colors
-- ✅ Use system accent colors (instead of custom colors)
-- ✅ Update control templates (buttons, inputs, etc.)
-- ✅ Improve spacing and typography hierarchy
+- `SettingsWindow` and `ActionEditDialog` are normal windows and are realistic candidates for deeper Windows 11 styling.
+- `RadialMenuWindow` and `ResultTooltipWindow` are transparent overlay windows using `WindowStyle="None"` and `AllowsTransparency="True"`.
+- Because of that overlay structure, true Windows 11 backdrop effects such as Mica/Acrylic are not a safe first step for the popup surfaces.
 
-### Medium Feasibility (Requires Effort)
-- ⚠️ **Mica Effect**: Requires Windows 11 DWM API (P/Invoke)
-  - `DwmSetWindowAttribute` + `DWMWA_SYSTEMBACKDROP_TYPE`
-  - Requires Windows 11 Build 22000+
-  - Need fallback for older versions
-- ⚠️ **Acrylic Effect**: Apply glass effect to popups
+### Scope Implication
 
-### Low Feasibility (Challenging)
-- ❌ **Perfect Fluent Design Match**: WPF is older technology compared to WinUI 3
-- ❌ **System-level Mica**: Requires significant interop code
+- We should **not** frame this work as a full Fluent parity effort.
+- We **should** frame it as a staged modernization of colors, spacing, control feel, and selective window treatment.
 
 ---
 
-## Proposed Strategy
+## What Is Realistic
 
-### Option 1: ModernWpf Library (Recommended)
-```
-NuGet: ModernWpf or WPF-UI
-```
-- Provides Fluent Design controls and Mica support
-- Easy and quick implementation
-- Drawback: Additional dependency
+### High Confidence
 
-### Option 2: Hybrid Approach (Most Realistic)
-1. **Phase 1**: Update colors/controls to Windows 11 style
-2. **Phase 2**: Add Mica effect via DWM API (Windows 11 only)
-3. **Phase 3**: Enhance system theme integration
+- Move the palette closer to Windows 11 neutral tones.
+- Reduce the current heavy violet/cyan visual bias.
+- Improve spacing, corner radius consistency, and control density.
+- Refine global button, input, combo box, and list styles.
+- Add better system theme and system accent integration.
 
-### Option 3: Fully Custom Implementation
-- Manual update of all control templates
-- High effort, maintenance burden
+### Medium Confidence
 
----
+- Apply more Windows 11-like window treatment to `SettingsWindow`.
+- Apply the same treatment to `ActionEditDialog`.
+- Add optional DWM-based backdrop experiments for standard windows only.
 
-## Recommended Action Plan
+### Low Confidence / Not Phase 1
 
-### Short Term (Issue Response)
-- Update color palette to more neutral Windows 11 style
-- Add system accent color support
-- Improve control styles
-
-### Medium Term
-- Add Mica effect (DWM API)
-- Evaluate ModernWpf library adoption
-
-### Response to Issue
-- Acknowledge acceptance of the request
-- Explain implementation challenges
-- Set realistic timeline expectations
-- Welcome PRs from community
+- True Mica/Acrylic treatment for transparent overlay windows.
+- Full adoption of a third-party Fluent control library.
+- Perfect visual parity with WinUI 3 apps.
 
 ---
 
-## Technical Notes
+## Non-Goals
 
-### DWM API for Mica (Reference)
-```csharp
-// For Mica effect on Windows 11
-[DllImport("dwmapi.dll", PreserveSig = true)]
-public static extern int DwmSetWindowAttribute(IntPtr hwnd, DWMWINDOWATTRIBUTE attribute, ref int pvAttribute, int cbAttribute);
+- No full WinUI rewrite.
+- No broad dependency migration as part of the first rollout.
+- No redesign of the popup interaction model.
+- No attempt to make every surface use native Windows 11 materials.
 
-// DWMWA_SYSTEMBACKDROP_TYPE = 38
-// DWMSBT_MAINWINDOW = 2 (Mica)
-```
+---
 
-### Files to Modify
-- `Themes/Dark.xaml` - Update color tokens
-- `Themes/Light.xaml` - Update color tokens
-- `App.xaml` - Update global styles
-- `RadialMenuWindow.xaml` - Pill menu styling
-- `SettingsWindow.xaml` - Settings UI styling
-- `App.xaml.cs` - Add system theme detection
+## Delivery Strategy
+
+Each phase below is designed to be safe for:
+
+- `build`
+- `test`
+- `commit`
+- optional `release`
+
+after that phase alone.
+
+Each phase should avoid partial foundations that require the next phase to make the app shippable.
+
+---
+
+## Phase 1: Token Cleanup
+
+### Objective
+
+Establish a safer design foundation without changing window behavior.
+
+### Scope
+
+- Refine theme color tokens in `Themes/Dark.xaml` and `Themes/Light.xaml`.
+- Introduce Windows 11-inspired neutral surfaces and calmer accent usage.
+- Normalize semantic token intent:
+  - surface background,
+  - panel background,
+  - input background,
+  - hover,
+  - border,
+  - accent,
+  - critical/destructive.
+- Keep existing resource keys where possible to minimize XAML churn.
+
+### Files
+
+- `Themes/Dark.xaml`
+- `Themes/Light.xaml`
+
+### Why This Phase Is Safe
+
+- No control structure changes.
+- No layout changes.
+- Easy to review visually.
+- Low merge risk with unrelated feature work.
+
+### Exit Criteria
+
+- App builds.
+- Dark and Light themes both load.
+- No missing resource keys.
+- Popup, tooltip, settings, and dialogs remain visually coherent.
+
+### Commit Guidance
+
+Recommended as a standalone commit.
+
+---
+
+## Phase 2: Global Control Styling
+
+### Objective
+
+Modernize the feel of common controls while keeping the app behavior unchanged.
+
+### Scope
+
+- Adjust global styles in `App.xaml` for:
+  - `Button`
+  - `TextBox`
+  - `PasswordBox`
+  - `ComboBox`
+  - `ListView`
+  - `GridViewColumnHeader`
+- Reduce heavy glow usage.
+- Tune corner radius, padding, border contrast, and hover states.
+- Prefer subtle elevation over bright accent-driven focus effects.
+
+### Files
+
+- `App.xaml`
+
+### Why This Phase Is Safe
+
+- Centralized change set.
+- No code-behind changes required.
+- Behavior should remain stable if resource names are preserved.
+
+### Risks
+
+- Overly aggressive template changes could regress sizing or readability.
+- ComboBox and ListView templates need basic manual validation.
+
+### Exit Criteria
+
+- App builds.
+- Settings window remains usable in both themes.
+- Dialog fields remain readable and keyboard-focus states are clear.
+
+### Commit Guidance
+
+Ship as its own commit after a quick manual UI pass.
+
+---
+
+## Phase 3: Settings Window Modernization
+
+### Objective
+
+Improve the main management surface first, where Windows 11 styling has the highest payoff.
+
+### Scope
+
+- Refine layout, grouping, section hierarchy, and spacing in `SettingsWindow.xaml`.
+- Make the header and panels feel more native to Windows 11.
+- Reduce decorative glow if it fights readability.
+- Keep existing settings flow and control bindings intact.
+
+### Files
+
+- `SettingsWindow.xaml`
+- optional small code-behind adjustments in `SettingsWindow.xaml.cs`
+
+### Why This Phase Is Safe
+
+- Isolated to one window.
+- High user-visible value.
+- Does not affect popup activation logic or core action execution.
+
+### Risks
+
+- Layout regressions at smaller window widths.
+- List/action area may need sizing adjustments.
+
+### Exit Criteria
+
+- App builds.
+- Settings window works at its supported minimum size.
+- Theme/language switching still updates correctly.
+- Action list, import/export, and hotkey editing remain usable.
+
+### Commit Guidance
+
+Safe as a separate shippable increment.
+
+---
+
+## Phase 4: Action Dialog Alignment
+
+### Objective
+
+Bring secondary management UI into the same visual system as the settings window.
+
+### Scope
+
+- Update `ActionEditDialog.xaml` styling and spacing.
+- Align field labels, button emphasis, and section grouping with Phase 3.
+- Avoid changing validation or save behavior.
+
+### Files
+
+- `ActionEditDialog.xaml`
+- optional small code-behind adjustments in `ActionEditDialog.xaml.cs`
+
+### Why This Phase Is Safe
+
+- Narrow surface area.
+- No popup/selection behavior impact.
+- Easy to validate manually.
+
+### Exit Criteria
+
+- App builds.
+- Add/Edit action flows still work.
+- Preset loading, save, and cancel behavior remain unchanged.
+
+### Commit Guidance
+
+Stand-alone commit recommended.
+
+---
+
+## Phase 5: System Accent Integration
+
+### Objective
+
+Make the app feel more native without introducing heavy platform coupling early.
+
+### Scope
+
+- Evaluate using Windows accent color for selected semantic tokens.
+- Limit accent adoption to focus, selected states, and primary actions.
+- Keep fallback colors for unsupported or disabled scenarios.
+
+### Files
+
+- `App.xaml.cs`
+- `Themes/Dark.xaml`
+- `Themes/Light.xaml`
+- possibly `App.xaml`
+
+### Why This Phase Is Safe
+
+- Can be added after the visual baseline is already stable.
+- If implementation is noisy, it can be deferred without blocking earlier work.
+
+### Risks
+
+- Accent-derived colors may reduce contrast in some user themes.
+- Requires careful fallback behavior.
+
+### Exit Criteria
+
+- App builds.
+- Accent behavior degrades safely when unavailable.
+- Contrast remains acceptable in both themes.
+
+### Commit Guidance
+
+Do not combine with large styling rewrites. Keep this phase isolated.
+
+---
+
+## Phase 6: Standard Window Backdrop Prototype
+
+### Objective
+
+Prototype Windows 11 backdrop treatment only where it is technically reasonable.
+
+### Scope
+
+- Experiment with DWM backdrop APIs on:
+  - `SettingsWindow`
+  - `ActionEditDialog`
+- Add Windows version guards and graceful fallback.
+- Do not apply this to transparent overlay popup windows in the same phase.
+
+### Files
+
+- `SettingsWindow.xaml.cs`
+- `ActionEditDialog.xaml.cs`
+- possibly shared helper code
+
+### Why This Phase Is Separate
+
+- This is the first phase that depends on OS-specific behavior.
+- It should not be mixed with basic styling work.
+- It may be rejected or rolled back independently.
+
+### Risks
+
+- Inconsistent behavior across Windows versions.
+- Visual mismatch if backdrop and token palette fight each other.
+
+### Exit Criteria
+
+- App builds.
+- Supported systems show the intended effect.
+- Unsupported systems fall back cleanly.
+- No crashes or broken window initialization.
+
+### Commit Guidance
+
+Prototype and release separately. Do not block earlier phases on this.
+
+---
+
+## Explicit Deferrals
+
+These items should stay out of the main migration track unless a later spike proves clear value:
+
+- adopting `ModernWpf`,
+- adopting `WPF-UI`,
+- reworking popup windows away from transparent overlays,
+- trying to force Mica/Acrylic onto `RadialMenuWindow`,
+- broad re-templating driven by a third-party design system.
+
+Those are architecture decisions, not polishing tasks.
+
+---
+
+## Suggested Implementation Order
+
+1. Phase 1
+2. Phase 2
+3. Phase 3
+4. Phase 4
+5. Phase 5
+6. Phase 6
+
+This order front-loads low-risk visual wins and pushes platform-specific experiments to the end.
+
+---
+
+## Review Rule For Each Phase
+
+Before merging or releasing a phase:
+
+1. Build the app.
+2. Open the settings window in both themes.
+3. Verify popup surfaces still render correctly.
+4. Verify no control lost focus visibility or contrast.
+5. Keep the phase commit small enough that rollback is trivial.
 
 ---
 
 ## Decision
 
-**Accepted** - Will implement gradually with hybrid approach.
+**Proceed with a phased hybrid approach.**
 
-**Priority**: Medium (aesthetic improvement, not critical functionality)
+Success should be defined as:
 
-**Estimated Effort**: 2-3 weeks for full implementation
+- Orbital feels more aligned with Windows 11,
+- the settings and dialog surfaces improve first,
+- popup behavior stays stable,
+- and no single phase becomes a long-running branch that blocks other work.
