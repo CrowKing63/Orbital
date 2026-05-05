@@ -2,40 +2,40 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <!-- ── Core design tokens (Claude Code Light palette) ── -->
-    <SolidColorBrush x:Key="BgDeep"    Color="#FAFAF7"/>
-    <SolidColorBrush x:Key="BgPanel"   Color="#EFEDE8"/>
-    <SolidColorBrush x:Key="BgElement" Color="#F0EEE9"/>
-    <SolidColorBrush x:Key="BgHover"   Color="#E8E5DF"/>
-    <SolidColorBrush x:Key="Border"    Color="#D4D0C8"/>
-    <SolidColorBrush x:Key="AccentVi"  Color="#DA7756"/>
-    <SolidColorBrush x:Key="AccentCy"  Color="#DA7756"/>
-    <SolidColorBrush x:Key="TextHigh"  Color="#1A1917"/>
-    <SolidColorBrush x:Key="TextMid"   Color="#6B6860"/>
-    <SolidColorBrush x:Key="TextLow"   Color="#9A9590"/>
-    <SolidColorBrush x:Key="Danger"    Color="#DA4040"/>
+    <SolidColorBrush x:Key="BgDeep"    Color="#F3F3F3"/>
+    <SolidColorBrush x:Key="BgPanel"   Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="BgElement" Color="#FAFAFA"/>
+    <SolidColorBrush x:Key="BgHover"   Color="#F0F0F0"/>
+    <SolidColorBrush x:Key="Border"    Color="#DADADA"/>
+    <SolidColorBrush x:Key="AccentVi"  Color="#2563EB"/>
+    <SolidColorBrush x:Key="AccentCy"  Color="#60A5FA"/>
+    <SolidColorBrush x:Key="TextHigh"  Color="#1F1F1F"/>
+    <SolidColorBrush x:Key="TextMid"   Color="#4A4A4A"/>
+    <SolidColorBrush x:Key="TextLow"   Color="#6E6E6E"/>
+    <SolidColorBrush x:Key="Danger"    Color="#DC2626"/>
 
     <!-- ── Settings window ── -->
-    <SolidColorBrush x:Key="WindowBgBrush"      Color="#FAFAF7"/>
-    <SolidColorBrush x:Key="PanelBgBrush"       Color="#EFEDE8"/>
-    <SolidColorBrush x:Key="PanelBorderBrush"   Color="#D4D0C8"/>
-    <SolidColorBrush x:Key="LabelFgBrush"       Color="#6B6860"/>
-    <SolidColorBrush x:Key="TitleFgBrush"       Color="#1A1917"/>
-    <SolidColorBrush x:Key="SubtitleFgBrush"    Color="#6B6860"/>
-    <SolidColorBrush x:Key="AccentBrush"        Color="#DA7756"/>
+    <SolidColorBrush x:Key="WindowBgBrush"      Color="#F3F3F3"/>
+    <SolidColorBrush x:Key="PanelBgBrush"       Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="PanelBorderBrush"   Color="#DADADA"/>
+    <SolidColorBrush x:Key="LabelFgBrush"       Color="#6E6E6E"/>
+    <SolidColorBrush x:Key="TitleFgBrush"       Color="#1F1F1F"/>
+    <SolidColorBrush x:Key="SubtitleFgBrush"    Color="#4A4A4A"/>
+    <SolidColorBrush x:Key="AccentBrush"        Color="#2563EB"/>
 
     <!-- ── Popup pill ── -->
-    <SolidColorBrush x:Key="PillBgBrush"        Color="#F0F5F4EF"/>
-    <SolidColorBrush x:Key="PillBorderBrush"    Color="#80D4D0C8"/>
-    <Color           x:Key="PillGlowColor">#DA7756</Color>
-    <Color           x:Key="AccentViColor">#DA7756</Color>
-    <Color           x:Key="AccentCyColor">#DA7756</Color>
-    <Color           x:Key="BgPanelColor">#EFEDE8</Color>
+    <SolidColorBrush x:Key="PillBgBrush"        Color="#F5FFFFFF"/>
+    <SolidColorBrush x:Key="PillBorderBrush"    Color="#902563EB"/>
+    <Color           x:Key="PillGlowColor">#60A5FA</Color>
+    <Color           x:Key="AccentViColor">#2563EB</Color>
+    <Color           x:Key="AccentCyColor">#60A5FA</Color>
+    <Color           x:Key="BgPanelColor">#FFFFFF</Color>
 
     <!-- ── Bar buttons ── -->
-    <SolidColorBrush x:Key="BtnFgBrush"         Color="#1A1917"/>
-    <SolidColorBrush x:Key="BtnHoverBgBrush"    Color="#40EDE9E3"/>
-    <SolidColorBrush x:Key="BtnPressedBgBrush"  Color="#60E0DBD3"/>
-    <SolidColorBrush x:Key="BtnHoverFgBrush"    Color="#DA7756"/>
-    <SolidColorBrush x:Key="BtnDisabledFgBrush" Color="#80B0B0A8"/>
+    <SolidColorBrush x:Key="BtnFgBrush"         Color="#1F1F1F"/>
+    <SolidColorBrush x:Key="BtnHoverBgBrush"    Color="#1F2563EB"/>
+    <SolidColorBrush x:Key="BtnPressedBgBrush"  Color="#332563EB"/>
+    <SolidColorBrush x:Key="BtnHoverFgBrush"    Color="#2563EB"/>
+    <SolidColorBrush x:Key="BtnDisabledFgBrush" Color="#807E7E7E"/>
 
 </ResourceDictionary>
