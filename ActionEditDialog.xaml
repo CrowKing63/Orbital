@@ -6,92 +6,121 @@
         Background="{DynamicResource WindowBgBrush}"
         WindowStartupLocation="CenterOwner" ResizeMode="NoResize">
 
-    <Grid Margin="20">
+    <Grid Margin="24">
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-        <StackPanel>
-
-        <!-- 이름 및 아이콘 -->
-        <Grid Margin="0,0,0,14">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="3*"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-
-            <StackPanel Grid.Column="0" Margin="0,0,8,0">
-                <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-                    <TextBlock Text="{DynamicResource Str_ButtonName}" FontSize="11" FontWeight="SemiBold"
-                               Foreground="{DynamicResource LabelFgBrush}"/>
-                    <Button x:Name="LoadPresetButton" Content="{DynamicResource Str_LoadPreset}"
-                            FontSize="10" Padding="6,1" Margin="8,0,0,0"
+            <StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,18">
+                    <TextBlock Text="{DynamicResource Str_EditAction}"
+                               FontSize="16"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource TitleFgBrush}"
+                               VerticalAlignment="Center"/>
+                    <Button x:Name="LoadPresetButton"
+                            Content="{DynamicResource Str_LoadPreset}"
+                            Margin="10,0,0,0"
+                            MinHeight="28"
+                            Padding="10,2"
+                            VerticalAlignment="Center"
                             Click="LoadPreset_Click"/>
                 </StackPanel>
-                <TextBox x:Name="NameBox"/>
+
+                <Border Background="{DynamicResource PanelBgBrush}"
+                        CornerRadius="12"
+                        BorderBrush="{DynamicResource PanelBorderBrush}"
+                        BorderThickness="1"
+                        Padding="16"
+                        Margin="0,0,0,12">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="3*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                            <TextBlock Text="{DynamicResource Str_ButtonName}" FontSize="11" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource LabelFgBrush}" Margin="0,0,0,6"/>
+                            <TextBox x:Name="NameBox"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="{DynamicResource Str_IconHint}" FontSize="11" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource LabelFgBrush}" Margin="0,0,0,6"/>
+                            <TextBox x:Name="IconBox" HorizontalContentAlignment="Center"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <Border Background="{DynamicResource PanelBgBrush}"
+                        CornerRadius="12"
+                        BorderBrush="{DynamicResource PanelBorderBrush}"
+                        BorderThickness="1"
+                        Padding="16"
+                        Margin="0,0,0,12">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                            <TextBlock Text="{DynamicResource Str_Prompt}" FontSize="11" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource LabelFgBrush}"/>
+                            <TextBlock Text="{DynamicResource Str_PromptHint}" FontSize="11"
+                                       Foreground="{DynamicResource TextLow}" Margin="6,0,0,0"/>
+                        </StackPanel>
+                        <TextBox x:Name="PromptBox"
+                                 MinHeight="90"
+                                 TextWrapping="Wrap"
+                                 AcceptsReturn="True"
+                                 VerticalScrollBarVisibility="Auto"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Background="{DynamicResource PanelBgBrush}"
+                        CornerRadius="12"
+                        BorderBrush="{DynamicResource PanelBorderBrush}"
+                        BorderThickness="1"
+                        Padding="16">
+                    <StackPanel>
+                        <TextBlock Text="{DynamicResource Str_OutputMode}" FontSize="11" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource LabelFgBrush}" Margin="0,0,0,6"/>
+                        <ComboBox x:Name="ResultActionBox" SelectedIndex="0" Margin="0,0,0,12">
+                            <ComboBoxItem Content="{DynamicResource Str_ActionReplace}"    Tag="Replace"    ToolTip="{DynamicResource Str_ActionReplaceTooltip}"/>
+                            <ComboBoxItem Content="{DynamicResource Str_ActionCopy}"       Tag="Copy"       ToolTip="{DynamicResource Str_ActionCopyTooltip}"/>
+                            <ComboBoxItem Content="{DynamicResource Str_ActionPopup}"      Tag="Popup"      ToolTip="{DynamicResource Str_ActionPopupTooltip}"/>
+                            <ComboBoxItem Content="{DynamicResource Str_ActionBrowser}"    Tag="Browser"    ToolTip="{DynamicResource Str_ActionBrowserTooltip}"/>
+                            <ComboBoxItem Content="{DynamicResource Str_ActionDirectCopy}" Tag="DirectCopy" ToolTip="{DynamicResource Str_ActionDirectCopyTooltip}"/>
+                            <ComboBoxItem Content="{DynamicResource Str_ActionCut}"        Tag="Cut"        ToolTip="{DynamicResource Str_ActionCutTooltip}"/>
+                            <ComboBoxItem Content="{DynamicResource Str_ActionPaste}"      Tag="Paste"      ToolTip="{DynamicResource Str_ActionPasteTooltip}"/>
+                            <ComboBoxItem Content="{DynamicResource Str_ActionSimulateKey}" Tag="SimulateKey" ToolTip="{DynamicResource Str_ActionSimulateKeyTooltip}"/>
+                            <ComboBoxItem Content="{DynamicResource Str_ActionSelectAll}"  Tag="SelectAll"  ToolTip="{DynamicResource Str_ActionSelectAllTooltip}"/>
+                        </ComboBox>
+
+                        <TextBlock Text="{DynamicResource Str_ButtonDisplay}" FontSize="11" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource LabelFgBrush}" Margin="0,0,0,6"/>
+                        <ComboBox x:Name="DisplayModeBox" SelectedIndex="0" Margin="0,0,0,10">
+                            <ComboBoxItem Content="{DynamicResource Str_DisplayTextAndIcon}" Tag="TextAndIcon"/>
+                            <ComboBoxItem Content="{DynamicResource Str_DisplayTextOnly}" Tag="TextOnly"/>
+                            <ComboBoxItem Content="{DynamicResource Str_DisplayIconOnly}" Tag="IconOnly"/>
+                        </ComboBox>
+
+                        <CheckBox x:Name="RequiresSelectionCheck"
+                                  Content="{DynamicResource Str_RequiresSelection}"
+                                  Foreground="{DynamicResource TextMid}"
+                                  FontSize="11"
+                                  IsChecked="True"/>
+                        <CheckBox x:Name="CleanOutputCheck"
+                                  Content="{DynamicResource Str_CleanOutput}"
+                                  Foreground="{DynamicResource TextMid}"
+                                  FontSize="11"
+                                  Margin="0,6,0,0"
+                                  ToolTip="{DynamicResource Str_CleanOutputTooltip}"/>
+                    </StackPanel>
+                </Border>
             </StackPanel>
-
-            <StackPanel Grid.Column="1">
-                <TextBlock Text="{DynamicResource Str_IconHint}" FontSize="11" FontWeight="SemiBold"
-                           Foreground="{DynamicResource LabelFgBrush}" Margin="0,0,0,6"/>
-                <TextBox x:Name="IconBox" HorizontalContentAlignment="Center"/>
-            </StackPanel>
-        </Grid>
-
-        <!-- 프롬프트 -->
-        <StackPanel Margin="0,0,0,14">
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-                <TextBlock Text="{DynamicResource Str_Prompt}" FontSize="11" FontWeight="SemiBold"
-                           Foreground="{DynamicResource LabelFgBrush}"/>
-                <TextBlock Text="{DynamicResource Str_PromptHint}" FontSize="11"
-                           Foreground="{DynamicResource TextLow}" Margin="6,0,0,0"/>
-            </StackPanel>
-            <TextBox x:Name="PromptBox" Height="75" TextWrapping="Wrap"
-                     AcceptsReturn="True" VerticalScrollBarVisibility="Auto"/>
-        </StackPanel>
-
-        <!-- 출력 방식 -->
-        <StackPanel Margin="0,0,0,14">
-            <TextBlock Text="{DynamicResource Str_OutputMode}" FontSize="11" FontWeight="SemiBold"
-                       Foreground="{DynamicResource LabelFgBrush}" Margin="0,0,0,6"/>
-            <ComboBox x:Name="ResultActionBox" SelectedIndex="0">
-                <ComboBoxItem Content="{DynamicResource Str_ActionReplace}"    Tag="Replace"    ToolTip="{DynamicResource Str_ActionReplaceTooltip}"/>
-                <ComboBoxItem Content="{DynamicResource Str_ActionCopy}"       Tag="Copy"       ToolTip="{DynamicResource Str_ActionCopyTooltip}"/>
-                <ComboBoxItem Content="{DynamicResource Str_ActionPopup}"      Tag="Popup"      ToolTip="{DynamicResource Str_ActionPopupTooltip}"/>
-                <ComboBoxItem Content="{DynamicResource Str_ActionBrowser}"    Tag="Browser"    ToolTip="{DynamicResource Str_ActionBrowserTooltip}"/>
-                <ComboBoxItem Content="{DynamicResource Str_ActionDirectCopy}" Tag="DirectCopy" ToolTip="{DynamicResource Str_ActionDirectCopyTooltip}"/>
-                <ComboBoxItem Content="{DynamicResource Str_ActionCut}"        Tag="Cut"        ToolTip="{DynamicResource Str_ActionCutTooltip}"/>
-                <ComboBoxItem Content="{DynamicResource Str_ActionPaste}"       Tag="Paste"       ToolTip="{DynamicResource Str_ActionPasteTooltip}"/>
-                <ComboBoxItem Content="{DynamicResource Str_ActionSimulateKey}" Tag="SimulateKey" ToolTip="{DynamicResource Str_ActionSimulateKeyTooltip}"/>
-                <ComboBoxItem Content="{DynamicResource Str_ActionSelectAll}"  Tag="SelectAll"  ToolTip="{DynamicResource Str_ActionSelectAllTooltip}"/>
-            </ComboBox>
-        </StackPanel>
-
-        <!-- Display mode -->
-        <StackPanel Margin="0,0,0,14">
-            <TextBlock Text="{DynamicResource Str_ButtonDisplay}" FontSize="11" FontWeight="SemiBold"
-                       Foreground="{DynamicResource LabelFgBrush}" Margin="0,0,0,6"/>
-            <ComboBox x:Name="DisplayModeBox" SelectedIndex="0">
-                <ComboBoxItem Content="{DynamicResource Str_DisplayTextAndIcon}" Tag="TextAndIcon"/>
-                <ComboBoxItem Content="{DynamicResource Str_DisplayTextOnly}"   Tag="TextOnly"/>
-                <ComboBoxItem Content="{DynamicResource Str_DisplayIconOnly}"   Tag="IconOnly"/>
-            </ComboBox>
-        </StackPanel>
-
-        <!-- 옵션 -->
-        <CheckBox x:Name="RequiresSelectionCheck" Content="{DynamicResource Str_RequiresSelection}"
-                  Foreground="{DynamicResource TextMid}" FontSize="11" IsChecked="True"/>
-        <CheckBox x:Name="CleanOutputCheck" Content="{DynamicResource Str_CleanOutput}"
-                  Foreground="{DynamicResource TextMid}" FontSize="11" Margin="0,6,0,0"
-                  ToolTip="{DynamicResource Str_CleanOutputTooltip}"/>
-
-        </StackPanel>
         </ScrollViewer>
 
-        <!-- 하단 버튼 (고정) -->
-        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,14,0,0">
             <Button Content="{DynamicResource Str_Save}" Width="82" Margin="0,0,8,0"
                     Style="{StaticResource PrimaryButton}"
                     IsDefault="True" Click="Ok_Click"/>
