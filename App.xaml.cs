@@ -14,6 +14,7 @@ using System.Windows.Interop;
 using Velopack;
 using Velopack.Sources;
 using WinForms = System.Windows.Forms;
+using MediaColor = System.Windows.Media.Color;
 
 namespace Orbital
 {
@@ -21,6 +22,9 @@ namespace Orbital
     {
         [DllImport("user32.dll", SetLastError = true)]
         private static extern bool DestroyIcon(IntPtr hIcon);
+
+        [DllImport("dwmapi.dll", PreserveSig = true)]
+        private static extern int DwmGetColorizationColor(out uint pcrColorization, out bool pfOpaqueBlend);
 
         [StructLayout(LayoutKind.Sequential)]
         private struct POINT
@@ -108,6 +112,7 @@ namespace Orbital
             bool recovered = SettingsManager.LoadSettings();
 
             ApplyTheme(SettingsManager.CurrentSettings.Theme);
+            ApplySystemAccentResources();
             ApplyLanguage(SettingsManager.CurrentSettings.Language);
             Microsoft.Win32.SystemEvents.UserPreferenceChanged += OnSystemUserPreferenceChanged;
 
@@ -211,6 +216,61 @@ namespace Orbital
             {
                 Dispatcher.BeginInvoke(() => ApplyTheme("System"));
             }
+
+            if (e.Category is UserPreferenceCategory.Color or UserPreferenceCategory.General)
+            {
+                Dispatcher.BeginInvoke(ApplySystemAccentResources);
+            }
+        }
+
+        private static void ApplySystemAccentResources()
+        {
+            if (Current == null) return;
+
+            if (!TryGetSystemAccentColor(out var accent))
+                return;
+
+            var accentSoft = BlendTowards(accent, Colors.White, 0.35);
+
+            Current.Resources["AccentVi"] = new SolidColorBrush(accent);
+            Current.Resources["AccentCy"] = new SolidColorBrush(accentSoft);
+            Current.Resources["AccentBrush"] = new SolidColorBrush(accent);
+            Current.Resources["AccentViColor"] = accent;
+            Current.Resources["AccentCyColor"] = accentSoft;
+        }
+
+        private static bool TryGetSystemAccentColor(out MediaColor accent)
+        {
+            accent = default;
+
+            try
+            {
+                int hr = DwmGetColorizationColor(out uint rawColor, out _);
+                if (hr != 0)
+                    return false;
+
+                byte a = (byte)((rawColor >> 24) & 0xFF);
+                byte r = (byte)((rawColor >> 16) & 0xFF);
+                byte g = (byte)((rawColor >> 8) & 0xFF);
+                byte b = (byte)(rawColor & 0xFF);
+
+                if (a == 0) a = 0xFF;
+                accent = MediaColor.FromArgb(a, r, g, b);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private static MediaColor BlendTowards(MediaColor baseColor, MediaColor target, double ratio)
+        {
+            ratio = Math.Clamp(ratio, 0d, 1d);
+            byte r = (byte)Math.Round(baseColor.R + ((target.R - baseColor.R) * ratio));
+            byte g = (byte)Math.Round(baseColor.G + ((target.G - baseColor.G) * ratio));
+            byte b = (byte)Math.Round(baseColor.B + ((target.B - baseColor.B) * ratio));
+            return MediaColor.FromArgb(0xFF, r, g, b);
         }
 
         private async Task CheckForUpdatesAsync()
