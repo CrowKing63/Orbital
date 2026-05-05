@@ -1,9 +1,9 @@
 using System;
-using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using Orbital.Services;
 
 namespace Orbital
 {
@@ -11,26 +11,11 @@ namespace Orbital
     {
         public ActionProfile Result { get; private set; } = new ActionProfile();
 
-        [DllImport("dwmapi.dll")]
-        private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int value, int size);
-
         protected override void OnSourceInitialized(EventArgs e)
         {
             base.OnSourceInitialized(e);
-            try
-            {
-                var hwnd = new System.Windows.Interop.WindowInteropHelper(this).Handle;
-                string theme = SettingsManager.CurrentSettings.Theme;
-                if (theme == "System")
-                {
-                    using var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(
-                        @"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize");
-                    theme = (key?.GetValue("AppsUseLightTheme") is int v && v == 1) ? "Light" : "Dark";
-                }
-                int dark = theme == "Light" ? 0 : 1;
-                DwmSetWindowAttribute(hwnd, 20, ref dark, sizeof(int));
-            }
-            catch { }
+            bool useDarkMode = ResolveCurrentTheme() != "Light";
+            WindowBackdropHelper.TryApply(this, useDarkMode, WindowBackdropKind.TransientWindow);
         }
 
         public ActionEditDialog(ActionProfile? existing = null)
@@ -123,6 +108,19 @@ namespace Orbital
             if (string.IsNullOrWhiteSpace(input)) return input;
             return Regex.Replace(input, @"(?:\\u|U\+)([0-9a-fA-F]{4,5})", m =>
                 char.ConvertFromUtf32(Convert.ToInt32(m.Groups[1].Value, 16)));
+        }
+
+        private static string ResolveCurrentTheme()
+        {
+            string theme = SettingsManager.CurrentSettings.Theme;
+            if (theme != "System")
+            {
+                return theme;
+            }
+
+            using var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(
+                @"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize");
+            return (key?.GetValue("AppsUseLightTheme") is int v && v == 1) ? "Light" : "Dark";
         }
     }
 }

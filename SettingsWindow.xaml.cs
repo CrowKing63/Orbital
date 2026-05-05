@@ -4,13 +4,13 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Navigation;
+using Orbital.Services;
 
 namespace Orbital
 {
@@ -50,19 +50,11 @@ namespace Orbital
         private bool _suppressEvents = false;
         private uint _capturedVk = 0;
 
-        [DllImport("dwmapi.dll")]
-        private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int value, int size);
-
         protected override void OnSourceInitialized(EventArgs e)
         {
             base.OnSourceInitialized(e);
-            try
-            {
-                var hwnd = new System.Windows.Interop.WindowInteropHelper(this).Handle;
-                int dark = 1;
-                DwmSetWindowAttribute(hwnd, 20 /* DWMWA_USE_IMMERSIVE_DARK_MODE */, ref dark, sizeof(int));
-            }
-            catch { }
+            bool useDarkMode = ResolveCurrentTheme() != "Light";
+            WindowBackdropHelper.TryApply(this, useDarkMode, WindowBackdropKind.MainWindow);
         }
 
         private static readonly HttpClient _http = new();
@@ -195,6 +187,19 @@ namespace Orbital
             if (url.Contains("openrouter.ai")) return "openrouter";
             if (url.Contains("openai.com"))    return "openai";
             return "custom";
+        }
+
+        private static string ResolveCurrentTheme()
+        {
+            string theme = SettingsManager.CurrentSettings.Theme;
+            if (theme != "System")
+            {
+                return theme;
+            }
+
+            using var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(
+                @"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize");
+            return (key?.GetValue("AppsUseLightTheme") is int v && v == 1) ? "Light" : "Dark";
         }
 
         private void SelectProvider(string tag, string url, string model)
