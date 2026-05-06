@@ -160,7 +160,7 @@ namespace Orbital
 
         public static void ApplyTheme(string themeName)
         {
-            string resolved = themeName == "System" ? GetSystemTheme() : themeName;
+            string resolved = ResolveTheme(themeName);
 
             var dicts = Current.Resources.MergedDictionaries;
             var existing = dicts.FirstOrDefault(d =>
@@ -173,6 +173,7 @@ namespace Orbital
 
             string path = resolved == "Light" ? "Themes/Light.xaml" : "Themes/Dark.xaml";
             dicts.Insert(0, new ResourceDictionary { Source = new Uri(path, UriKind.Relative) });
+            (Current as App)?.UpdateTrayIcon(resolved);
 
             SettingsManager.CurrentSettings.Theme = themeName; // "System" 그대로 저장
         }
@@ -197,6 +198,9 @@ namespace Orbital
             // Rebuild WinForms tray menu (DynamicResource doesn't apply to WinForms)
             (Current as App)?.RebuildTrayMenu();
         }
+
+        private static string ResolveTheme(string themeName)
+            => themeName == "System" ? GetSystemTheme() : themeName;
 
         private static string GetSystemTheme()
         {
@@ -356,31 +360,56 @@ namespace Orbital
                 Visible = true
             };
 
-            try
-            {
-                var uri = new Uri("pack://application:,,,/Assets/orbit_logo.ico");
-                var streamInfo = System.Windows.Application.GetResourceStream(uri);
-                if (streamInfo != null)
-                {
-                    using (var stream = streamInfo.Stream)
-                    {
-                        _notifyIcon.Icon = new System.Drawing.Icon(stream);
-                    }
-                }
-                else
-                {
-                    _notifyIcon.Icon = SystemIcons.Application;
-                }
-            }
-            catch
-            {
-                _notifyIcon.Icon = SystemIcons.Application;
-            }
+            UpdateTrayIcon(ResolveTheme(SettingsManager.CurrentSettings.Theme));
 
             _notifyIcon.ContextMenuStrip = new WinForms.ContextMenuStrip();
             _notifyIcon.DoubleClick += (s, e) => Dispatcher.Invoke(OpenSettingsWindow);
 
             RebuildTrayMenu();
+        }
+
+        private void UpdateTrayIcon(string resolvedTheme)
+        {
+            if (_notifyIcon == null) return;
+
+            string themedPath = resolvedTheme == "Light"
+                ? "pack://application:,,,/Assets/orbit_logo_light.ico"
+                : "pack://application:,,,/Assets/orbit_logo_dark.ico";
+
+            if (TryLoadTrayIcon(themedPath, out var themedIcon))
+            {
+                _notifyIcon.Icon = themedIcon;
+                return;
+            }
+
+            if (TryLoadTrayIcon("pack://application:,,,/Assets/orbit_logo.ico", out var fallbackIcon))
+            {
+                _notifyIcon.Icon = fallbackIcon;
+                return;
+            }
+
+            _notifyIcon.Icon = SystemIcons.Application;
+        }
+
+        private static bool TryLoadTrayIcon(string resourceUri, out Icon icon)
+        {
+            icon = null!;
+
+            try
+            {
+                var uri = new Uri(resourceUri);
+                var streamInfo = System.Windows.Application.GetResourceStream(uri);
+                if (streamInfo == null)
+                    return false;
+
+                using var stream = streamInfo.Stream;
+                icon = new Icon(stream);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         /// <summary>
