@@ -128,6 +128,21 @@
                         <ComboBoxItem Content="{DynamicResource Str_PopupPositionNearActionBar}" Tag="NearActionBar"/>
                     </ComboBox>
                 </StackPanel>
+                <CheckBox x:Name="PopupAutoCloseEnabledCheck"
+                          Content="{DynamicResource Str_PopupAutoClose}"
+                          Foreground="{DynamicResource TextMid}" FontSize="12"
+                          Margin="0,10,0,0"
+                          Checked="PopupAutoCloseSetting_Changed"
+                          Unchecked="PopupAutoCloseSetting_Changed"/>
+                <StackPanel Margin="0,8,0,0">
+                    <TextBlock Text="{DynamicResource Str_PopupAutoCloseSeconds}" FontSize="11"
+                               Foreground="{DynamicResource LabelFgBrush}" Margin="0,0,0,5"/>
+                    <TextBox x:Name="PopupAutoCloseSecondsBox"
+                             Width="120"
+                             HorizontalAlignment="Left"
+                             PreviewTextInput="PopupAutoCloseSecondsBox_PreviewTextInput"
+                             LostFocus="PopupAutoCloseSecondsBox_LostFocus"/>
+                </StackPanel>
             </StackPanel>
         </Border>
 

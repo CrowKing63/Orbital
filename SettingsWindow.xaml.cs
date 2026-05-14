@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
@@ -139,6 +140,9 @@ namespace Orbital
                     break;
                 }
             }
+            PopupAutoCloseEnabledCheck.IsChecked = SettingsManager.CurrentSettings.PopupAutoCloseEnabled;
+            PopupAutoCloseSecondsBox.Text = SettingsManager.CurrentSettings.PopupAutoCloseSeconds.ToString();
+            UpdatePopupAutoCloseControls();
 
             // Theme selector
             string currentTheme = SettingsManager.CurrentSettings.Theme ?? "Dark";
@@ -288,6 +292,48 @@ namespace Orbital
                 SettingsManager.CurrentSettings.PopupPlacement = parsed;
                 SettingsManager.SaveSettings();
             }
+        }
+
+        private void PopupAutoCloseSetting_Changed(object sender, RoutedEventArgs e)
+        {
+            if (_suppressEvents) return;
+            SettingsManager.CurrentSettings.PopupAutoCloseEnabled = PopupAutoCloseEnabledCheck.IsChecked == true;
+            UpdatePopupAutoCloseControls();
+            SettingsManager.SaveSettings();
+        }
+
+        private void PopupAutoCloseSecondsBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            e.Handled = !Regex.IsMatch(e.Text, "^[0-9]+$");
+        }
+
+        private void PopupAutoCloseSecondsBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (_suppressEvents) return;
+
+            if (TryApplyPopupAutoCloseSeconds(PopupAutoCloseSecondsBox.Text))
+            {
+                return;
+            }
+
+            PopupAutoCloseSecondsBox.Text = SettingsManager.CurrentSettings.PopupAutoCloseSeconds.ToString();
+        }
+
+        private bool TryApplyPopupAutoCloseSeconds(string? value)
+        {
+            if (!int.TryParse(value, out int seconds) || seconds < 1)
+            {
+                return false;
+            }
+
+            SettingsManager.CurrentSettings.PopupAutoCloseSeconds = seconds;
+            SettingsManager.SaveSettings();
+            return true;
+        }
+
+        private void UpdatePopupAutoCloseControls()
+        {
+            PopupAutoCloseSecondsBox.IsEnabled = PopupAutoCloseEnabledCheck.IsChecked == true;
         }
 
         private void ThemeBox_SelectionChanged(object sender, SelectionChangedEventArgs e)

@@ -132,6 +132,8 @@ Doppelklicke auf das Infobereich-Symbol, um die Einstellungen zu öffnen.</s:Str
     <s:String x:Key="Str_TriggerLongPress">Long Press</s:String>
     <s:String x:Key="Str_TriggerKeyboard">Keyboard Selection</s:String>
     <s:String x:Key="Str_PopupPosition">Popup Position</s:String>
+    <s:String x:Key="Str_PopupAutoClose">Auto-close popup</s:String>
+    <s:String x:Key="Str_PopupAutoCloseSeconds">Auto-close after (seconds)</s:String>
     <s:String x:Key="Str_PopupPositionBottomRight">Bottom-right (current)</s:String>
     <s:String x:Key="Str_PopupPositionNearCursor">Near cursor</s:String>
     <s:String x:Key="Str_PopupPositionNearSelection">Near selected text</s:String>

@@ -9,7 +9,7 @@ namespace Orbital
 {
     public partial class ResultTooltipWindow : Window
     {
-        private readonly DispatcherTimer _autoCloseTimer;
+        private readonly DispatcherTimer? _autoCloseTimer;
         private readonly PopupAnchorContext _anchors;
 
         public ResultTooltipWindow(string result, PopupAnchorContext anchors)
@@ -22,9 +22,19 @@ namespace Orbital
             Loaded += OnLoaded;
 
             // 20초 후 자동 닫기
-            _autoCloseTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(20) };
-            _autoCloseTimer.Tick += (s, e) => { _autoCloseTimer.Stop(); Close(); };
-            _autoCloseTimer.Start();
+            if (SettingsManager.CurrentSettings.PopupAutoCloseEnabled)
+            {
+                _autoCloseTimer = new DispatcherTimer
+                {
+                    Interval = TimeSpan.FromSeconds(SettingsManager.CurrentSettings.PopupAutoCloseSeconds)
+                };
+                _autoCloseTimer.Tick += (s, e) =>
+                {
+                    _autoCloseTimer.Stop();
+                    Close();
+                };
+                _autoCloseTimer.Start();
+            }
         }
 
         private void OnLoaded(object sender, RoutedEventArgs e)
@@ -60,7 +70,7 @@ namespace Orbital
 
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
-            _autoCloseTimer.Stop();
+            _autoCloseTimer?.Stop();
             Close();
         }
 

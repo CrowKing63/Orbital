@@ -63,6 +63,8 @@ namespace Orbital
 
         public bool SoundEnabled { get; set; } = true;
         public PopupPlacementMode PopupPlacement { get; set; } = PopupPlacementMode.BottomRight;
+        public bool PopupAutoCloseEnabled { get; set; } = true;
+        public int PopupAutoCloseSeconds { get; set; } = 20;
 
     }
 
@@ -106,6 +108,7 @@ namespace Orbital
                     }
 
                     CurrentSettings = loadedSettings;
+                    NormalizeSettings(CurrentSettings);
                 }
                 catch (Exception)
                 {
@@ -142,6 +145,14 @@ namespace Orbital
 
             string json = JsonConvert.SerializeObject(CurrentSettings, Formatting.Indented);
             File.WriteAllText(ConfigPath, json);
+        }
+
+        private static void NormalizeSettings(AppSettings settings)
+        {
+            if (settings.PopupAutoCloseSeconds < 1)
+            {
+                settings.PopupAutoCloseSeconds = 20;
+            }
         }
 
         private static AppSettings CreateDefaultSettings()

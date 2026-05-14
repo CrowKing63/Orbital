@@ -54,6 +54,8 @@ public class SettingsManagerTests
         Assert.Equal("https://api.openai.com/v1", settings.ApiBaseUrl);
         Assert.Equal("gpt-4o-mini", settings.ModelName);
         Assert.Equal(PopupPlacementMode.BottomRight, settings.PopupPlacement);
+        Assert.True(settings.PopupAutoCloseEnabled);
+        Assert.Equal(20, settings.PopupAutoCloseSeconds);
     }
 
     [Fact]
@@ -201,5 +203,40 @@ public class SettingsManagerTests
         SettingsManager.LoadSettings();
 
         Assert.Equal(PopupPlacementMode.BottomRight, SettingsManager.CurrentSettings.PopupPlacement);
+    }
+
+    [Fact]
+    public void SaveAndLoadSettings_PreservesPopupAutoCloseSettings()
+    {
+        using var scope = new IsolatedSettingsScope();
+        SettingsManager.LoadSettings();
+
+        SettingsManager.CurrentSettings.PopupAutoCloseEnabled = false;
+        SettingsManager.CurrentSettings.PopupAutoCloseSeconds = 60;
+        SettingsManager.SaveSettings();
+
+        SettingsManager.LoadSettings();
+
+        Assert.False(SettingsManager.CurrentSettings.PopupAutoCloseEnabled);
+        Assert.Equal(60, SettingsManager.CurrentSettings.PopupAutoCloseSeconds);
+    }
+
+    [Fact]
+    public void LoadSettings_WhenPopupAutoCloseFieldsMissing_DefaultsArePreserved()
+    {
+        using var scope = new IsolatedSettingsScope();
+
+        var settings = CreateDefaultSettings();
+        settings.PopupAutoCloseEnabled = false;
+        settings.PopupAutoCloseSeconds = 45;
+        var obj = JObject.Parse(JsonConvert.SerializeObject(settings, Formatting.Indented));
+        obj.Remove(nameof(AppSettings.PopupAutoCloseEnabled));
+        obj.Remove(nameof(AppSettings.PopupAutoCloseSeconds));
+        File.WriteAllText(scope.ConfigPath, obj.ToString());
+
+        SettingsManager.LoadSettings();
+
+        Assert.True(SettingsManager.CurrentSettings.PopupAutoCloseEnabled);
+        Assert.Equal(20, SettingsManager.CurrentSettings.PopupAutoCloseSeconds);
     }
 }

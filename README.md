@@ -119,7 +119,7 @@ Select **OpenRouter** as the provider and use `openrouter/free` as the model nam
 |---|---|
 | `Replace` | AI result overwrites your selected text (Ctrl+V) |
 | `Copy` | AI result is copied to clipboard |
-| `Popup` | AI result shown in a floating window (20s auto-close) |
+| `Popup` | AI result shown in a floating window with configurable auto-close or manual close |
 | `DirectCopy` | Copies selected text as-is - no AI |
 | `Cut` | Cuts selected text - no AI |
 | `Paste` | Pastes clipboard at cursor - no AI |
