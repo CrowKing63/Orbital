@@ -94,6 +94,7 @@ namespace Orbital
             {
                 "notepad++",
                 "emeditor",
+                "sublime_text",
             };
 
         private static readonly HashSet<string> s_clipboardFallbackEditorClasses =
@@ -744,10 +745,7 @@ namespace Orbital
                     }
                 }
 
-                bool allowClipboardFallback =
-                    s_clipboardFallbackEditorClasses.Contains(controlClass) ||
-                    s_clipboardFallbackEditorClasses.Contains(rootClass) ||
-                    (!string.IsNullOrEmpty(processName) && s_clipboardFallbackEditorProcesses.Contains(processName));
+                bool allowClipboardFallback = IsClipboardFallbackEditor(controlClass, rootClass, processName);
                 if (allowClipboardFallback)
                 {
                     string selectedText = ClipboardHelper.GetSelectedText();
@@ -758,6 +756,13 @@ namespace Orbital
                 return (false, false, false);
             }
             catch { return (false, false, false); }
+        }
+
+        internal static bool IsClipboardFallbackEditor(string controlClass, string rootClass, string processName)
+        {
+            return s_clipboardFallbackEditorClasses.Contains(controlClass) ||
+                s_clipboardFallbackEditorClasses.Contains(rootClass) ||
+                (!string.IsNullOrEmpty(processName) && s_clipboardFallbackEditorProcesses.Contains(processName));
         }
 
         private static string GetWindowClass(IntPtr hwnd)
