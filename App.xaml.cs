@@ -745,13 +745,8 @@ namespace Orbital
                     }
                 }
 
-                bool allowClipboardFallback = IsClipboardFallbackEditor(controlClass, rootClass, processName);
-                if (allowClipboardFallback)
-                {
-                    string selectedText = ClipboardHelper.GetSelectedText();
-                    if (!string.IsNullOrWhiteSpace(selectedText))
-                        return (true, true, true);
-                }
+                if (IsClipboardFallbackEditor(controlClass, rootClass, processName))
+                    return (true, true, true);
 
                 return (false, false, false);
             }
