@@ -541,8 +541,15 @@ namespace Orbital
         {
             if (!SettingsManager.CurrentSettings.EnableDoubleClickTrigger) return;
 
-            // Editable-control check is deferred to the background thread inside TriggerSelectionMenu
-            TriggerSelectionMenu(e.X, e.Y, isKeyboard: false, requireEditable: true);
+            // Pass the button-down window class so browser windows hit the fast path in
+            // CheckEditability: Chrome's UIA tree resolves to ControlType.Window at word
+            // positions, which would otherwise be rejected as non-selectable.
+            // A double-click is an intentional new-selection gesture: its first click
+            // doubles as the dismiss of any visible popup, so that dismiss must not
+            // suppress this trigger via the 150 ms window.
+            var downClass = SystemHookManager.LastButtonDownHwndClass;
+            TriggerSelectionMenu(e.X, e.Y, isKeyboard: false, requireEditable: true,
+                dragStartHwndClass: downClass, ignoreDismissSuppression: true);
         }
 
         private void SystemHookManager_OnKeyboardSelection(object? sender, SystemHookManager.MousePoint e)
@@ -609,7 +616,8 @@ namespace Orbital
         /// the cursor drifts outside the text field before mouse-up.</param>
         private void TriggerSelectionMenu(int screenX, int screenY, bool isKeyboard,
             bool requireEditable = false, int editCheckX = -1, int editCheckY = -1,
-            string dragStartHwndClass = "", bool? forceHasText = null)
+            string dragStartHwndClass = "", bool? forceHasText = null,
+            bool ignoreDismissSuppression = false)
         {
             // Throttle: if another trigger arrived within 80 ms, just cancel the in-flight
             // task instead of starting a new UIA round-trip that would pile up and lag the mouse.
@@ -621,7 +629,10 @@ namespace Orbital
             _lastTriggerAttemptTime = DateTime.UtcNow;
 
             // Suppress rapid re-triggers after dismiss (e.g. accidental double-trigger).
-            if ((DateTime.UtcNow - _lastDismissTime).TotalMilliseconds < 150)
+            // Skipped for double-click: its first click doubles as the dismiss of any visible
+            // popup, so that dismiss must not suppress the new selection itself.
+            if (!ignoreDismissSuppression &&
+                (DateTime.UtcNow - _lastDismissTime).TotalMilliseconds < 150)
                 return;
 
             // Fall back to the menu-display position when no explicit check position is given.
