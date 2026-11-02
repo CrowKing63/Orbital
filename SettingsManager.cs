@@ -76,7 +76,45 @@ namespace Orbital
             "settings.json");
         private static string? _configPathOverride;
 
-        private static string ConfigPath => _configPathOverride ?? DefaultConfigPath;
+        private static string ConfigPath => ResolveConfigPath();
+
+        /// <summary>
+        /// Resolves the settings file path. Portable builds (compiled with the PORTABLE
+        /// constant) store settings in the application folder next to the exe, wherever it
+        /// lives; installed builds use %APPDATA%\Orbital.
+        /// </summary>
+        internal static string ResolveConfigPath(string? baseDirectoryOverride = null)
+        {
+            if (_configPathOverride != null)
+                return _configPathOverride;
+
+#if PORTABLE
+            return Path.Combine(baseDirectoryOverride ?? GetExeDirectory(), "settings.json");
+#else
+            return DefaultConfigPath;
+#endif
+        }
+
+        /// <summary>
+        /// One-time migration for portable users upgrading from builds that stored settings in
+        /// %APPDATA%: copies the legacy settings file next to the exe.
+        /// </summary>
+        internal static void MigratePortableSettings(string portableConfigPath, string legacyConfigPath)
+        {
+            if (File.Exists(portableConfigPath)) return;
+            if (!File.Exists(legacyConfigPath)) return;
+
+            try { File.Copy(legacyConfigPath, portableConfigPath); }
+            catch { /* non-fatal: start fresh with defaults */ }
+        }
+
+        private static string GetExeDirectory()
+        {
+            string? exePath = Environment.ProcessPath;
+            if (!string.IsNullOrEmpty(exePath))
+                return Path.GetDirectoryName(exePath) ?? AppContext.BaseDirectory;
+            return AppContext.BaseDirectory;
+        }
 
         public static AppSettings CurrentSettings { get; private set; } = CreateDefaultSettings();
 
@@ -95,12 +133,16 @@ namespace Orbital
         public static bool LoadSettings()
         {
             MigrateFromLegacyPath();
+            string configPath = ConfigPath;
+            if (configPath != DefaultConfigPath && !File.Exists(configPath))
+                MigratePortableSettings(configPath, DefaultConfigPath);
+
             bool recovered = false;
-            if (File.Exists(ConfigPath))
+            if (File.Exists(configPath))
             {
                 try
                 {
-                    string json = File.ReadAllText(ConfigPath);
+                    string json = File.ReadAllText(configPath);
                     AppSettings? loadedSettings = JsonConvert.DeserializeObject<AppSettings>(json);
                     if (loadedSettings == null)
                     {
@@ -112,11 +154,11 @@ namespace Orbital
                 }
                 catch (Exception)
                 {
-                    string backupPath = ConfigPath + ".corrupt.bak";
+                    string backupPath = configPath + ".corrupt.bak";
                     try
                     {
                         if (File.Exists(backupPath)) File.Delete(backupPath);
-                        File.Move(ConfigPath, backupPath);
+                        File.Move(configPath, backupPath);
                     }
                     catch { } // Best effort backup
 

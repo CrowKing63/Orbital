@@ -48,30 +48,12 @@ jobs:
         run: |
           dotnet publish Orbital.csproj /p:PublishProfile=installer --configuration Release --output publish/installer
 
-      # ---------- Package with Velopack ----------
-      - name: Install Velopack CLI
-        run: dotnet tool install -g vpk
-
-      - name: Package with Velopack
-        shell: pwsh
-        run: |
-          $ver = '${{ steps.version.outputs.version }}'
-          New-Item -ItemType Directory -Force -Path dist | Out-Null
-          vpk pack `
-            --packId Orbital `
-            --packVersion $ver `
-            --packDir publish/installer `
-            --packTitle "Orbital" `
-            --mainExe Orbital.exe `
-            --icon Assets/orbit_logo.ico `
-            --outputDir dist
-          # Rename bootstrapper if vpk used a different naming pattern
-          $setup = Get-ChildItem dist -Filter '*Setup*.exe' | Select-Object -First 1
-          if ($setup -and $setup.Name -ne 'OrbitalSetup.exe') {
-            Rename-Item $setup.FullName 'OrbitalSetup.exe'
-          }
-          # Remove Velopack's auto-generated portable zip — we provide our own below
-          Remove-Item dist\*-win-Portable.zip -ErrorAction SilentlyContinue
+      # ---------- Compile installer with Inno Setup ----------
+      - name: Compile installer with Inno Setup
+        uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
+        with:
+          path: installer/Orbital.iss
+          options: /DMyAppVersion=${{ steps.version.outputs.version }}
 
       # ---------- Build portable (self-contained multi-file) ----------
       - name: Publish portable build
@@ -86,7 +68,6 @@ jobs:
           $staging = "publish/staging/$folder"
           New-Item -ItemType Directory -Force -Path $staging | Out-Null
           Copy-Item publish/portable/Orbital.exe $staging
-          Copy-Item portable/Cleanup.cmd $staging
           Compress-Archive -Path "publish/staging/$folder" -DestinationPath "dist/Orbital-$ver-Portable.zip"
 
       # ---------- Create GitHub Release ----------
@@ -109,7 +90,7 @@ jobs:
           $json = gh release view $tag --repo '${{ github.repository }}' --json assets 2>$null
           if ($LASTEXITCODE -eq 0 -and $json) {
             ($json | ConvertFrom-Json).assets |
-              Where-Object { $_.name -like '*Setup.exe' -or $_.name -like '*.nupkg' -or $_.name -eq 'RELEASES' } |
+              Where-Object { $_.name -like '*Setup.exe' } |
               ForEach-Object {
                 Write-Host "Removing stale asset: $($_.name)"
                 gh release delete-asset $tag $_.name --repo '${{ github.repository }}' --yes
@@ -127,9 +108,5 @@ jobs:
           generate_release_notes: true
           fail_on_unmatched_files: false
           files: |
-            dist/RELEASES
-            dist/releases.win.json
-            dist/assets.win.json
-            dist/Orbital-*-full.nupkg
-            dist/OrbitalSetup.exe
+            dist/Orbital-*-Setup.exe
             dist/Orbital-*-Portable.zip

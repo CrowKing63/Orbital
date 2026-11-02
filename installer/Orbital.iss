@@ -19,7 +19,9 @@ AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}/issues
 AppUpdatesURL={#MyAppURL}/releases
-DefaultDirName={autopf}\{#MyAppName}
+; Per-user install to %LocalAppData% — no elevation required, which keeps
+; silent auto-updates (launched by the app) fully unattended.
+DefaultDirName={localappdata}\{#MyAppName}
 DefaultGroupName={#MyAppName}
 AllowNoIcons=yes
 ; Compression
@@ -33,15 +35,18 @@ OutputBaseFilename=Orbital-{#MyAppVersion}-Setup
 ; Uninstaller
 UninstallDisplayName={#MyAppName}
 UninstallDisplayIcon={app}\{#MyAppExeName}
-; Privilege
+; Privileges
 PrivilegesRequired=lowest
-PrivilegesRequiredOverridesAllowed=dialog
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
+
+[Registry]
+; Remove the auto-start registry entry on uninstall.
+Root: HKCU; Subkey: Software\Microsoft\Windows\CurrentVersion\Run; KeyName: Orbital; Flags: uninsdeletevalue
 
 [Files]
 Source: "..\publish\installer\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
@@ -59,6 +64,32 @@ Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChang
 Filename: "taskkill.exe"; Parameters: "/f /im {#MyAppExeName}"; Flags: runhidden; RunOnceId: "KillOrbital"
 
 [Code]
+// Auto-update launches the installer, then the app shuts itself down.
+// Wait here so the installer never copies over a running executable.
+// (Also covers manual reinstalls while the app is open.)
+procedure InitializeWizard();
+begin
+  while DoWaitForProcess('Orbital.exe', 1000) do
+    Sleep(500);
+end;
+
+// After a silent auto-update, relaunch the app using the flag file the app
+// wrote before starting the installer.
+procedure CurInstallChanged(CurInstallStep: TUninstallStep);
+var
+  RestartFlag: String;
+begin
+  if CurInstallStep = usPostInstall then
+  begin
+    RestartFlag := ExpandConstant('{tmp}\orbital-update-restart.flag');
+    if FileExists(RestartFlag) then
+    begin
+      Exec(ExpandConstant('{app}\Orbital.exe'));
+      DelFile(RestartFlag);
+    end;
+  end;
+end;
+
 // Ask whether to remove AppData on uninstall
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
 var

@@ -239,4 +239,76 @@ public class SettingsManagerTests
         Assert.True(SettingsManager.CurrentSettings.PopupAutoCloseEnabled);
         Assert.Equal(20, SettingsManager.CurrentSettings.PopupAutoCloseSeconds);
     }
+
+    [Fact]
+    public void ResolveConfigPath_InstalledBuild_ReturnsAppDataPath_EvenWithStrayMarkerFile()
+    {
+        // This test assembly is built without the PORTABLE constant, so the installed
+        // branch must always resolve to %APPDATA%\Orbital — a stray portable.txt next to
+        // the exe has no effect.
+        using var dir = new TempDirectory();
+        File.WriteAllText(System.IO.Path.Combine(dir.Path, "portable.txt"), "");
+
+        string expected = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "Orbital",
+            "settings.json");
+        Assert.Equal(expected, SettingsManager.ResolveConfigPath(dir.Path));
+    }
+
+    [Fact]
+    public void MigratePortableSettings_CopiesLegacyFile_WhenLocalMissing()
+    {
+        using var dir = new TempDirectory();
+        string local = Path.Combine(dir.Path, "settings.json");
+        string legacy = Path.Combine(dir.Path, "legacy-settings.json");
+        File.WriteAllText(legacy, "{}");
+
+        SettingsManager.MigratePortableSettings(local, legacy);
+
+        Assert.True(File.Exists(local));
+        Assert.Equal("{}", File.ReadAllText(local));
+    }
+
+    [Fact]
+    public void MigratePortableSettings_DoesNothing_WhenLocalAlreadyExists()
+    {
+        using var dir = new TempDirectory();
+        string local = Path.Combine(dir.Path, "settings.json");
+        string legacy = Path.Combine(dir.Path, "legacy-settings.json");
+        File.WriteAllText(local, "{}");
+        File.WriteAllText(legacy, "{\"changed\":true}");
+
+        SettingsManager.MigratePortableSettings(local, legacy);
+
+        Assert.Equal("{}", File.ReadAllText(local));
+    }
+
+    [Fact]
+    public void MigratePortableSettings_DoesNothing_WhenLegacyMissing()
+    {
+        using var dir = new TempDirectory();
+        string local = Path.Combine(dir.Path, "settings.json");
+
+        SettingsManager.MigratePortableSettings(local, Path.Combine(dir.Path, "legacy-settings.json"));
+
+        Assert.False(File.Exists(local));
+    }
+
+    private sealed class TempDirectory : IDisposable
+    {
+        public string Path { get; }
+
+        public TempDirectory()
+        {
+            Path = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "Orbital.Tests", Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(Path);
+        }
+
+        public void Dispose()
+        {
+            if (Directory.Exists(Path))
+                Directory.Delete(Path, true);
+        }
+    }
 }

@@ -19,7 +19,6 @@
     <StartupObject>Orbital.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Velopack" Version="0.*" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="8.0.0" />
   </ItemGroup>

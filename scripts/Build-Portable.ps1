@@ -5,7 +5,7 @@
 .DESCRIPTION
     1. Reads the version from Orbital.csproj
     2. Publishes a self-contained multi-file build to publish\portable\
-    3. Bundles all publish output + Cleanup.cmd into dist\Orbital-<version>-Portable.zip
+    3. Bundles all publish output into dist\Orbital-<version>-Portable.zip
 .EXAMPLE
     .\scripts\Build-Portable.ps1
 #>
@@ -40,12 +40,6 @@ try {
 
     # Copy all published files
     Copy-Item "$publishDir\*" $stagingDir -Recurse
-
-    # Copy Cleanup.cmd
-    $cleanupSrc = Join-Path $Root 'portable\Cleanup.cmd'
-    if (Test-Path $cleanupSrc) {
-        Copy-Item $cleanupSrc $stagingDir
-    }
 
     # Create zip
     New-Item -ItemType Directory -Force -Path (Join-Path $Root 'dist') | Out-Null

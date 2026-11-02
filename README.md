@@ -85,8 +85,8 @@ Recent releases moved Orbital closer to modern Windows 11 app styling without ch
 
 Grab the latest release from the [Releases](../../releases) page.
 
-- **Installer**: Run `Orbital-Setup.exe` - installs to Program Files with an uninstaller
-- **Portable**: Extract the zip and run `Orbital.exe` directly - no installation required
+- **Installer**: Run `Orbital-<version>-Setup.exe` - installs per-user to `%LocalAppData%\Orbital` with an uninstaller. The app checks for new releases on startup and can update itself silently (no restart prompt, no UAC).
+- **Portable**: Extract the zip and run `Orbital.exe` directly - no installation required. Settings (`settings.json`) are stored in the same folder as the executable, so deleting the folder removes the app and all of its settings.
 
 ### First-time Setup
 
@@ -176,17 +176,12 @@ The project uses WPF for UI and WinForms only for the `NotifyIcon` tray integrat
 
 ## Security / Antivirus False Positives
 
-Some antivirus programs (notably Kaspersky) flag `Update.exe`, the auto-updater installed by Velopack to `%LocalAppData%\Orbital\Update.exe`, as a trojan (`Trojan.Win32.Zapchast` or similar). **This is a false positive.**
-
-### Why does this happen?
-
-Orbital releases are currently **unsigned**. No code-signing certificate is applied to the binaries. Antivirus heuristics treat unsigned executables that run silently in the background (as Velopack's updater does) as suspicious, even when the code is entirely benign.
+Orbital releases are currently **unsigned**. No code-signing certificate is applied to the binaries. Some antivirus heuristics flag unsigned executables as suspicious, even when the code is entirely benign. (The previous `Update.exe` false positive from the Velopack auto-updater no longer applies — updates now run through the standard Inno installer.)
 
 ### What you can do
 
-- **Portable users**: Use the `Orbital-*-Portable.zip` release instead of the installer. The portable build does not install `Update.exe`.
-- **Installer users**: Add `%LocalAppData%\Orbital\Update.exe` to your antivirus exclusions, then re-run the installer.
 - **Verify the source**: You can inspect the full source code of Orbital in this repository. Releases are built automatically by [GitHub Actions](.github/workflows/release.yml) from this source with no manual steps.
+- **Allow the file** in your antivirus if it is flagged, then re-run the installer.
 
 ### Long-term fix
 

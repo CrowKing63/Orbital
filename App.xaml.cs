@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using Microsoft.Win32;
+using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,8 +13,8 @@ using System.Windows.Automation;
 using System.Windows.Automation.Text;
 using System.Windows.Media;
 using System.Windows.Interop;
-using Velopack;
-using Velopack.Sources;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using WinForms = System.Windows.Forms;
 using MediaColor = System.Windows.Media.Color;
 
@@ -52,8 +54,7 @@ namespace Orbital
         private ActionExecutorService? _actionExecutor;
         private CancellationTokenSource? _selectionCts;
         private readonly object _selectionLock = new object();
-        private UpdateInfo? _pendingUpdate;
-        private UpdateManager? _updateManager;
+        private (string Version, string InstallerPath)? _pendingUpdate;
         private DateTime _lastDismissTime = DateTime.MinValue;
         private DateTime _lastTriggerAttemptTime = DateTime.MinValue;
 
@@ -282,27 +283,70 @@ namespace Orbital
         {
             try
             {
-                var mgr = new UpdateManager(
-                    new GithubSource("https://github.com/CrowKing63/Orbital", null, false));
-                var updateInfo = await mgr.CheckForUpdatesAsync();
-                if (updateInfo != null)
+                using var http = new HttpClient();
+                const string latestUrl = "https://api.github.com/repos/CrowKing63/Orbital/releases/latest";
+                string json = await http.GetStringAsync(latestUrl);
+                var release = JObject.Parse(json);
+
+                // Only update from stable releases.
+                if ((bool?)release["prerelease"] == true) return;
+
+                string? tag = (string?)release["tag_name"];
+                if (tag == null) return;
+                string version = tag.TrimStart('v');
+                string current = typeof(App).Assembly.GetName().Version.ToString(3);
+                if (!UpdateChecker.IsNewerVersion(version, current)) return;
+
+                string? url = UpdateChecker.FindSetupAssetUrl(release, version);
+                if (url == null) return;
+
+                // Download the new installer to a temp file.
+                string installerPath = Path.Combine(Path.GetTempPath(), $"Orbital-{version}-Setup.exe");
+                using var response = await http.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+                response.EnsureSuccessStatusCode();
+                using var inStream = await response.Content.ReadAsStreamAsync();
+                using (var outStream = File.Create(installerPath))
                 {
-                    await mgr.DownloadUpdatesAsync(updateInfo);
-                    _updateManager = mgr;
-                    _pendingUpdate = updateInfo;
-                    mgr.WaitExitThenApplyUpdates(updateInfo, silent: true, restart: true);
-                    Dispatcher.Invoke(() =>
-                    {
-                        RebuildTrayMenu();
-                        _notifyIcon.ShowBalloonTip(
-                            8000,
-                            Loc.Get("Str_UpdateBalloonTitle"),
-                            string.Format(Loc.Get("Str_UpdateBalloonMsg"), updateInfo.TargetFullRelease.Version),
-                            WinForms.ToolTipIcon.Info);
-                    });
+                    await inStream.CopyToAsync(outStream);
                 }
+
+                _pendingUpdate = (version, installerPath);
+                Dispatcher.Invoke(() =>
+                {
+                    RebuildTrayMenu();
+                    _notifyIcon.ShowBalloonTip(
+                        8000,
+                        Loc.Get("Str_UpdateBalloonTitle"),
+                        string.Format(Loc.Get("Str_UpdateBalloonMsg"), version),
+                        WinForms.ToolTipIcon.Info);
+                });
             }
             catch { /* Update check is best-effort — ignore all errors */ }
+        }
+
+        /// <summary>
+        /// Launches the downloaded installer silently, then shuts the app down.
+        /// The installer waits for this process to exit, upgrades in place, and
+        /// relaunches the app via a restart flag file (see Orbital.iss).
+        /// </summary>
+        private void ApplyPendingUpdate()
+        {
+            if (!_pendingUpdate.HasValue) return;
+            var (version, installerPath) = _pendingUpdate.Value;
+
+            try
+            {
+                // Flag file consumed by the installer's post-install step to relaunch the app.
+                File.WriteAllText(Path.Combine(Path.GetTempPath(), "orbital-update-restart.flag"), version);
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(installerPath)
+                {
+                    Arguments = "/VERYSILENT /SUPPRESSMSGBOXES",
+                    UseShellExecute = false
+                });
+            }
+            catch { /* If the installer fails to start, just exit normally. */ }
+
+            Dispatcher.Invoke(Shutdown);
         }
 
         private void OpenSettingsWindow()
@@ -431,13 +475,13 @@ namespace Orbital
                 (s, e) => Dispatcher.Invoke(OpenSettingsWindow));
             menu.Items.Add(new WinForms.ToolStripSeparator());
 
-            string restartLabel = _pendingUpdate != null
-                ? $"{Loc.Get("Str_TrayRestart")} (v{_pendingUpdate.TargetFullRelease.Version})"
+            string restartLabel = _pendingUpdate.HasValue
+                ? $"{Loc.Get("Str_TrayRestart")} (v{_pendingUpdate.Value.Version})"
                 : Loc.Get("Str_TrayRestart");
             menu.Items.Add(restartLabel, null, (s, e) =>
             {
-                if (_pendingUpdate != null)
-                    _updateManager?.ApplyUpdatesAndRestart(_pendingUpdate);
+                if (_pendingUpdate.HasValue)
+                    ApplyPendingUpdate();
                 else
                 {
                     var exe = Environment.ProcessPath;
