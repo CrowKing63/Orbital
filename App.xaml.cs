@@ -294,7 +294,7 @@ namespace Orbital
                 string? tag = (string?)release["tag_name"];
                 if (tag == null) return;
                 string version = tag.TrimStart('v');
-                string current = typeof(App).Assembly.GetName().Version.ToString(3);
+                string current = typeof(App).Assembly.GetName().Version?.ToString(3) ?? "0.0.0";
                 if (!UpdateChecker.IsNewerVersion(version, current)) return;
 
                 string? url = UpdateChecker.FindSetupAssetUrl(release, version);

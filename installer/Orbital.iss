@@ -27,8 +27,8 @@ AllowNoIcons=yes
 ; Compression
 Compression=lzma2/ultra64
 SolidCompression=yes
-ArchitecturesInstallIn64BitMode=x64
-ArchitecturesAllowed=x64
+ArchitecturesInstallIn64BitMode=x64compatible
+ArchitecturesAllowed=x64compatible
 ; Output
 OutputDir=..\dist
 OutputBaseFilename=Orbital-{#MyAppVersion}-Setup
@@ -46,7 +46,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 
 [Registry]
 ; Remove the auto-start registry entry on uninstall.
-Name: "Software\Microsoft\Windows\CurrentVersion\Run\Orbital"; Root: HKCU; Flags: uninsdeletevalue
+Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueName: "Orbital"; Flags: uninsdeletevalue
 
 [Files]
 Source: "..\publish\installer\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
@@ -64,28 +64,30 @@ Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChang
 Filename: "taskkill.exe"; Parameters: "/f /im {#MyAppExeName}"; Flags: runhidden; RunOnceId: "KillOrbital"
 
 [Code]
-// Auto-update launches the installer, then the app shuts itself down.
-// Wait here so the installer never copies over a running executable.
-// (Also covers manual reinstalls while the app is open.)
+// The app normally exits itself before launching the installer
+// (auto-update flow). For manual installs while the app is open,
+// terminate it so files are never locked.
 procedure InitializeWizard();
+var
+  ResultCode: Integer;
 begin
-  while DoWaitForProcess('Orbital.exe', 1000) do
-    Sleep(500);
+  Exec('taskkill.exe', '/f /im Orbital.exe', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
 end;
 
 // After a silent auto-update, relaunch the app using the flag file the app
 // wrote before starting the installer.
-procedure CurInstallChanged(CurInstallStep: TUninstallStep);
+procedure CurStepChanged(CurStep: TSetupStep);
 var
   RestartFlag: String;
+  ResultCode: Integer;
 begin
-  if CurInstallStep = usPostInstall then
+  if CurStep = ssPostInstall then
   begin
     RestartFlag := ExpandConstant('{tmp}\orbital-update-restart.flag');
     if FileExists(RestartFlag) then
     begin
-      Exec(ExpandConstant('{app}\Orbital.exe'));
-      DelFile(RestartFlag);
+      Exec(ExpandConstant('{app}\Orbital.exe'), '', '', SW_SHOW, ewNoWait, ResultCode);
+      DeleteFile(RestartFlag);
     end;
   end;
 end;
