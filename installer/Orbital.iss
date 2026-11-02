@@ -46,7 +46,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 
 [Registry]
 ; Remove the auto-start registry entry on uninstall.
-Root: HKCU; Subkey: Software\Microsoft\Windows\CurrentVersion\Run; KeyName: Orbital; Flags: uninsdeletevalue
+Name: "Software\Microsoft\Windows\CurrentVersion\Run\Orbital"; Root: HKCU; Flags: uninsdeletevalue
 
 [Files]
 Source: "..\publish\installer\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
