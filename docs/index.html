@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orbital — a free, open-source action bar for selected text on Windows</title>
+<meta name="description" content="Orbital pops up an AI-powered action bar whenever you select text on Windows. Translate, summarize, rewrite, search, or run any custom prompt in one click. Free and open source.">
+<style>
+  :root {
+    --bg: #202020;
+    --panel: #2A2A2A;
+    --element: #333333;
+    --border: #4A4A4A;
+    --accent: #60A5FA;
+    --accent-vivid: #2563EB;
+    --text-high: #F3F3F3;
+    --text-mid: #D0D0D0;
+    --text-low: #A0A0A0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text-high);
+    font-family: "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+
+  /* ── Top nav ─────────────────────────────── */
+  nav {
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(8px);
+  }
+  .nav-inner {
+    display: flex; align-items: center; justify-content: space-between;
+    height: 56px;
+  }
+  .brand { display: flex; align-items: center; gap: 9px; font-weight: 700; font-size: 15px; color: var(--text-high); text-decoration: none; }
+  .dot {
+    width: 9px; height: 9px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #93C5FD, var(--accent-vivid));
+    box-shadow: 0 0 8px rgba(96,165,250,.8);
+  }
+  .nav-links { display: flex; align-items: center; gap: 22px; }
+  .nav-links a:not(.btn) { color: var(--text-mid); text-decoration: none; font-size: 14px; }
+  .nav-links a:not(.btn):hover { color: var(--text-high); }
+
+  /* ── Buttons ─────────────────────────────── */
+  .btn {
+    display: inline-block; padding: 9px 18px; border-radius: 8px;
+    font-size: 14px; text-decoration: none; cursor: pointer;
+    transition: background .15s, border-color .15s, color .15s;
+  }
+  .btn-primary { background: var(--accent-vivid); color: #fff; font-weight: 600; border: 1px solid transparent; }
+  .btn-primary:hover { background: #1d4ed8; }
+  .btn-ghost { background: transparent; color: var(--text-mid); border: 1px solid var(--border); }
+  .btn-ghost:hover { color: var(--text-high); border-color: var(--text-low); }
+
+  /* ── Hero ─────────────────────────────────── */
+  .hero { padding: 84px 0 56px; text-align: center; }
+  .hero h1 { font-size: 40px; font-weight: 700; letter-spacing: -0.5px; }
+  .tagline { margin-top: 12px; font-size: 18px; color: var(--text-mid); max-width: 560px; margin-left: auto; margin-right: auto; }
+  .hero-actions { margin-top: 28px; display: flex; gap: 12px; justify-content: center; }
+
+  /* ── Hero visual: the pill over selected text ── */
+  .scene {
+    margin: 56px auto 0; max-width: 720px;
+    background: var(--panel); border: 1px solid var(--border); border-radius: 14px;
+    padding: 36px 40px 40px; position: relative;
+    box-shadow: 0 8px 30px rgba(0,0,0,.25);
+  }
+  .scene p { color: var(--text-mid); font-size: 15px; margin-bottom: 14px; }
+  .sel { background: rgba(96,165,250,.32); color: var(--text-high); border-radius: 3px; padding: 1px 2px; }
+
+  .pill {
+    position: absolute; left: 50%; top: -12px; transform: translateX(-50%);
+    background: rgba(255,255,255,.62); border: none;
+    backdrop-filter: blur(16px) saturate(1.4);
+    -webkit-backdrop-filter: blur(16px) saturate(1.4);
+    border-radius: 999px; padding: 4px 8px; z-index: 2;
+    box-shadow: 0 0 18px rgba(96,165,250,.30), 0 10px 28px rgba(0,0,0,.28);
+  }
+  .pill-body { display: flex; gap: 2px; align-items: center; }
+  .pill-btn {
+    height: 36px; padding: 0 12px; border-radius: 16px; font-size: 12px;
+    color: #1F1F1F; background: transparent; white-space: nowrap;
+    display: inline-flex; align-items: center;
+  }
+  .pill-btn.active { color: var(--accent-vivid); font-weight: 600; background: rgba(37,99,235,.10); }
+
+  /* ── Sections ─────────────────────────────── */
+  section { padding: 72px 0; }
+  h2 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+  .section-sub { color: var(--text-low); font-size: 15px; margin-bottom: 36px; max-width: 640px; }
+
+  /* Steps */
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .step { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 24px; }
+  .step-num { font-size: 12px; font-weight: 700; color: var(--accent); letter-spacing: 1px; }
+  .step h3 { margin-top: 10px; font-size: 16px; font-weight: 600; }
+  .step p { margin-top: 8px; font-size: 14px; color: var(--text-mid); }
+
+  /* Feature grid */
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 24px; transition: border-color .15s; }
+  .card:hover { border-color: rgba(96,165,250,.5); }
+  .card h3 { font-size: 15px; font-weight: 600; }
+  .card p { margin-top: 8px; font-size: 14px; color: var(--text-mid); }
+
+  /* Download */
+  .dl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .dl-card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 28px; }
+  .dl-card h3 { font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+  .ver { font-size: 11px; font-weight: 600; color: var(--accent); background: rgba(96,165,250,.12); border-radius: 5px; padding: 2px 7px; }
+  .dl-card p { margin-top: 10px; font-size: 14px; color: var(--text-mid); }
+  .dl-card a { display: inline-block; margin-top: 16px; font-size: 13px; color: var(--accent); text-decoration: none; }
+  .dl-card a:hover { text-decoration: underline; }
+  .free-note {
+    margin-top: 24px; padding: 14px 18px; border-radius: 8px; font-size: 14px; color: var(--text-mid);
+    background: var(--element); border: 1px solid var(--border);
+  }
+  .free-note strong { color: var(--text-high); font-weight: 600; }
+
+  /* Footer */
+  footer { border-top: 1px solid var(--border); padding: 28px 0; }
+  .foot-inner { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--text-low); }
+  .foot-inner a { color: var(--text-low); text-decoration: none; }
+  .foot-inner a:hover { color: var(--text-mid); }
+
+  @media (max-width: 720px) {
+    .steps, .grid, .dl-grid { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 32px; }
+    .pill { min-width: 0; width: calc(100% - 48px); }
+    .nav-links a:not(.btn) { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap nav-inner">
+    <a class="brand" href="#top"><span class="dot"></span>Orbital</a>
+    <div class="nav-links">
+      <a href="#how">How it works</a>
+      <a href="#features">Features</a>
+      <a class="btn btn-primary" href="https://github.com/CrowKing63/Orbital/releases/latest">Download</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero wrap" id="top">
+  <h1>Orbital</h1>
+  <p class="tagline">A free, open-source action bar for selected text on Windows. Translate, summarize, rewrite, search — one click, right where you're working.</p>
+  <div class="hero-actions">
+    <a class="btn btn-primary" href="https://github.com/CrowKing63/Orbital/releases/latest">Download v0.5.1</a>
+    <a class="btn btn-ghost" href="https://github.com/CrowKing63/Orbital">View on GitHub</a>
+  </div>
+
+  <div class="scene" aria-hidden="true">
+    <div class="pill">
+      <div class="pill-body">
+        <span class="pill-btn active">Replace</span>
+        <span class="pill-btn">Copy</span>
+        <span class="pill-btn">Popup</span>
+        <span class="pill-btn">Search</span>
+      </div>
+    </div>
+    <p>The quick brown fox jumps over the <span class="sel">lazy dog near the riverbank</span>, and the farmer watched from the porch.</p>
+    <p>It was a quiet afternoon, the kind that makes you forget your phone is in your pocket.</p>
+  </div>
+</header>
+
+<section id="how" class="wrap">
+  <h2>How it works</h2>
+  <p class="section-sub">Orbital watches your mouse and keyboard globally. No browser extension, no per-app setup — it works everywhere on Windows.</p>
+  <div class="steps">
+    <div class="step">
+      <span class="step-num">01</span>
+      <h3>Select any text</h3>
+      <p>Mouse drag, double-click, Shift + arrows, Ctrl+A, long-press, or a custom hotkey.</p>
+    </div>
+    <div class="step">
+      <span class="step-num">02</span>
+      <h3>The bar appears above your cursor</h3>
+      <p>A floating pill shows up right where you selected — dismiss with Esc, right-click, or a click outside.</p>
+    </div>
+    <div class="step">
+      <span class="step-num">03</span>
+      <h3>One click, done</h3>
+      <p>Replace the text in place, copy it to your clipboard, show a popup, or search — no context switching.</p>
+    </div>
+  </div>
+</section>
+
+<section id="features" class="wrap">
+  <h2>Features</h2>
+  <p class="section-sub">Everything runs from the tray. No subscription, no account, no telemetry.</p>
+  <div class="grid">
+    <div class="card">
+      <h3>Instant action bar</h3>
+      <p>Select text anywhere on Windows and get a floating pill menu above your cursor.</p>
+    </div>
+    <div class="card">
+      <h3>Any AI provider</h3>
+      <p>OpenAI, OpenRouter, Ollama, LM Studio, or any OpenAI-compatible endpoint — you choose.</p>
+    </div>
+    <div class="card">
+      <h3>Custom prompts</h3>
+      <p>Add, edit, and reorder actions with your own templates using a <code>{text}</code> placeholder.</p>
+    </div>
+    <div class="card">
+      <h3>Local models</h3>
+      <p>Run fully offline with Ollama or LM Studio. No data ever leaves your machine.</p>
+    </div>
+    <div class="card">
+      <h3>Utility actions</h3>
+      <p>Copy, cut, paste, delete, key simulation, and Google Search — no AI calls required.</p>
+    </div>
+    <div class="card">
+      <h3>Private by design</h3>
+      <p>API keys are encrypted with Windows DPAPI and stored locally. Nothing is sent anywhere else.</p>
+    </div>
+  </div>
+</section>
+
+<section id="download" class="wrap">
+  <h2>Download</h2>
+  <p class="section-sub">Windows 10/11 (x64). The installer checks for new releases on startup and updates itself silently.</p>
+  <div class="dl-grid">
+    <div class="dl-card">
+      <h3>Installer <span class="ver">v0.5.1</span></h3>
+      <p>Per-user install to <code>%LocalAppData%\Orbital</code>, with an uninstaller. No admin rights needed.</p>
+      <a href="https://github.com/CrowKing63/Orbital/releases/latest">Get Orbital-0.5.1-Setup.exe &#8594;</a>
+    </div>
+    <div class="dl-card">
+      <h3>Portable <span class="ver">v0.5.1</span></h3>
+      <p>A single exe. Settings live in the same folder — delete the folder to remove everything.</p>
+      <a href="https://github.com/CrowKing63/Orbital/releases/latest">Get Orbital-0.5.1-Portable.zip &#8594;</a>
+    </div>
+  </div>
+  <div class="free-note">
+    <strong>No credit card required.</strong> Pick OpenRouter with the <code>openrouter/free</code> model and Orbital routes to free models automatically.
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot-inner">
+    <span>&copy; CrowKing63 &middot; <a href="https://github.com/CrowKing63/Orbital/blob/main/LICENSE">MIT License</a></span>
+    <span><a href="https://github.com/CrowKing63/Orbital">GitHub</a> &middot; <a href="https://github.com/CrowKing63/Orbital/releases">Releases</a></span>
+  </div>
+</footer>
+
+</body>
+</html>
