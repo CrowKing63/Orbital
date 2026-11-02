@@ -677,10 +677,19 @@ namespace Orbital
                     if (token.IsCancellationRequested) return;
 
                     (bool canSelect, bool canWrite, bool selHasText) =
-                        CheckEditability(editCheckX, editCheckY, dragStartHwndClass);
+                        CheckEditability(editCheckX, editCheckY, dragStartHwndClass, useFocusFallback: requireEditable);
                     if (!canSelect) return;
                     isEditable = canWrite;
                     hasText = selHasText;
+
+                    // Double-click: refine the optimistic hasText with the focused element's
+                    // real selection, so selection-dependent actions (Copy / Search / LLM)
+                    // are hidden when nothing is actually selected (e.g. an empty field).
+                    if (requireEditable)
+                    {
+                        bool? realSel = HasRealFocusedSelection();
+                        if (realSel.HasValue) hasText = realSel.Value;
+                    }
                 }
 
                 Dispatcher.BeginInvoke(() =>
@@ -692,22 +701,13 @@ namespace Orbital
         }
 
         /// <summary>
-        /// Returns (canSelect, canWrite) for the UI element at the given screen point.
-        /// canSelect — text is selected and can be acted on.
-        ///             For Edit controls this is always true (Paste is useful even without selection).
-        /// canWrite  — element accepts text input; controls whether Cut/Paste actions are shown.
-        ///
-        /// Only ControlType.Edit, Document, and Text-inside-Document are considered.
-        /// Everything else (game windows, taskbar, desktop, etc.) returns (false, false).
-        /// </summary>
-        /// <summary>
         /// Returns (canSelect, canWrite, hasText) for the UI element at the given screen point.
         /// canSelect — popup may be shown at all.
         /// canWrite  — element accepts text input (Cut / Paste / Replace work).
         /// hasText   — a non-empty text selection currently exists (LLM / selection-based actions work).
         /// </summary>
         private static (bool canSelect, bool canWrite, bool hasText) CheckEditability(
-            int screenX, int screenY, string hwndClass = "")
+            int screenX, int screenY, string hwndClass = "", bool useFocusFallback = false)
         {
             // Fast path: skip expensive UIA IPC for known browser windows.
             // Browsers are always treated as read-only Document with optimistic hasText.
@@ -803,6 +803,17 @@ namespace Orbital
                 if (IsClipboardFallbackEditor(controlClass, rootClass, processName))
                     return (true, true, true);
 
+                // The point did not resolve to a text element: Chrome and the new Notepad
+                // UIA trees often hit-test as the top-level Window. For double-click
+                // triggers the click itself just set keyboard focus, so the focused
+                // element is reliable evidence of a text context. hasText is optimistic
+                // here and refined later via HasRealFocusedSelection.
+                if (useFocusFallback)
+                {
+                    var focusedResult = CheckFocusedElement(screenX, screenY);
+                    if (focusedResult.HasValue) return focusedResult.Value;
+                }
+
                 return (false, false, false);
             }
             catch { return (false, false, false); }
@@ -881,6 +892,91 @@ namespace Orbital
             if (sel.Length == 0) return false;
             // CompareEndpoints == 0 means start == end (collapsed cursor, no visible selection).
             return sel[0].CompareEndpoints(TextPatternRangeEndpoint.Start, sel[0], TextPatternRangeEndpoint.End) != 0;
+        }
+
+        /// <summary>
+        /// Fallback for when FromPoint resolves only to the top-level window: classify the
+        /// focused element instead. A double-click sets focus on the control it landed in,
+        /// so Edit / Document / ComboBox focus is strong evidence of a text context.
+        /// The click point must lie inside the focused control's bounding rectangle —
+        /// clicking a title bar, button, or image leaves the previously focused text
+        /// control in place and would otherwise false-positive.
+        /// Returns null when the focused element is not a text control at this point.
+        /// hasText is optimistic here and refined later via HasRealFocusedSelection.
+        /// </summary>
+        private static (bool canSelect, bool canWrite, bool hasText)? CheckFocusedElement(int screenX, int screenY)
+        {
+            try
+            {
+                var focused = AutomationElement.FocusedElement;
+                if (focused == null) return null;
+                var ct = focused.Current.ControlType;
+                if (ct != ControlType.Edit && ct != ControlType.Document && ct != ControlType.ComboBox)
+                    return null;
+
+                // The double-click must have landed inside the focused control.
+                var rect = focused.Current.BoundingRectangle;
+                if (rect.Width <= 0 || rect.Height <= 0) return null;
+                if (screenX < rect.X || screenX > rect.X + rect.Width ||
+                    screenY < rect.Y || screenY > rect.Y + rect.Height)
+                    return null;
+
+                bool isWritable;
+                if (focused.TryGetCurrentPattern(ValuePattern.Pattern, out var vpo) && vpo is ValuePattern vp)
+                    isWritable = !vp.Current.IsReadOnly;
+                else
+                    // Align with the Document path in CheckEditability: a focusable
+                    // Document without a ValuePattern is treated as writable.
+                    isWritable = ct == ControlType.Edit || ct == ControlType.ComboBox ||
+                        (ct == ControlType.Document &&
+                         (bool)focused.GetCurrentPropertyValue(AutomationElement.IsKeyboardFocusableProperty));
+
+                return (true, isWritable, true);
+            }
+            catch { return null; }
+        }
+
+        /// <summary>
+        /// Returns the real selection state of the currently focused element:
+        /// true = a non-whitespace text selection exists, false = definitively none,
+        /// null = cannot be determined (no TextPattern available). Used to refine the
+        /// optimistic hasText on double-click triggers.
+        /// </summary>
+        private static bool? HasRealFocusedSelection()
+        {
+            try
+            {
+                var focused = AutomationElement.FocusedElement;
+                if (focused == null) return null;
+
+                TextPattern? tp = null;
+                if (focused.TryGetCurrentPattern(TextPattern.Pattern, out var tpo) && tpo is TextPattern live)
+                    tp = live;
+                if (tp == null)
+                {
+                    // Some apps expose the selection only on a Text descendant of the focused element.
+                    try
+                    {
+                        var txt = focused.FindFirst(TreeScope.Subtree,
+                            new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.Text));
+                        if (txt != null && txt.TryGetCurrentPattern(TextPattern.Pattern, out var dpo) && dpo is TextPattern dto)
+                            tp = dto;
+                    }
+                    catch { }
+                }
+                if (tp == null) return null;
+
+                var sel = tp.GetSelection();
+                if (sel.Length == 0) return false;
+                // CompareEndpoints == 0 means start == end (collapsed cursor, no visible selection).
+                if (sel[0].CompareEndpoints(TextPatternRangeEndpoint.Start, sel[0], TextPatternRangeEndpoint.End) == 0)
+                    return false;
+                // A whitespace-only selection (e.g. a lone newline from double-clicking an empty
+                // line in Notepad) does not count as real text.
+                string text = sel[0].GetText(200);
+                return text.Trim().Length > 0;
+            }
+            catch { return null; }
         }
 
         /// <summary>
