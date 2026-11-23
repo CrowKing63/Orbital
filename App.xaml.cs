@@ -58,6 +58,41 @@ namespace Orbital
         private DateTime _lastDismissTime = DateTime.MinValue;
         private DateTime _lastTriggerAttemptTime = DateTime.MinValue;
 
+        private enum TriggerCase
+        {
+            Unsupported,
+            InputField,
+            OutsideSelection,
+        }
+
+        /// <summary>
+        /// Target classification for a trigger gesture. Exactly two cases produce a popup.
+        /// HasText only controls button visibility for Case B; Case A must show even with
+        /// no selection so Paste / Select All remain available.
+        /// </summary>
+        private readonly struct TriggerDecision
+        {
+            public TriggerCase Case { get; }
+            public bool IsEditable { get; }
+            public bool HasText { get; }
+
+            private TriggerDecision(TriggerCase targetCase, bool isEditable, bool hasText)
+            {
+                Case = targetCase;
+                IsEditable = isEditable;
+                HasText = hasText;
+            }
+
+            public static TriggerDecision Unsupported { get; } =
+                new(TriggerCase.Unsupported, false, false);
+
+            public static TriggerDecision InputField(bool hasText) =>
+                new(TriggerCase.InputField, true, hasText);
+
+            public static TriggerDecision OutsideSelection(bool hasText) =>
+                new(TriggerCase.OutsideSelection, false, hasText);
+        }
+
         private static readonly HashSet<string> _supportedLanguages =
             new() { "en", "ko", "ja", "zh", "es", "fr", "de", "pt", "ru", "it" };
 
@@ -542,8 +577,8 @@ namespace Orbital
             if (!SettingsManager.CurrentSettings.EnableDoubleClickTrigger) return;
 
             // Pass the button-down window class so browser windows hit the fast path in
-            // CheckEditability: Chrome's UIA tree resolves to ControlType.Window at word
-            // positions, which would otherwise be rejected as non-selectable.
+            // ClassifyTrigger: Chrome's UIA tree resolves to ControlType.Window at word
+            // positions, which would otherwise be rejected as unsupported.
             // A double-click is an intentional new-selection gesture: its first click
             // doubles as the dismiss of any visible popup, so that dismiss must not
             // suppress this trigger via the 150 ms window.
@@ -652,67 +687,48 @@ namespace Orbital
             {
                 if (token.IsCancellationRequested) return;
 
-                bool isEditable = false;
-                bool hasText = false;
+                TriggerDecision decision;
 
-                if (isKeyboard && forceHasText.HasValue)
+                if (forceHasText.HasValue)
                 {
-                    // Long-press path: already verified editable, no text selection.
-                    isEditable = true;
-                    hasText = forceHasText.Value;
-                }
-                else if (isKeyboard)
-                {
-                    isEditable = true;
-                    hasText = true; // keyboard selection always produces a text selection
+                    // Long-press already verified an editable control on the hook path.
+                    decision = TriggerDecision.InputField(forceHasText.Value);
                 }
                 else
                 {
-                    // Single attempt with a short adaptive delay.
-                    // Browsers hit the fast-path in CheckEditability (zero UIA IPC).
-                    // Native apps (Notepad, Word) are fast with CacheRequest.
-                    // Double-click needs a slightly longer wait for word selection to settle.
+                    // Let word selection settle (longer for double-click) before classifying.
                     int delay = requireEditable ? 80 : 25;
                     if (delay > 0) Thread.Sleep(delay);
                     if (token.IsCancellationRequested) return;
 
-                    (bool canSelect, bool canWrite, bool selHasText) =
-                        CheckEditability(editCheckX, editCheckY, dragStartHwndClass, useFocusFallback: requireEditable);
-                    if (!canSelect) return;
-                    isEditable = canWrite;
-                    hasText = selHasText;
-
-                    // Double-click: refine the optimistic hasText with the focused element's
-                    // real selection, so selection-dependent actions (Copy / Search / LLM)
-                    // are hidden when nothing is actually selected (e.g. an empty field).
-                    if (requireEditable)
-                    {
-                        bool? realSel = HasRealFocusedSelection();
-                        if (realSel.HasValue) hasText = realSel.Value;
-                    }
+                    decision = ClassifyTrigger(editCheckX, editCheckY, dragStartHwndClass,
+                        isKeyboard: isKeyboard, selectionIntent: true);
                 }
+
+                if (decision.Case == TriggerCase.Unsupported) return;
 
                 Dispatcher.BeginInvoke(() =>
                 {
                     if (!token.IsCancellationRequested)
-                        _radialMenu.ShowAtCursor(screenX, screenY, isEditable, hasText);
+                        _radialMenu.ShowAtCursor(screenX, screenY,
+                            decision.IsEditable, decision.HasText);
                 });
             }, token);
         }
 
         /// <summary>
-        /// Returns (canSelect, canWrite, hasText) for the UI element at the given screen point.
-        /// canSelect — popup may be shown at all.
-        /// canWrite  — element accepts text input (Cut / Paste / Replace work).
-        /// hasText   — a non-empty text selection currently exists (LLM / selection-based actions work).
+        /// Classifies the target of a trigger gesture into one of two supported cases:
+        /// an editable text input, or a text selection outside an input field.
+        /// Anything else returns Unsupported and produces no popup.
+        /// Decision order: focused element, point, browser class, fallback classes.
+        /// The browser class check must come after focus/point so that an empty input
+        /// field in a browser is still classified as a text input (Case A).
         /// </summary>
-        private static (bool canSelect, bool canWrite, bool hasText) CheckEditability(
-            int screenX, int screenY, string hwndClass = "", bool useFocusFallback = false)
+        private static TriggerDecision ClassifyTrigger(
+            int screenX, int screenY, string hwndClass = "",
+            bool isKeyboard = false, bool selectionIntent = true)
         {
-            // Fast path: skip expensive UIA IPC for known browser windows.
-            // Browsers are always treated as read-only Document with optimistic hasText.
-            if (!string.IsNullOrEmpty(hwndClass) && s_browserClasses.Contains(hwndClass))
-                return (true, false, true);
+            bool isBrowser = !string.IsNullOrEmpty(hwndClass) && s_browserClasses.Contains(hwndClass);
 
             try
             {
@@ -721,14 +737,19 @@ namespace Orbital
                 string controlClass = GetWindowClass(hwnd);
                 string processName = GetProcessNameFromHwnd(hwnd);
 
-                if (s_excludedRootWindowClasses.Contains(rootClass) || s_excludedControlClasses.Contains(controlClass))
-                    return (false, false, false);
+                if (s_excludedRootWindowClasses.Contains(rootClass) ||
+                    s_excludedControlClasses.Contains(controlClass))
+                    return TriggerDecision.Unsupported;
+
+                // Focused element first. This is the reliable signal in Chromium and modern
+                // WinUI apps where FromPoint only sees the top-level Window. Keyboard gestures
+                // skip the rectangle check because no click is involved.
+                var focusedDecision = ClassifyFocusedElement(screenX, screenY, isKeyboard, selectionIntent);
+                if (focusedDecision.HasValue) return focusedDecision.Value;
 
                 var point = new System.Windows.Point(screenX, screenY);
 
-                // Use CacheRequest to batch property/pattern retrieval in a single cross-process
-                // round-trip. This cuts IPC from ~4 separate calls down to 1, which is the main
-                // cause of mouse stutter when dragging over Chromium-based apps.
+                // CacheRequest batches property/pattern retrieval into one IPC round-trip.
                 var cacheRequest = new CacheRequest();
                 cacheRequest.Add(AutomationElement.ControlTypeProperty);
                 cacheRequest.Add(AutomationElement.IsKeyboardFocusableProperty);
@@ -738,85 +759,147 @@ namespace Orbital
                 using (cacheRequest.Activate())
                 {
                     var element = AutomationElement.FromPoint(point);
-                    if (element == null) return (false, false, false);
+                    if (element == null)
+                        return isBrowser
+                            ? OutsideSelectionOrUnsupported(selectionIntent)
+                            : TriggerDecision.Unsupported;
 
                     var controlType = element.GetCachedPropertyValue(AutomationElement.ControlTypeProperty) as ControlType;
 
-                    // Writable text input — always show popup (Paste is useful even without selection).
                     if (controlType == ControlType.Edit || controlType == ControlType.ComboBox)
-                    {
-                        bool sel = HasRealTextSelection(element);
-                        return (true, true, sel);
-                    }
+                        return TriggerDecision.InputField(HasRealTextSelection(element));
 
                     if (controlType == ControlType.Document)
                     {
-                        bool isWritable;
                         var vp = TryGetCachedPattern<ValuePattern>(element, ValuePattern.Pattern);
-                        if (vp != null)
-                            isWritable = !vp.Current.IsReadOnly;
-                        else
-                            isWritable = (bool)element.GetCachedPropertyValue(AutomationElement.IsKeyboardFocusableProperty);
-
-                        bool sel = HasRealTextSelection(element);
-                        return isWritable ? (true, true, sel) : (true, false, true);
+                        bool writable = vp != null
+                            ? !vp.Current.IsReadOnly
+                            : (bool)element.GetCachedPropertyValue(AutomationElement.IsKeyboardFocusableProperty);
+                        return writable
+                            ? TriggerDecision.InputField(HasRealTextSelection(element))
+                            : OutsideSelectionOrUnsupported(selectionIntent);
                     }
 
-                    // WinUI 3 / UWP text areas (e.g. new Sticky Notes) report as Pane
-                    // but expose TextPattern.
-                    if (controlType == ControlType.Pane)
-                    {
-                        if (TryGetCachedPattern<TextPattern>(element, TextPattern.Pattern) != null)
-                        {
-                            bool sel = HasRealTextSelection(element);
-                            return (true, true, sel);
-                        }
-                    }
+                    // WinUI 3 / UWP text areas report as Pane but expose TextPattern.
+                    if (controlType == ControlType.Pane &&
+                        TryGetCachedPattern<TextPattern>(element, TextPattern.Pattern) != null)
+                        return TriggerDecision.InputField(HasRealTextSelection(element));
 
-                    // Parent fallback — parent wasn't in the cache, so live calls are required.
+                    // One-level parent fallback only — deeper walking causes false positives.
+                    var parent = TreeWalker.ControlViewWalker.GetParent(element);
+                    if (parent != null)
                     {
-                        var parent = TreeWalker.ControlViewWalker.GetParent(element);
-                        if (parent != null)
+                        var parentType = parent.GetCurrentPropertyValue(AutomationElement.ControlTypeProperty) as ControlType;
+                        if (parentType == ControlType.Edit)
+                            return TriggerDecision.InputField(HasRealTextSelection(parent));
+                        if (parentType == ControlType.Document)
                         {
-                            var parentType = parent.GetCurrentPropertyValue(AutomationElement.ControlTypeProperty) as ControlType;
-                            if (parentType == ControlType.Edit)
-                            {
-                                bool sel = HasRealTextSelection(parent);
-                                return (true, true, sel);
-                            }
-                            if (parentType == ControlType.Document)
-                            {
-                                bool isWritable;
-                                if (parent.TryGetCurrentPattern(ValuePattern.Pattern, out var vpo2) && vpo2 is ValuePattern vp2)
-                                    isWritable = !vp2.Current.IsReadOnly;
-                                else
-                                    isWritable = (bool)parent.GetCurrentPropertyValue(AutomationElement.IsKeyboardFocusableProperty);
-                                bool sel = HasRealTextSelection(parent);
-                                return isWritable ? (true, true, sel) : (true, false, true);
-                            }
-                            if (controlType == ControlType.Text && parentType == ControlType.Group)
-                                return (true, false, true);
+                            bool writable;
+                            if (parent.TryGetCurrentPattern(ValuePattern.Pattern, out var vpo2) && vpo2 is ValuePattern vp2)
+                                writable = !vp2.Current.IsReadOnly;
+                            else
+                                writable = (bool)parent.GetCurrentPropertyValue(AutomationElement.IsKeyboardFocusableProperty);
+                            return writable
+                                ? TriggerDecision.InputField(HasRealTextSelection(parent))
+                                : OutsideSelectionOrUnsupported(selectionIntent);
                         }
+                        if (controlType == ControlType.Text && parentType == ControlType.Group)
+                            return OutsideSelectionOrUnsupported(selectionIntent);
                     }
                 }
+
+                // Browser: FromPoint often resolves to the top-level Window and focus may be
+                // on browser chrome. Only now fall back to class-based Case B, after the
+                // focused element and point checks have failed to find an input field.
+                if (isBrowser)
+                    return OutsideSelectionOrUnsupported(selectionIntent);
 
                 if (IsClipboardFallbackEditor(controlClass, rootClass, processName))
-                    return (true, true, true);
+                    return TriggerDecision.InputField(true);
 
-                // The point did not resolve to a text element: Chrome and the new Notepad
-                // UIA trees often hit-test as the top-level Window. For double-click
-                // triggers the click itself just set keyboard focus, so the focused
-                // element is reliable evidence of a text context. hasText is optimistic
-                // here and refined later via HasRealFocusedSelection.
-                if (useFocusFallback)
+                return TriggerDecision.Unsupported;
+            }
+            catch { return TriggerDecision.Unsupported; }
+        }
+
+        /// <summary>
+        /// Case B is valid only when a real selection exists. Returns true when confirmed,
+        /// false when proven absent, and null when verification was unavailable. The caller
+        /// suppresses the popup only on false.
+        /// </summary>
+        private static bool? VerifyOutsideSelection(bool selectionIntent)
+        {
+            if (!selectionIntent) return false;
+
+            bool? viaUia = HasRealFocusedSelection();
+            if (viaUia == true) return true;
+
+            try
+            {
+                string text = ClipboardHelper.GetSelectedText();
+                return !string.IsNullOrWhiteSpace(text);
+            }
+            catch
+            {
+                return viaUia; // null = unknown; keep the popup rather than lose a selection
+            }
+        }
+
+        private static TriggerDecision OutsideSelectionOrUnsupported(bool selectionIntent)
+        {
+            bool? verified = VerifyOutsideSelection(selectionIntent);
+            if (verified == false) return TriggerDecision.Unsupported;
+            return TriggerDecision.OutsideSelection(verified ?? true);
+        }
+
+        /// <summary>
+        /// Focus-based classification. A mouse gesture must land inside the focused
+        /// control, otherwise a click on a title bar or button would reuse the previously
+        /// focused text control and produce a false Case A.
+        /// </summary>
+        private static TriggerDecision? ClassifyFocusedElement(
+            int screenX, int screenY, bool isKeyboard, bool selectionIntent)
+        {
+            try
+            {
+                var focused = AutomationElement.FocusedElement;
+                if (focused == null) return null;
+
+                var ct = focused.Current.ControlType;
+                if (ct != ControlType.Edit && ct != ControlType.Document &&
+                    ct != ControlType.ComboBox && ct != ControlType.Text &&
+                    ct != ControlType.Pane)
+                    return null;
+
+                if (!isKeyboard)
                 {
-                    var focusedResult = CheckFocusedElement(screenX, screenY);
-                    if (focusedResult.HasValue) return focusedResult.Value;
+                    var rect = focused.Current.BoundingRectangle;
+                    if (rect.Width <= 0 || rect.Height <= 0) return null;
+                    if (screenX < rect.X || screenX > rect.X + rect.Width ||
+                        screenY < rect.Y || screenY > rect.Y + rect.Height)
+                        return null;
                 }
 
-                return (false, false, false);
+                bool writable;
+                if (focused.TryGetCurrentPattern(ValuePattern.Pattern, out var vpo) && vpo is ValuePattern vp)
+                    writable = !vp.Current.IsReadOnly;
+                else
+                    writable = ct == ControlType.Edit || ct == ControlType.ComboBox ||
+                        (ct == ControlType.Document &&
+                         (bool)focused.GetCurrentPropertyValue(AutomationElement.IsKeyboardFocusableProperty)) ||
+                        (ct == ControlType.Pane &&
+                         focused.TryGetCurrentPattern(TextPattern.Pattern, out _) &&
+                         (bool)focused.GetCurrentPropertyValue(AutomationElement.IsKeyboardFocusableProperty));
+
+                if (writable)
+                {
+                    bool hasText = HasRealFocusedSelection() ?? HasRealTextSelection(focused);
+                    return TriggerDecision.InputField(hasText);
+                }
+
+                return OutsideSelectionOrUnsupported(selectionIntent);
             }
-            catch { return (false, false, false); }
+            catch { return null; }
         }
 
         internal static bool IsClipboardFallbackEditor(string controlClass, string rootClass, string processName)
@@ -895,52 +978,10 @@ namespace Orbital
         }
 
         /// <summary>
-        /// Fallback for when FromPoint resolves only to the top-level window: classify the
-        /// focused element instead. A double-click sets focus on the control it landed in,
-        /// so Edit / Document / ComboBox focus is strong evidence of a text context.
-        /// The click point must lie inside the focused control's bounding rectangle —
-        /// clicking a title bar, button, or image leaves the previously focused text
-        /// control in place and would otherwise false-positive.
-        /// Returns null when the focused element is not a text control at this point.
-        /// hasText is optimistic here and refined later via HasRealFocusedSelection.
-        /// </summary>
-        private static (bool canSelect, bool canWrite, bool hasText)? CheckFocusedElement(int screenX, int screenY)
-        {
-            try
-            {
-                var focused = AutomationElement.FocusedElement;
-                if (focused == null) return null;
-                var ct = focused.Current.ControlType;
-                if (ct != ControlType.Edit && ct != ControlType.Document && ct != ControlType.ComboBox)
-                    return null;
-
-                // The double-click must have landed inside the focused control.
-                var rect = focused.Current.BoundingRectangle;
-                if (rect.Width <= 0 || rect.Height <= 0) return null;
-                if (screenX < rect.X || screenX > rect.X + rect.Width ||
-                    screenY < rect.Y || screenY > rect.Y + rect.Height)
-                    return null;
-
-                bool isWritable;
-                if (focused.TryGetCurrentPattern(ValuePattern.Pattern, out var vpo) && vpo is ValuePattern vp)
-                    isWritable = !vp.Current.IsReadOnly;
-                else
-                    // Align with the Document path in CheckEditability: a focusable
-                    // Document without a ValuePattern is treated as writable.
-                    isWritable = ct == ControlType.Edit || ct == ControlType.ComboBox ||
-                        (ct == ControlType.Document &&
-                         (bool)focused.GetCurrentPropertyValue(AutomationElement.IsKeyboardFocusableProperty));
-
-                return (true, isWritable, true);
-            }
-            catch { return null; }
-        }
-
-        /// <summary>
         /// Returns the real selection state of the currently focused element:
         /// true = a non-whitespace text selection exists, false = definitively none,
-        /// null = cannot be determined (no TextPattern available). Used to refine the
-        /// optimistic hasText on double-click triggers.
+        /// null = cannot be determined (no TextPattern available). Used by ClassifyTrigger
+        /// for input fields and by VerifyOutsideSelection to confirm Case B.
         /// </summary>
         private static bool? HasRealFocusedSelection()
         {
@@ -981,7 +1022,7 @@ namespace Orbital
 
         /// <summary>
         /// Returns true when the cursor is over an editable text control — used by the long-press path.
-        /// Unlike CheckEditability, this does NOT require an active text selection.
+        /// Unlike ClassifyTrigger, this does NOT require an active text selection.
         /// Handles ControlType.Edit (classic Win32/WPF) and ControlType.Document with a writable
         /// ValuePattern (Windows 11 Notepad, contenteditable, Word Online, etc.).
         /// </summary>

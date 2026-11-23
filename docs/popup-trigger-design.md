@@ -1,5 +1,10 @@
 # Popup Trigger System — Design Decisions & Guardrails
 
+> **Superseded for the two-case classifier (Task 09):** §1 (no proactive Ctrl+C) and §2
+> (optimistic `hasText` for read-only Document) have been overridden by user decision,
+> because reliable two-case detection is the app's core behavior. See
+> `docs/tasks/task-09-two-case-trigger-classifier.md` §3 and §4.5. §§3–5 still apply.
+
 Each decision was reached after failed attempts — **check this document before changing anything "for improvement".**
 
 ## 1. Popup visibility: UIA-based (no proactive Ctrl+C)

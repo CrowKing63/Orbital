@@ -13,6 +13,7 @@ Each task file contains step-by-step instructions sized for an AI agent.
 | 06 | Per-button display mode: Text+Icon / Text / Icon | `task-06-button-display-mode.md` | Medium | Small OK (review) |
 | 07 | Light theme (Claude Code Light palette) | `task-07-design-theme.md` | **HIGH** | ⚠️ Advanced |
 | 08 | Auto-start with Windows (opt-out, checkbox) | `task-08-autostart.md` | Low-Medium | Small OK |
+| 09 | Two-case trigger classifier (confirmed — core behavior) | `task-09-two-case-trigger-classifier.md` | **MEDIUM-HIGH** | ⚠️ Advanced |
 
 ---
 
