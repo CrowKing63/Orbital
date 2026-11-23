@@ -176,6 +176,7 @@ namespace Orbital
             SystemHookManager.OnMouseUp             += SystemHookManager_OnMouseUp;
             SystemHookManager.OnLongPress           += SystemHookManager_OnLongPress;
             SystemHookManager.OnDoubleClickRelease  += SystemHookManager_OnDoubleClickRelease;
+            SystemHookManager.OnTripleClickRelease  += SystemHookManager_OnTripleClickRelease;
             SystemHookManager.OnKeyboardSelection   += SystemHookManager_OnKeyboardSelection;
             SystemHookManager.OnEscapePressed       += SystemHookManager_OnEscapePressed;
             SystemHookManager.OnClipboardShortcut   += SystemHookManager_OnClipboardShortcut;
@@ -537,6 +538,10 @@ namespace Orbital
 
         private void SystemHookManager_OnAnyMouseDown(object? sender, SystemHookManager.MousePoint e)
         {
+            // The third click of a chain must not dismiss the popup opened by the second
+            // click — the OS is completing paragraph selection on this very click.
+            if (SystemHookManager.IsTripleClickDown) return;
+
             Dispatcher.BeginInvoke(() =>
             {
                 if (!_radialMenu.IsVisible) return;
@@ -582,6 +587,20 @@ namespace Orbital
             // A double-click is an intentional new-selection gesture: its first click
             // doubles as the dismiss of any visible popup, so that dismiss must not
             // suppress this trigger via the 150 ms window.
+            var downClass = SystemHookManager.LastButtonDownHwndClass;
+            TriggerSelectionMenu(e.X, e.Y, isKeyboard: false, requireEditable: true,
+                dragStartHwndClass: downClass, ignoreDismissSuppression: true);
+        }
+
+        /// <summary>
+        /// Third click of the same chain: the OS has just expanded the selection to a
+        /// paragraph. Shares the double-click setting — no separate toggle — and re-runs
+        /// the classifier at the third click point so the popup tracks the final selection.
+        /// </summary>
+        private void SystemHookManager_OnTripleClickRelease(object? sender, SystemHookManager.MousePoint e)
+        {
+            if (!SettingsManager.CurrentSettings.EnableDoubleClickTrigger) return;
+
             var downClass = SystemHookManager.LastButtonDownHwndClass;
             TriggerSelectionMenu(e.X, e.Y, isKeyboard: false, requireEditable: true,
                 dragStartHwndClass: downClass, ignoreDismissSuppression: true);

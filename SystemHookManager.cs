@@ -65,8 +65,11 @@ namespace Orbital
         private static Timer? _longPressTimer;
         private static bool  _isLongPressed;
         private static bool  _isDoubleClick;
+        private static bool  _isTripleClick;
+        private static int   _clickChainCount;
 
-        // Double-click tracking
+        // Double/triple-click tracking. Consecutive clicks must stay within the Windows
+        // double-click time and pixel tolerance so the system setting controls both.
         private static DateTime  _lastClickTime = DateTime.MinValue;
         private static MousePoint _lastClickPos;
 
@@ -96,6 +99,13 @@ namespace Orbital
         /// <summary>Win32 class name of the HWND under the cursor at the last left button down.</summary>
         public static string LastButtonDownHwndClass => _buttonDownHwndClass;
 
+        /// <summary>
+        /// True while the third left-button down of a double-click-time chain is being
+        /// dispatched. The App uses this to keep the just-opened popup alive so the OS can
+        /// finish paragraph selection before the release re-triggers it.
+        /// </summary>
+        public static bool IsTripleClickDown { get; private set; }
+
         // ── Public events ────────────────────────────────────────────────────────
 
         /// <summary>Any mouse button down — used to dismiss the popup when clicking outside.</summary>
@@ -112,6 +122,9 @@ namespace Orbital
 
         /// <summary>Double-click mouse button released — OS has completed word selection by now.</summary>
         public static event EventHandler<MousePoint>? OnDoubleClickRelease;
+
+        /// <summary>Third click released — OS has completed paragraph selection by now.</summary>
+        public static event EventHandler<MousePoint>? OnTripleClickRelease;
 
         /// <summary>Keyboard text selection completed (Shift+nav key or Ctrl+A released).</summary>
         public static event EventHandler<MousePoint>? OnKeyboardSelection;
@@ -206,51 +219,51 @@ namespace Orbital
 
                 if (wParam == (IntPtr)WM_LBUTTONDOWN)
                 {
-                    OnAnyMouseDown?.Invoke(null, hookStruct.pt);
-
-                    _buttonDownPos = hookStruct.pt;
-                    _isLongPressed = false;
-                    _isDoubleClick = false;
-
                     IntPtr hwnd = WindowFromPoint(hookStruct.pt);
                     var hwndClsBuf = new System.Text.StringBuilder(128);
                     GetClassName(hwnd, hwndClsBuf, hwndClsBuf.Capacity);
                     _buttonDownHwndClass = hwndClsBuf.ToString();
-                    
+
                     IntPtr rootHwnd = GetAncestor(hwnd, GA_ROOT);
                     if (rootHwnd == IntPtr.Zero) rootHwnd = hwnd;
-                    
+
                     _mouseDownInClient = IsPointInClientArea(rootHwnd, hookStruct.pt)
                                         && !IsSystemShellWindow(rootHwnd);
 
-                    bool startLongPressTimer = true;
+                    // Evaluate the chain before notifying the App: a third click must be
+                    // recognizable as part of the same gesture so it does not dismiss the
+                    // popup opened by the second click.
+                    DateTime now = DateTime.UtcNow;
+                    double msSinceLast = (now - _lastClickTime).TotalMilliseconds;
+                    int ddx = Math.Abs(hookStruct.pt.X - _lastClickPos.X);
+                    int ddy = Math.Abs(hookStruct.pt.Y - _lastClickPos.Y);
+                    bool withinWindow = _mouseDownInClient &&
+                        msSinceLast <= GetDoubleClickTime() &&
+                        ddx <= GetSystemMetrics(SM_CXDOUBLECLK) &&
+                        ddy <= GetSystemMetrics(SM_CYDOUBLECLK);
 
-                    if (_mouseDownInClient)
-                    {
-                        DateTime now = DateTime.UtcNow;
-                        double msSinceLast = (now - _lastClickTime).TotalMilliseconds;
-                        int ddx = Math.Abs(hookStruct.pt.X - _lastClickPos.X);
-                        int ddy = Math.Abs(hookStruct.pt.Y - _lastClickPos.Y);
+                    if (withinWindow && _clickChainCount < 3) _clickChainCount++;
+                    else _clickChainCount = 1; // fourth click starts a fresh chain
 
-                        if (msSinceLast <= GetDoubleClickTime() &&
-                            ddx <= GetSystemMetrics(SM_CXDOUBLECLK) &&
-                            ddy <= GetSystemMetrics(SM_CYDOUBLECLK))
-                        {
-                            _isDoubleClick      = true;
-                            _lastClickTime      = DateTime.MinValue;
-                            startLongPressTimer = false;
-                            OnDoubleClick?.Invoke(null, hookStruct.pt);
-                        }
-                        else
-                        {
-                            _lastClickTime = now;
-                            _lastClickPos  = hookStruct.pt;
-                        }
-                    }
-                    else
-                    {
-                        _lastClickTime = DateTime.MinValue;
-                    }
+                    bool continuation = withinWindow && _clickChainCount > 1;
+                    _isDoubleClick = continuation && _clickChainCount == 2;
+                    _isTripleClick = continuation && _clickChainCount == 3;
+                    IsTripleClickDown = _isTripleClick;
+
+                    // Keep the timestamp on every click so click 3 is measured against
+                    // click 2 with the same Windows settings, not against click 1.
+                    _lastClickTime = now;
+                    _lastClickPos = hookStruct.pt;
+
+                    OnAnyMouseDown?.Invoke(null, hookStruct.pt);
+
+                    _buttonDownPos = hookStruct.pt;
+                    _isLongPressed = false;
+
+                    bool startLongPressTimer = !continuation;
+
+                    if (_isDoubleClick)
+                        OnDoubleClick?.Invoke(null, hookStruct.pt);
 
                     if (startLongPressTimer)
                     {
@@ -269,7 +282,12 @@ namespace Orbital
                         int dy = Math.Abs(hookStruct.pt.Y - _buttonDownPos.Y);
 
                         var pt = hookStruct.pt; // capture for closure
-                        if (_isDoubleClick)
+                        if (_isTripleClick)
+                        {
+                            // Paragraph selection is complete at mouse-up time
+                            ThreadPool.QueueUserWorkItem(_ => OnTripleClickRelease?.Invoke(null, pt));
+                        }
+                        else if (_isDoubleClick)
                         {
                             // Word selection is complete at mouse-up time
                             ThreadPool.QueueUserWorkItem(_ => OnDoubleClickRelease?.Invoke(null, pt));
@@ -286,10 +304,13 @@ namespace Orbital
 
                     _isLongPressed = false;
                     _isDoubleClick = false;
+                    _isTripleClick = false;
+                    IsTripleClickDown = false;
                 }
                 else if (wParam == (IntPtr)WM_RBUTTONDOWN)
                 {
                     // Right-click dismisses the popup the same way a left-click outside does
+                    IsTripleClickDown = false;
                     OnAnyMouseDown?.Invoke(null, hookStruct.pt);
                 }
             }
