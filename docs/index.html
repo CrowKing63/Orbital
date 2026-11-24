@@ -160,7 +160,7 @@
   <h1>Orbital</h1>
   <p class="tagline">A free, open-source action bar for selected text on Windows. Translate, summarize, rewrite, search — one click, right where you're working.</p>
   <div class="hero-actions">
-    <a class="btn btn-primary" href="https://github.com/CrowKing63/Orbital/releases/latest">Download v0.5.1</a>
+    <a class="btn btn-primary" data-hero-download href="https://github.com/CrowKing63/Orbital/releases/latest">Download</a>
     <a class="btn btn-ghost" href="https://github.com/CrowKing63/Orbital">View on GitHub</a>
   </div>
 
@@ -236,14 +236,14 @@
   <p class="section-sub">Windows 10/11 (x64). The installer checks for new releases on startup and updates itself silently.</p>
   <div class="dl-grid">
     <div class="dl-card">
-      <h3>Installer <span class="ver">v0.5.1</span></h3>
+      <h3>Installer <span class="ver" data-version-badge>latest</span></h3>
       <p>Per-user install to <code>%LocalAppData%\Orbital</code>, with an uninstaller. No admin rights needed.</p>
-      <a href="https://github.com/CrowKing63/Orbital/releases/latest">Get Orbital-0.5.1-Setup.exe &#8594;</a>
+      <a data-download="Setup.exe" href="https://github.com/CrowKing63/Orbital/releases/latest">Get the installer &#8594;</a>
     </div>
     <div class="dl-card">
-      <h3>Portable <span class="ver">v0.5.1</span></h3>
+      <h3>Portable <span class="ver" data-version-badge>latest</span></h3>
       <p>A single exe. Settings live in the same folder — delete the folder to remove everything.</p>
-      <a href="https://github.com/CrowKing63/Orbital/releases/latest">Get Orbital-0.5.1-Portable.zip &#8594;</a>
+      <a data-download="Portable.zip" href="https://github.com/CrowKing63/Orbital/releases/latest">Get the portable zip &#8594;</a>
     </div>
   </div>
   <div class="free-note">
@@ -257,6 +257,27 @@
     <span><a href="https://github.com/CrowKing63/Orbital">GitHub</a> &middot; <a href="https://github.com/CrowKing63/Orbital/releases">Releases</a></span>
   </div>
 </footer>
+
+<script>
+  // Fill in the latest release version so the download labels never need a manual bump.
+  // Falls back to the static "latest" labels if the fetch fails (offline, API hiccup).
+  (function () {
+    var REPO = "CrowKing63/Orbital";
+    fetch("https://api.github.com/repos/" + REPO + "/releases/latest")
+      .then(function (res) { if (!res.ok) throw new Error(res.status); return res.json(); })
+      .then(function (rel) {
+        var v = String(rel.tag_name || "").replace(/^v/, "");
+        if (!v) return;
+        var heroBtn = document.querySelector("[data-hero-download]");
+        if (heroBtn) heroBtn.textContent = "Download v" + v;
+        document.querySelectorAll("[data-version-badge]").forEach(function (el) { el.textContent = "v" + v; });
+        document.querySelectorAll("[data-download]").forEach(function (el) {
+          el.textContent = "Get Orbital-" + v + "-" + el.getAttribute("data-download") + " \u2192";
+        });
+      })
+      .catch(function () {});
+  })();
+</script>
 
 </body>
 </html>
